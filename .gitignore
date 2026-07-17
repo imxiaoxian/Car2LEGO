@@ -1,0 +1,55 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+.env
+
+# Node
+node_modules/
+.next/
+out/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Storage (generated .io/.ldr files)
+storage/
+*.ldr
+*.io
+*.pdf
+
+# Docker
+pgdata/
+
+# Environment
+.env.local
+.env.production
+
+# Test databases
+*.db
+!data/*.db
+
+# Temp files
+tmp_*.html
+
+# Studio 2.0 application (desktop app, not source code)
+Studio 2.0/
+
+# Internal dev docs (.trae)
+.trae/
+.pytest_cache/
+
+# Logs
+*.log
