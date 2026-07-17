@@ -62,5 +62,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
     ]
 
+    # Design workflow version
+    design_workflow: str = "v2"  # "v2" (section-by-section) | "legacy" (template-first)
+
 
 settings = Settings()
