@@ -55,6 +55,20 @@ class DesignState(TypedDict, total=False):
     status: str            # "completed" | "failed"
     error_message: str
 
+    # ── 新增：分步 workflow 状态 (v2) ──
+    plan: dict | None                      # DesignPlan dump
+    current_section: str                   # "chassis" | "front" | ...
+    section_index: int                     # 0-4
+    committed_parts: list[dict]            # 已通过评估的零件（不可变）
+    pending_parts: list[dict]              # 本步生成、待评估
+    section_feedback: Annotated[list, add_messages]  # 驳回原因累积
+    inspection_snapshot: dict | None       # 最近一次 inspect_ldr 输出
+    evaluation_result: dict | None         # 最近一次 llm_evaluate 输出
+    section_retry_count: int               # 当前部位重试计数
+    final_validation_issues: list[str]     # final_validate 失败时定位部位
+    fallback_used: bool                    # 是否降级到 single-shot
+    progress: str                          # "1/5" 形式的进度字符串
+
 
 class CustomizationState(TypedDict, total=False):
     """State for the customization graph.
