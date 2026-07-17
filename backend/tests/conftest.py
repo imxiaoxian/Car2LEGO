@@ -124,7 +124,7 @@ def mock_chat_model():
 @pytest.fixture
 def mock_studio_design():
     """Return a valid StudioDesign Pydantic instance for mocked LLM tests."""
-    from app.agents.design_graph import StudioDesign, LegoPartPlacement
+    from app.agents.design_graph_legacy import StudioDesign, LegoPartPlacement
     return StudioDesign(
         design_notes="Mocked design for a sports car.",
         total_parts=3,
@@ -179,7 +179,7 @@ def mock_design_customization():
     This is the Template-First Architecture output: the LLM only produces
     colors + recolor_rules + replace_rules + extra_parts, NOT a full parts list.
     """
-    from app.agents.design_graph import DesignCustomization, ExtraPart, RecolorRule, ReplaceRule
+    from app.agents.design_graph_legacy import DesignCustomization, ExtraPart, RecolorRule, ReplaceRule
 
     return DesignCustomization(
         body_color_id=4,  # Red (Ferrari)

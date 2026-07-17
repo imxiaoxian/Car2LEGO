@@ -12,8 +12,8 @@ from unittest.mock import patch
 
 import pytest
 
-from app.agents import design_graph
-from app.agents.design_graph import build_design_graph
+from app.agents import design_graph_legacy as design_graph
+from app.agents.design_graph_legacy import build_design_graph
 from app.config import settings
 from app.services.studio_templates import get_template_ldr
 from app.services.template_parser import TemplateParser

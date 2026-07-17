@@ -88,7 +88,7 @@ class TestCreateDesignL4Mocked:
         """An unknown car falls through to L4 and the mocked LLM produces a design."""
         # Patch create_text_llm at the design_graph module level
         mock_llm = MockChatModel(structured_output=mock_design_customization)
-        with patch("app.agents.design_graph.create_text_llm", return_value=mock_llm):
+        with patch("app.agents.design_graph_legacy.create_text_llm", return_value=mock_llm):
             response = await e2e_client.post(
                 "/api/v1/designs",
                 json={"make": "Zenvo", "model": "TSR-S", "year": 2023, "scale": "1:38"},
@@ -104,7 +104,7 @@ class TestCreateDesignL4Mocked:
     ):
         """After sync generation, the .io file is downloadable."""
         mock_llm = MockChatModel(structured_output=mock_design_customization)
-        with patch("app.agents.design_graph.create_text_llm", return_value=mock_llm):
+        with patch("app.agents.design_graph_legacy.create_text_llm", return_value=mock_llm):
             create_resp = await e2e_client.post(
                 "/api/v1/designs",
                 json={"make": "Koenigsegg", "model": "Jesko", "year": 2024, "scale": "1:38"},
@@ -129,7 +129,7 @@ class TestCreateDesignL4Mocked:
     ):
         """The LDraw endpoint returns LDraw content with part lines."""
         mock_llm = MockChatModel(structured_output=mock_design_customization)
-        with patch("app.agents.design_graph.create_text_llm", return_value=mock_llm):
+        with patch("app.agents.design_graph_legacy.create_text_llm", return_value=mock_llm):
             create_resp = await e2e_client.post(
                 "/api/v1/designs",
                 json={"make": "Pagani", "model": "Huayra", "year": 2022, "scale": "1:38"},
@@ -147,7 +147,7 @@ class TestCreateDesignL4Mocked:
     ):
         """The design detail includes parts after generation."""
         mock_llm = MockChatModel(structured_output=mock_design_customization)
-        with patch("app.agents.design_graph.create_text_llm", return_value=mock_llm):
+        with patch("app.agents.design_graph_legacy.create_text_llm", return_value=mock_llm):
             create_resp = await e2e_client.post(
                 "/api/v1/designs",
                 json={"make": "Rimac", "model": "Nevera", "year": 2023, "scale": "1:38"},
@@ -171,7 +171,7 @@ class TestCustomizationE2EMocked:
         """Customizing an existing design produces a child design with modifications."""
         # First create a base design
         text_llm = MockChatModel(structured_output=mock_design_customization)
-        with patch("app.agents.design_graph.create_text_llm", return_value=text_llm):
+        with patch("app.agents.design_graph_legacy.create_text_llm", return_value=text_llm):
             create_resp = await e2e_client.post(
                 "/api/v1/designs",
                 json={"make": "Aston Martin", "model": "Vantage", "year": 2023, "scale": "1:38"},
@@ -212,7 +212,7 @@ class TestFromImageMocked:
         img_bytes = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9"
 
         with patch("app.agents.vision_graph.create_vision_llm", return_value=vision_llm), \
-             patch("app.agents.design_graph.create_text_llm", return_value=text_llm):
+             patch("app.agents.design_graph_legacy.create_text_llm", return_value=text_llm):
             response = await e2e_client.post(
                 "/api/v1/designs/from-image",
                 files={"image": ("car.jpg", img_bytes, "image/jpeg")},
