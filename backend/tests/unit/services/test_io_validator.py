@@ -163,6 +163,10 @@ class TestValidateCarGeometry:
 
 
 class TestValidateIoFileEndToEnd:
+    @pytest.mark.skipif(
+        not Path(r"D:\lego\Studio 2.0\ldraw\parts").exists(),
+        reason="Studio LDraw parts library not installed (CI environment)",
+    )
     def test_valid_io_file_passes(self, tmp_path):
         """Create a minimal valid .io file and verify validation passes."""
         ldr = """0 FILE model.ldr

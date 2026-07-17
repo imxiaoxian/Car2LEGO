@@ -53,3 +53,7 @@ Studio 2.0/
 
 # Logs
 *.log
+
+# Generated
+next-env.d.ts
+tsconfig.tsbuildinfo
