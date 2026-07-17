@@ -226,7 +226,7 @@ export default function DesignDetailPage() {
               </p>
               <p className="text-sm mt-2 text-white/50 max-w-md">
                 Claude is designing your LEGO car model as a BrickLink Studio .io file.
-                You'll be able to open it directly in Studio.
+                You&rsquo;ll be able to open it directly in Studio.
               </p>
             </div>
           </div>
