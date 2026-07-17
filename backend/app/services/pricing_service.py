@@ -10,7 +10,6 @@ Price sources (in priority order):
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 # ═══════════════════════════════════════════════════════════════

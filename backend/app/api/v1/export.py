@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.deps import get_db
-from app.models.design import Design, DesignPart
+from app.models.design import Design
 from app.services.export_service import ExportService
 
 router = APIRouter()

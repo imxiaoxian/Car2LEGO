@@ -21,9 +21,8 @@ This service:
 import io as std_io
 import json
 import zipfile
-import uuid
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -220,7 +219,7 @@ class StudioService:
             f"0 FILE {name.replace(' ', '_').lower()}.io",
             f"0 {name}",
             f"0 Name: {name}",
-            f"0 Author: Car2LEGO",
+            "0 Author: Car2LEGO",
             "0 CustomBrick",
             "",
         ]
@@ -282,7 +281,8 @@ class StudioService:
     @staticmethod
     def _make_thumbnail() -> bytes:
         """Generate a minimal placeholder PNG (1x1 pixel, black)."""
-        import struct, zlib
+        import struct
+        import zlib
         # Minimal valid PNG: 1x1 black pixel
         def chunk(chunk_type: bytes, data: bytes) -> bytes:
             c = chunk_type + data

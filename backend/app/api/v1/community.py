@@ -1,8 +1,7 @@
 """Community Mod System API — Steam Workshop style for LEGO car mods."""
 
-import uuid
 from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 
 from app.config import settings
 from app.services.community_mods import ModRepository
@@ -101,7 +100,9 @@ async def submit_mod(
 
     Multipart form upload with mod.json metadata + LDraw file + preview image.
     """
-    import json, shutil, tempfile
+    import json
+    import shutil
+    import tempfile
 
     # Create temp directory for mod
     tmp_dir = Path(tempfile.mkdtemp(prefix="mod_"))

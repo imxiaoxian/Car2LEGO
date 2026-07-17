@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.api.v1.router import api_router
 from app.database import engine, Base
-from app.models import *  # noqa: ensure all models are loaded
+from app.models import *  # noqa: F403 ensure all models are loaded
 
 
 async def _run_alembic_upgrade() -> None:

@@ -1,7 +1,6 @@
 """Base HTTP client with retry logic for external API calls."""
 
 import httpx
-from app.config import settings
 
 
 class BaseApiClient:

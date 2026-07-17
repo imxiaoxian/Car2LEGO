@@ -13,10 +13,8 @@ Priority sources:
 Extracted data feeds into the design pipeline for accurate LEGO generation.
 """
 
-import json
 import re
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -139,7 +137,6 @@ class CarResearchService:
 
         # Priority 1: Official manufacturer page
         if official_domain:
-            domain_name = official_domain.replace(".com", "").replace("-global", "")
             queries.append({
                 "query": f"site:{official_domain} {car} specifications",
                 "priority": 1,

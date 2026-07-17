@@ -27,7 +27,6 @@ import time
 from pathlib import Path
 from typing import Optional
 
-import os
 STUDIO_PATH = os.getenv("STUDIO_PATH", r"D:\lego\Studio 2.0\Studio.exe")
 PARTDESIGNER_PATH = os.getenv("PARTDESIGNER_PATH", r"D:\lego\Studio 2.0\patcher2\Patcher.exe")
 

@@ -10,9 +10,7 @@ to provide a deterministic structural base that the LLM only customizes
 """
 
 import json
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import Any
+from dataclasses import dataclass, field
 
 from app.services.lego_parts_knowledge import CAR_PARTS_CATALOG
 from app.services.studio_templates import get_scale_spec

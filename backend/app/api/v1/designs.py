@@ -850,20 +850,26 @@ async def create_design_from_image(
             make = make or features.make
             model = model or features.model
             year = year or features.year
-        if not make: make = "custom"
-        if not model: model = "car"
+        if not make:
+            make = "custom"
+        if not model:
+            model = "car"
         stmt = select(Car).where(func.lower(Car.make) == make.lower(), func.lower(Car.model) == model.lower(), Car.year == year)
         result = await db.execute(stmt)
         car = result.scalar_one_or_none()
         if not car:
             car = Car(make=make, model=model, year=year, body_style=features.body_style if features else None, metadata_={"vision": features.analysis_text} if features else {})
-            db.add(car); await db.flush(); await db.refresh(car)
+            db.add(car)
+            await db.flush()
+            await db.refresh(car)
         engine = MatchingEngine(db)
         match_result = await engine.match(car.make, car.model, car.year)
         design = Design(car_id=car.id, match_level=match_result.level, status="completed" if match_result.is_immediate else "pending", matched_set_num=match_result.set_num)
         if features:
             design.metadata_ = {"vision_features": {"color": features.primary_color_name, "lego_color": features.closest_lego_color, "body_style": features.body_style, "detected_mods": features.detected_mods}}
-        db.add(design); await db.flush(); await db.refresh(design)
+        db.add(design)
+        await db.flush()
+        await db.refresh(design)
         if match_result.level == 4:
             generation_mode = os.getenv("GENERATION_MODE", "auto")
             redis_url = os.getenv("REDIS_URL", "")
@@ -885,7 +891,8 @@ async def create_design_from_image(
         result = await db.execute(stmt)
         return await _design_to_detail(result.scalar_one(), db)
     finally:
-        if os.path.exists(tmp_path): os.unlink(tmp_path)
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 @router.get("/{design_id}/pricing")

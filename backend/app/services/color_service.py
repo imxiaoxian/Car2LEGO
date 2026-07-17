@@ -4,7 +4,6 @@ Used by the L3/L4 matching pipeline to sample colors from car images
 and map them to the closest LEGO brick colors.
 """
 
-import colorsys
 from dataclasses import dataclass
 
 

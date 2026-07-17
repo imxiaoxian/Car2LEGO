@@ -27,7 +27,9 @@ from app.services.vehicle_taxonomy import (
 class CarFeatures:
     """Rich car features extracted by Vision analysis."""
     # Identity
-    make: str = ""; model: str = ""; year: int = 0
+    make: str = ""
+    model: str = ""
+    year: int = 0
 
     # Classification
     body_style: str = ""              # Main: sports_car, supercar, sedan, suv, pickup, hatchback, wagon, convertible, van

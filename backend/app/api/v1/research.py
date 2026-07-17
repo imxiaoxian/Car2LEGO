@@ -6,10 +6,10 @@ When a car is not in our database, this endpoint gathers high-quality
 specifications from the web to enable accurate LEGO design generation.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from app.services.car_research import CarResearchService, CarResearchResult
+from app.services.car_research import CarResearchService
 
 router = APIRouter()
 

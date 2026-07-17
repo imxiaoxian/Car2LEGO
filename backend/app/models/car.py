@@ -4,7 +4,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, SmallInteger, Text, UniqueConstraint, func
-from sqlalchemy import JSON; from sqlalchemy import Uuid as UUID
+from sqlalchemy import JSON
+from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base

@@ -393,13 +393,13 @@ def _validate_info(info_content: str, report: ValidationReport):
         return
 
     required_fields = {"Author", "Name"}
-    for field in required_fields:
-        if field not in info:
-            report.add("error", "metadata", f".info missing required field: '{field}'")
-        elif not info[field]:
-            report.add("warning", "metadata", f".info field '{field}' is empty")
+    for req_field in required_fields:
+        if req_field not in info:
+            report.add("error", "metadata", f".info missing required field: '{req_field}'")
+        elif not info[req_field]:
+            report.add("warning", "metadata", f".info field '{req_field}' is empty")
 
     optional_fields = {"Description", "Application", "Version"}
-    for field in optional_fields:
-        if field not in info:
-            report.add("info", "metadata", f".info missing optional field: '{field}'")
+    for opt_field in optional_fields:
+        if opt_field not in info:
+            report.add("info", "metadata", f".info missing optional field: '{opt_field}'")

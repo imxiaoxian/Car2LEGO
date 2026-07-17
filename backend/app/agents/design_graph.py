@@ -21,7 +21,6 @@ Nodes:
 - `build_parts_data`: reuses `StudioDesignGenerator._build_parts_data`
 """
 
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal

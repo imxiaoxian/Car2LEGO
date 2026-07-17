@@ -263,7 +263,10 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
 
     @staticmethod
     def _estimate_difficulty(parts_count: int) -> str:
-        if parts_count < 80: return "Easy"
-        elif parts_count < 180: return "Medium"
-        elif parts_count < 400: return "Hard"
+        if parts_count < 80:
+            return "Easy"
+        elif parts_count < 180:
+            return "Medium"
+        elif parts_count < 400:
+            return "Hard"
         return "Expert"

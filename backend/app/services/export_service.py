@@ -18,12 +18,12 @@ class ExportService:
             item_id = p.bricklink_id or p.part_num
             color_id = p.bricklink_color_id or p.ldraw_color_id
             lines.append("  <ITEM>")
-            lines.append(f"    <ITEMTYPE>P</ITEMTYPE>")
+            lines.append("    <ITEMTYPE>P</ITEMTYPE>")
             lines.append(f"    <ITEMID>{item_id}</ITEMID>")
             if color_id:
                 lines.append(f"    <COLOR>{color_id}</COLOR>")
             lines.append(f"    <MINQTY>{p.quantity}</MINQTY>")
-            lines.append(f"    <REMARKS>Car2LEGO design part</REMARKS>")
+            lines.append("    <REMARKS>Car2LEGO design part</REMARKS>")
             lines.append("  </ITEM>")
         lines.append("</INVENTORY>")
         return "\n".join(lines)
@@ -51,7 +51,7 @@ class ExportService:
         lines = [
             "0 Car2LEGO Design",
             f"0 Name: {design.id}",
-            f"0 Author: Car2LEGO",
+            "0 Author: Car2LEGO",
             "0 !LICENSE Redistributable under CC BY 4.0",
             "",
         ]

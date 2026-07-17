@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.services.mod_parts_catalog import MOD_CATALOG, get_all_mods, get_mods_by_category
+from app.services.mod_parts_catalog import MOD_CATALOG
 
 router = APIRouter()
 
