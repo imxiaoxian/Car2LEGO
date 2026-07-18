@@ -37,7 +37,7 @@ def create_text_llm() -> BaseChatModel:
             "api_key": settings.deepseek_api_key,
             "base_url": base_url,
             "model": settings.deepseek_model,
-            "max_tokens": 32768,
+            "max_tokens": settings.text_max_tokens,
         }
         if settings.deepseek_reasoning_effort:
             kwargs["reasoning_effort"] = settings.deepseek_reasoning_effort
@@ -50,7 +50,7 @@ def create_text_llm() -> BaseChatModel:
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,
             model=settings.openai_text_model,
-            max_tokens=16384,
+            max_tokens=settings.text_max_tokens,
         )
 
     if provider == "anthropic":
@@ -59,7 +59,7 @@ def create_text_llm() -> BaseChatModel:
         return ChatAnthropic(
             api_key=settings.anthropic_api_key,
             model=settings.anthropic_model,
-            max_tokens=16384,
+            max_tokens=settings.text_max_tokens,
         )
 
     raise ValueError(f"Unknown AI_TEXT_PROVIDER: {provider!r}")
@@ -79,7 +79,7 @@ def create_vision_llm() -> BaseChatModel:
             api_key=settings.doubao_api_key,
             base_url=settings.doubao_base_url,
             model=settings.doubao_vision_model,
-            max_tokens=8192,
+            max_tokens=settings.vision_max_tokens,
         )
 
     if provider == "openai":
@@ -89,7 +89,7 @@ def create_vision_llm() -> BaseChatModel:
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,
             model=settings.openai_vision_model,
-            max_tokens=8192,
+            max_tokens=settings.vision_max_tokens,
         )
 
     if provider == "anthropic":
@@ -98,7 +98,7 @@ def create_vision_llm() -> BaseChatModel:
         return ChatAnthropic(
             api_key=settings.anthropic_api_key,
             model=settings.anthropic_vision_model,
-            max_tokens=8192,
+            max_tokens=settings.vision_max_tokens,
         )
 
     raise ValueError(f"Unknown AI_VISION_PROVIDER: {provider!r}")

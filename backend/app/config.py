@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     doubao_vision_model: str = "doubao-seed-2-1-pro-260628"
     doubao_base_url: str = "https://ark.cn-beijing.volces.com/api/v3"
 
+    # LLM max output tokens (avoid hardcoding 8192 — let users tune per workload)
+    text_max_tokens: int = 32768     # used by create_text_llm() across providers
+    vision_max_tokens: int = 8192    # used by create_vision_llm() across providers
+
     # App
     app_name: str = "Car2LEGO API"
     debug: bool = True
