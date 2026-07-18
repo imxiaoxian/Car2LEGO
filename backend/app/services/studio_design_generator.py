@@ -123,6 +123,9 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
     ) -> dict:
         """Generate a Studio .io file for a car model via the LangGraph design graph.
 
+        Routes to v2 section workflow (default) or legacy template-first
+        workflow based on ``settings.design_workflow`` ("v2" | "legacy").
+
         Args:
             design_id: UUID for this design
             make/model/year: Target car
@@ -131,12 +134,22 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
             flagship_metadata: Technic flagship specs (engine, gearbox, doors, etc.)
             scale: Target LEGO scale (only "1:38" supports AI generation)
         """
-        # Imported here to avoid circular import: design_graph.py imports
-        # StudioDesignGenerator at module level for SYSTEM_PROMPT + helpers.
-        from app.agents.design_graph import build_design_graph
+        # Imported here to avoid circular import: design_graph.py and
+        # design_graph_legacy.py both import StudioDesignGenerator at module
+        # level (for SYSTEM_PROMPT + helpers), and section_graph.py →
+        # section_inspector.py also imports StudioDesignGenerator. Top-level
+        # imports in this module would create a cycle that Python cannot
+        # resolve. This is the established pattern for this entry point.
+        if settings.design_workflow == "legacy":
+            from app.agents.design_graph_legacy import build_design_graph as build_design_graph_legacy
+
+            graph = build_design_graph_legacy()
+        else:
+            from app.agents.design_graph import build_design_graph as build_design_graph_v2
+
+            graph = build_design_graph_v2()
 
         scale = validate_scale(scale)
-        graph = build_design_graph()
         initial_state = {
             "design_id": design_id,
             "make": make,
@@ -151,6 +164,16 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
             "retry_count": 0,
             "status": "",
             "error_message": "",
+            # v2 section-workflow fields (ignored by legacy graph)
+            "plan": None,
+            "current_section": "",
+            "section_index": 0,
+            "committed_parts": [],
+            "pending_parts": [],
+            "section_feedback": [],
+            "section_retry_count": 0,
+            "progress": "",
+            "fallback_used": False,
         }
         result = await graph.ainvoke(initial_state)
 
