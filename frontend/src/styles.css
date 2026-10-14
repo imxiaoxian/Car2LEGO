@@ -104,21 +104,4 @@ pre { max-height: 240px; overflow: auto; padding: 12px; background: var(--surfac
 .brand-other > span > span { font-size: 12px; color: var(--muted); }
 .brand-other-chevron { margin-left: auto; transform: rotate(-90deg); color: var(--muted); }
 .brand-other:hover { color: var(--blue); }
-@media (max-width: 760px) {
-  .site-nav { padding: 0 18px; }
-  .wordmark { font-size: 17px; }
-  .local-status { font-size: 10px; }
-  .workspace { grid-template-columns: minmax(0, 1fr); padding: 24px 18px; gap: 28px; }
-  .configuration { border-right: 0; padding-right: 0; }
-  .result { border-top: 1px solid var(--line); padding-top: 24px; }
-  .pipeline-strip { gap: 8px; }
-  .brand-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); }
-  .brand-dialog-content { padding: 18px; max-height: calc(100dvh - 24px); }
-  .brand-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
-  .brand-option { gap: 8px; padding: 10px 6px; }
-  .brand-option .brand-logo { width: 38px; flex-basis: 38px; height: 32px; }
-  .brand-dialog-heading h2 { font-size: 20px; }
-  .brand-clear { top: 16px; }
-}
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
-@media (max-width: 360px) { .brand-options { grid-template-columns: minmax(0, 1fr); } }
