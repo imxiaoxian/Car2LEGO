@@ -10,3 +10,6 @@ external/
 models/
 runs/
 *.log
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo

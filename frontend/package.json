@@ -1,0 +1,12 @@
+{
+  "name": "car2lego-3d-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "tsc --noEmit && vite build", "dev": "vite --host 127.0.0.1" },
+  "dependencies": { "react": "18.3.1", "react-dom": "18.3.1", "lucide-react": "1.55.0" },
+  "devDependencies": {
+    "@types/node": "^24.0.0", "@types/react": "18.3.9", "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "6.1.2", "typescript": "5.9.3", "vite": "8.3.4"
+  }
+}

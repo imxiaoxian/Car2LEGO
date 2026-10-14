@@ -2,7 +2,8 @@
 
 The project glue, plate packing and exports use the MIT license in `LICENSE`.
 Model licenses and downloaded dependencies remain separate. This repository does
-not redistribute model weights, the Studio/LDraw library, or third-party source.
+not redistribute model weights or the Studio/LDraw library. Reused UI source
+and catalog assets are identified below.
 
 - **TripoSR**: https://github.com/VAST-AI-Research/TripoSR
   Copyright (c) 2024 Tripo AI & Stability AI; MIT code and model weights.
@@ -25,7 +26,20 @@ not redistribute model weights, the Studio/LDraw library, or third-party source.
   own licenses. See the installed distributions for full notices.
 - **Car2LEGO**: https://github.com/imxiaoxian/Car2LEGO (MIT, copyright 2025
   imxiaoxian). Architecture reference: real part IDs, LDraw outputs, and separate
-  digital versus physical validation. No original source or private data copied.
+  digital versus physical validation. The brand selector, search helper, catalog,
+  translations, logo assets, catalog documentation and sync script are reused.
+  Original MIT copyright and license are retained in `frontend/LICENSE.Car2LEGO`.
+  No private data or credentials are copied.
+- **car-logos-dataset**: https://github.com/filippofilip95/car-logos-dataset,
+  revision `bb2d661f28ce617dba8a51bdfc2069a3381a23b0`. Its README states MIT
+  for the project but the pinned revision has no standalone LICENSE file.
+  Vehicle logos belong to their respective owners; project MIT terms do not
+  grant logo redistribution rights. Additional assets come from Carlogos.org,
+  manufacturer websites and Seeklogo. Each asset's original source and SHA-256
+  are stored in `frontend/lib/data/vehicle-brands.json`; see
+  `docs/vehicle-brand-catalog.md` for scope and license limitations.
+- **React**, **Vite**, **TypeScript** (MIT), **lucide-react** (ISC): local page
+  dependencies retain their respective licenses in installed packages.
 
 LEGO and BrickLink are trademarks of their owners. This research project is not
 affiliated with or endorsed by them.

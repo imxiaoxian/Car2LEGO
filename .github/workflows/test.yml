@@ -16,3 +16,16 @@ jobs:
       - run: .venv/bin/python -m car2lego3d setup
       - run: .venv/bin/python -m pytest -q
       - run: .venv/bin/python scripts/verify_examples.py
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-fund --no-audit
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend

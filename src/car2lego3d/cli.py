@@ -14,6 +14,8 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("setup", help="Clone and pin upstream TripoSR source")
     commands.add_parser("doctor", help="Show environment and CUDA availability")
+    web = commands.add_parser("web", help="Serve the local generation page and brand selector")
+    web.add_argument("--port", type=int, default=8765)
     requirements = commands.add_parser("requirements", help="Export per-scale policies and vehicle-specific plans")
     requirements.add_argument("--scale", choices=SCALES)
     requirements.add_argument("--vehicle-specs", type=Path)
@@ -74,7 +76,10 @@ def main():
         parser.error("--length-studs must be positive")
     if args.command == "run" and vehicle_spec is not None and (args.up_axis != "z" or args.yaw != 0):
         parser.error("Spec-based run uses the calibrated TripoSR X-long/Z-up frame; omit --up-axis and --yaw")
-    if args.command == "setup":
+    if args.command == "web":
+        from .web import serve
+        serve(args.port)
+    elif args.command == "setup":
         from .reconstruction import setup_source
         print(setup_source())
     elif args.command == "requirements":

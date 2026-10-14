@@ -37,6 +37,35 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 
 如果 Git 配置了失效代理，修复本机代理，或仅在本次克隆临时使用 `git -c http.proxy= -c https.proxy= clone ...`。
 
+## 本地生成页面与品牌选择
+
+需要 Node.js 22.12+（本机使用 24）。完成 Python 环境安装后运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1
+```
+
+打开 http://127.0.0.1:8765；端口占用时追加 `-Port 8766`。
+页面直接复用 Car2LEGO 的品牌选择器和目录，收录 396 个品牌的中文名与本地 Logo，
+支持热门/全部、中文/英文/别名搜索。列表底部固定“其他”，选择后可输入自定义品牌。
+目录包含现存、历史及商用品牌，不保证穷尽全球所有品牌；数据来源和更新方式见
+[品牌目录](docs/vehicle-brand-catalog.md)。原项目 `D:\lego` 不参与本项目运行，也不会被修改。
+
+页面提交品牌、车型、颜色、比例和种子，实际调用上述完整 CLI 流程；完成后可下载
+Studio `.io`、LDraw 和 3D 网格。任务参数、日志和产物保存在 `runs/web/<任务ID>/`，
+刷新页面可恢复最近任务；同一服务每次只运行一个生成任务。
+服务只监听本机地址，写入接口校验同源请求。
+
+当前默认 Ferrari F40 1:24 草稿使用已核对规格。其他比例只展示不同的设计要求，
+缺少独立配方时禁止生成。其他车型可选择自定义车长研究草稿，品牌名会进入生图，
+但通用跑车配方不保证该车型的外观或尺寸还原；品牌目录不等同于规格/配方支持目录。
+页面初始图片是已有 F40 草稿渲染，本次生成后展示参考图片和重建网格，不能替代
+Studio GUI、原生零件碰撞或外观验收。
+
+前端开发：在后端运行时，在 `frontend` 目录执行 `npm run dev`（API 代理到 8765）。
+单独启动已构建页面：`.venv/Scripts/python.exe -m car2lego3d web --port 8765`。
+浏览器验收截图、测试和页面实际生成记录见 [验证记录](docs/brand-selector-validation.md)。
+
 ## 完整流程
 
 ```powershell
