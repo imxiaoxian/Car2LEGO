@@ -1,5 +1,5 @@
 * text=auto eol=lf
 # Experiment hashes refer to exact exported bytes, including their original newlines.
-examples/** -text
+examples/** -text whitespace=cr-at-eol
 *.png binary
 *.glb binary
