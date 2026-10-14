@@ -251,7 +251,7 @@ class ReferenceImageService:
         brief = manifest.get("brief")
         if not brief:
             result = await model_call(lambda: create_text_llm(max_tokens=4096).with_structured_output(VehicleReferenceBrief).ainvoke([
-                SystemMessage(content="Describe the exact target vehicle's visible appearance for image generation. Preserve year, variant and input photo features. Do not present inferred dimensions as measured facts."),
+                SystemMessage(content="Describe the exact target vehicle's visible appearance for image generation. Preserve any specified year, variant and input photo features. A null year is unspecified; do not assume the current year. Use the sourced generation scope where available and keep one consistent variant. Do not present inferred dimensions as measured facts."),
                 HumanMessage(content=json.dumps({key: identity[key] for key in
                     ("make", "model", "year", "vehicle_features", "custom_request", "mod_ids")} | {
                         "physical_specifications": state.get("physical_specifications", {})})),
@@ -301,7 +301,7 @@ class ReferenceImageService:
                     state["checkpoint_progress"](f"reference_images:{view}", percent)
                 prompt = (
                     f"Create a high-quality photorealistic engineering visual reference of the exact "
-                    f"{state['year']} {state['make']} {state['model']}. {instructions}\n"
+                    f"{str(state['year']) + ' ' if state.get('year') is not None else ''}{state['make']} {state['model']}. {instructions}\n"
                     f"Locked appearance: {json.dumps(brief)}\n"
                     f"Vehicle detail constraints: {vehicle_reference_constraints(state, view)}\n"
                     f"Sourced physical geometry (mm/deg; missing data is unknown): {json.dumps(state.get('physical_specifications', {}))}\n"

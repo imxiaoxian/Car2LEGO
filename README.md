@@ -33,6 +33,16 @@ graphs, collision geometry and OR-Tools layout solving produce the assembly scen
 Every supported scale has its own appearance, mechanism, reference and measurement
 requirements. Requirements are snapshotted for pause/resume and exposed in the UI.
 
+After vehicle identification, the `research-vehicle-specifications` skill executes
+web searches and reads manufacturer pages, automotive references and technical
+PDFs. Dimensions, tyre sizes and available component geometry become inputs to
+reference generation and assembly planning. Missing details trigger focused
+follow-up searches; each measurement retains its original document and evidence.
+See [vehicle research](docs/vehicle-physical-specifications.md).
+Model year is optional for text and photo requests. Research begins after design
+submission; each make/model/optional-year identity has its own cache. Completed
+research can be reused, and the detail page search action refreshes it explicitly.
+
 | Scale | Target | Required mechanisms | Default reference sheets |
 | --- | --- | --- | --- |
 | 1:38 | Recognizable compact exterior | Four rolling wheels | 6 |

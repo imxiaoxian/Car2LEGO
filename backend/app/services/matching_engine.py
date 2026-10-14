@@ -235,7 +235,7 @@ class MatchingEngine:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def match(self, make: str, model: str, year: int) -> MatchResult:
+    async def match(self, make: str, model: str, year: int | None) -> MatchResult:
         """Run the full matching cascade and return the best result.
 
         L1 -> L2 -> L3 -> L4 (each only runs if previous fails).
@@ -261,7 +261,7 @@ class MatchingEngine:
     # ── L1: Official LEGO Sets ──────────────────────────
 
     async def _match_level1(
-        self, make: str, model: str, year: int
+        self, make: str, model: str, year: int | None
     ) -> MatchResult | None:
         """Search for official LEGO sets matching the car."""
         stmt = select(LegoSet).where(
@@ -282,7 +282,7 @@ class MatchingEngine:
             if c.year and year:
                 year_diff = abs(c.year - year)
                 score += max(0, 1.0 - year_diff / 50.0)
-            if c.year == year:
+            if year is not None and c.year == year:
                 score += 0.5  # exact year bonus
             if score > best_score:
                 best_score = score
@@ -304,7 +304,7 @@ class MatchingEngine:
     # ── L2: Community MOCs ──────────────────────────────
 
     async def _match_level2(
-        self, make: str, model: str, year: int
+        self, make: str, model: str, year: int | None
     ) -> MatchResult | None:
         """Search community MOCs for the car model."""
         stmt = (
@@ -334,14 +334,15 @@ class MatchingEngine:
     # ── L3: Category Templates ──────────────────────────
 
     async def _match_level3(
-        self, make: str, model: str, year: int
+        self, make: str, model: str, year: int | None
     ) -> MatchResult | None:
         """Match by car body style category template."""
         # Look up car body_style from DB, default to sedan
         from app.models.car import Car
         car_stmt = select(Car).where(
             func.lower(Car.make) == make.lower(),
-            func.lower(Car.model).contains(model.lower()),
+            func.lower(Car.model) == model.lower(),
+            Car.year == year,
         )
         car_result = await self.db.execute(car_stmt)
         car = car_result.scalar_one_or_none()
@@ -380,7 +381,7 @@ class MatchingEngine:
 
     # ── L4: AI Generation ───────────────────────────────
 
-    def _match_level4(self, make: str, model: str, year: int) -> MatchResult:
+    def _match_level4(self, make: str, model: str, year: int | None) -> MatchResult:
         """AI voxel generation fallback — returns immediately with pending status."""
         return MatchResult(
             level=4,

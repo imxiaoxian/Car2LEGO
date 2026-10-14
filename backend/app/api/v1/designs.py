@@ -1023,7 +1023,7 @@ async def open_in_studio(
         io_path = FilePath(settings.storage_path) / design.file_io_path
         if io_path.exists():
             car = design.car
-            filename = f"{car.make}_{car.model}_{car.year}.io" if car else f"car2lego_{design_id}.io"
+            filename = f"{car.make}_{car.model}{'_' + str(car.year) if car.year is not None else ''}.io" if car else f"car2lego_{design_id}.io"
             return FileResponse(
                 io_path,
                 media_type="application/octet-stream",
@@ -1046,7 +1046,7 @@ async def create_design_from_image(
 ):
     """Recognize a car, preserve its photo, and generate image-guided Studio output."""
     try:
-        DesignCreate(make=make or "unknown", model=model or "unknown", year=year or 2000, scale=scale)
+        DesignCreate(make=make or "unknown", model=model or "unknown", year=year, scale=scale)
     except ValidationError as exc:
         raise RequestValidationError(exc.errors()) from exc
     if scale in ("1:8", "1:10"):
@@ -1073,9 +1073,10 @@ async def create_design_from_image(
         if features:
             make = make or features.make
             model = model or features.model
-            year = year or features.year
-        if not features or not make or not model or not year:
-            raise HTTPException(status_code=422, detail="Unable to identify vehicle; provide make, model and year with a clear car photo")
+            if year is None and features.year:
+                year = features.year
+        if not make or not model:
+            raise HTTPException(status_code=422, detail="Unable to identify vehicle; provide make and model with a clear car photo")
         # Apply the same request validation as the text path.
         try:
             DesignCreate(make=make, model=model, year=year, scale=scale)
@@ -1227,7 +1228,7 @@ async def customize_design(
 
     # Build car info string
     car = base_design.car
-    car_info = f"{car.make} {car.model} ({car.year})" if car else "Unknown car"
+    car_info = f"{car.make} {car.model}{' (' + str(car.year) + ')' if car.year is not None else ''}" if car else "Unknown car"
 
     # Create new design as child
     new_design = Design(

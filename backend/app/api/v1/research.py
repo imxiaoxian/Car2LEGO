@@ -20,13 +20,13 @@ router = APIRouter()
 class ResearchRequest(BaseModel):
     make: str = Field(..., min_length=1, max_length=100, examples=["BYD"])
     model: str = Field(..., min_length=1, max_length=200, examples=["Han EV"])
-    year: int = Field(default=2024, ge=1886, le=2100, examples=[2024])
+    year: int | None = Field(default=None, ge=1886, le=2100, examples=[2024])
 
 
 class ResearchResponse(BaseModel):
     make: str
     model: str
-    year: int
+    year: int | None = None
     official_domain: str | None = None
     search_queries: list[dict] = []
     suggested_sources: list[str] = []
@@ -51,15 +51,16 @@ class PhysicalResearchRequest(ResearchRequest):
 @router.get("/physical-specifications")
 async def get_physical_specifications(make: str = Query(min_length=1, max_length=100),
                                       model: str = Query(min_length=1, max_length=200),
-                                      year: int = Query(ge=1886, le=2100),
+                                      year: int | None = Query(default=None, ge=1886, le=2100),
                                       scale: Literal["1:38", "1:24", "1:16", "1:12"] = "1:38"):
     return load_profile(make, model, year).resolved(scale)
 
 
 @router.post("/physical-specifications")
 async def research_physical_specifications(req: PhysicalResearchRequest):
-    """Fetch source documents without AI calls; explicit imports remain marked provided."""
-    profile = await collect_physical_profile(req.make, req.model, req.year, source_urls=[str(url) for url in req.source_urls]) if req.collect_sources else load_profile(req.make, req.model, req.year)
+    """Search and read vehicle documents using the research skill before planning."""
+    profile = await collect_physical_profile(req.make, req.model, req.year, scale=req.scale,
+        source_urls=[str(url) for url in req.source_urls]) if req.collect_sources else load_profile(req.make, req.model, req.year)
     for measurement in req.measurements:
         measurement = measurement.model_copy(update={"source_status": "provided"})
         payload = measurement.model_dump()
@@ -90,13 +91,14 @@ async def research_car(req: ResearchRequest):
     sources.append(f"https://en.wikipedia.org/wiki/{wiki_title}")
 
     # Automotive databases
-    car_slug = f"{req.make.lower()}-{req.model.lower()}-{req.year}".replace(" ", "-")
+    car_slug = f"{req.make.lower()}-{req.model.lower()}{'-' + str(req.year) if req.year is not None else ''}".replace(" ", "-")
     sources.append(f"https://www.caranddriver.com/{req.make.lower()}/{req.model.lower()}")
     sources.append(f"https://www.autoevolution.com/cars/{car_slug}.html")
-    sources.append(f"https://www.netcarshow.com/{req.make.lower()}/{req.year}-{req.model.lower()}/")
+    if req.year is not None:
+        sources.append(f"https://www.netcarshow.com/{req.make.lower()}/{req.year}-{req.model.lower()}/")
     sources.append(f"https://www.ultimatecarpage.com/spec/{car_slug}.html")
 
-    notes = f"""Research plan for {req.year} {req.make} {req.model}:
+    notes = f"""Research plan for {str(req.year) + ' ' if req.year is not None else ''}{req.make} {req.model}:
 
 1. OFFICIAL SITE (highest priority): {official_domain or 'Not in known list — try searching "[make] official website"'}
 2. WIKIPEDIA: Check en.wikipedia.org for specifications and dimensions

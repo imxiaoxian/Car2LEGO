@@ -115,7 +115,7 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         design_id: str,
         make: str,
         model: str,
-        year: int,
+        year: int | None,
         mod_ids: list[str] | None = None,
         custom_request: str = "",
         flagship_metadata: dict | None = None,
@@ -219,7 +219,7 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
             "error_message": result.get("error_message", ""),
         }
 
-    def _build_ldraw(self, data: dict, make: str, model: str, year: int) -> str:
+    def _build_ldraw(self, data: dict, make: str, model: str, year: int | None) -> str:
         """Build complete LDraw content from structured output.
 
         Groups parts by build step with `0 STEP` separators.
@@ -228,9 +228,9 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         outputs the right half; this function creates the left side.
         """
         lines = [
-            f"0 {year} {make} {model}",
+            f"0 {str(year) + ' ' if year is not None else ''}{make} {model}",
             "0 Author: Car2LEGO AI (OpenAI + Studio 2.26.6)",
-            f"0 Name: {make}_{model}_{year}",
+            f"0 Name: {make}_{model}{'_' + str(year) if year is not None else ''}",
             "0 !LICENSE Redistributable under CC BY 4.0",
             "0",
             f"0 // Design Notes: {data.get('design_notes', '')}",

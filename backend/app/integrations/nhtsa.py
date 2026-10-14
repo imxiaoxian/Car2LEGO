@@ -47,9 +47,9 @@ class NhtsaClient(BaseApiClient):
 
         return None
 
-    async def get_vehicle_details(self, make: str, model: str, year: int) -> dict:
+    async def get_vehicle_details(self, make: str, model: str, year: int | None = None) -> dict:
         """Get full vehicle specifications including body style."""
-        result = await self.validate_car(make, model, year)
+        result = await self.validate_car(make, model, year) if year is not None else None
         if result:
             return {
                 "make": result.get("Make_Name", make),

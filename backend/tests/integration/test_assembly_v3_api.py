@@ -55,6 +55,56 @@ async def test_multiscale_always_dispatches_assembly(v3client,scale):
     assert response.json()["workflow_version"]=="assembly_v3"
 
 
+async def test_design_and_lookup_accept_optional_year_and_reuse_identity(v3client, monkeypatch):
+    from app.integrations.nhtsa import nhtsa_client
+    validate = AsyncMock()
+    monkeypatch.setattr(nhtsa_client, "validate_car", validate)
+    client, sessions, _, generate = v3client
+    for payload in ({"make":"Ferrari", "model":"F40", "scale":"1:24"},
+                    {"make":"ferrari", "model":"f40", "year":None, "scale":"1:16"}):
+        response = await client.post("/api/v1/designs", json=payload)
+        assert response.status_code == 201, response.text
+        assert response.json()["car"]["year"] is None
+        assert response.json()["physical_specifications"]["vehicle"]["year"] is None
+        assert generate.call_args.kwargs["year"] is None
+    async with sessions() as db:
+        cars = (await db.scalars(select(Car).where(Car.year.is_(None)))).all()
+        assert len(cars) == 1
+    response = await client.post("/api/v1/cars/lookup", json={"make":"Ferrari", "model":"F40"})
+    assert response.status_code == 200 and response.json()["id"] == str(cars[0].id)
+    validate.assert_not_awaited()
+    response = await client.post("/api/v1/designs", json={"make":"Ferrari", "model":"F40", "year":0})
+    assert response.status_code == 422
+
+
+async def test_image_recognition_without_year_can_create_design(v3client, monkeypatch):
+    import io
+    from PIL import Image
+    from app.services.vision_analyzer import CarFeatures, VisionAnalyzer
+    monkeypatch.setattr(VisionAnalyzer, "analyze_image", AsyncMock(return_value=CarFeatures(make="Ferrari", model="F40", year=0)))
+    photo = io.BytesIO()
+    Image.new("RGB", (64,48), "red").save(photo, format="PNG")
+    client, _, _, generate = v3client
+    response = await client.post("/api/v1/designs/from-image", files={"image":("car.png", photo.getvalue(), "image/png")}, data={"scale":"1:24"})
+    assert response.status_code == 201, response.text
+    assert response.json()["car"]["year"] is None
+    assert generate.call_args.kwargs["year"] is None
+
+
+async def test_research_apis_allow_missing_year(v3client):
+    client, _, _, _ = v3client
+    response = await client.post("/api/v1/research/physical-specifications", json={
+        "make":"Ferrari", "model":"F40", "collect_sources":False})
+    assert response.status_code == 200, response.text
+    assert response.json()["vehicle"]["year"] is None
+    response = await client.get("/api/v1/research/physical-specifications", params={"make":"Ferrari", "model":"F40"})
+    assert response.status_code == 200 and response.json()["vehicle"]["year"] is None
+    response = await client.post("/api/v1/research", json={"make":"Ferrari", "model":"F40"})
+    assert response.status_code == 200, response.text
+    assert response.json()["year"] is None
+    assert all("None" not in item["query"] and "2024" not in item["query"] for item in response.json()["search_queries"])
+
+
 async def test_reserved_scales_are_closed_and_catalog_is_honest(v3client):
     client,_,_,_=v3client
     response=await client.post("/api/v1/designs",json={"make":"Ferrari","model":"F40","year":1990,"scale":"1:8"})

@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String, SmallInteger, Text, UniqueConstraint, func
+from sqlalchemy import DateTime, Index, String, SmallInteger, Text, UniqueConstraint, func, text
 from sqlalchemy import JSON
 from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,7 +20,7 @@ class Car(Base):
     )
     make: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     model: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    year: Mapped[int] = mapped_column(SmallInteger, nullable=False, index=True)
+    year: Mapped[int | None] = mapped_column(SmallInteger, nullable=True, index=True)
     trim: Mapped[str | None] = mapped_column(String(200), nullable=True)
     body_style: Mapped[str | None] = mapped_column(String(50), nullable=True)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -34,3 +34,7 @@ class Car(Base):
     )
 
     designs = relationship("Design", back_populates="car")
+
+
+Index("uq_cars_without_year", func.lower(Car.make), func.lower(Car.model), unique=True,
+      sqlite_where=text("year IS NULL"), postgresql_where=text("year IS NULL"))

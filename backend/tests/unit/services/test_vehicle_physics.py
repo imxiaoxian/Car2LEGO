@@ -10,6 +10,12 @@ from app.services.vehicle_research import parse_measurements, collect_physical_p
 from app.services.assembly_v3.specifications import specifications_from_profile, physical_layout_constraints, F40_SPEC
 
 
+@pytest.fixture(autouse=True)
+def no_paid_research(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "vehicle_research_model_extraction", False)
+
+
 def measurement(name="length", value=4358, **kwargs):
     if name == "width":
         kwargs.setdefault("width_reference", "body")
@@ -50,6 +56,25 @@ def test_unsourced_unmatched_estimated_and_conflicting_data_do_not_become_ground
     result = profile(item, conflict).resolved()
     assert result["conflicts"] and not result["measurements"]["length"]["grounded"]
     assert not profile(item, year=2020).resolved()["measurements"]
+
+
+def test_optional_year_preserves_source_scope_and_rejects_mixed_generations(tmp_path):
+    from app.services.vehicle_physics import vehicle_key
+    data = profile(measurement(), year=None)
+    result = data.resolved()
+    assert result["vehicle"]["year"] is None
+    assert result["generation_status"] == "source_scoped"
+    assert result["measurements"]["length"]["grounded"]
+    save_profile(data, tmp_path)
+    assert load_profile("Ferrari", "F40", None, tmp_path).measurements
+    other = load_profile("Ferrari", "F50", None, tmp_path)
+    assert not other.measurements and not other.research
+    assert vehicle_key("Ferrari", "F40", None) != vehicle_key("Ferrari", "F40", 1990)
+    later = measurement("door_length", 1000).model_copy(update={"year_start":2000, "year_end":2005})
+    result = profile(measurement(), later, year=None).resolved()
+    assert result["generation_status"] == "ambiguous"
+    assert not any(m["grounded"] for m in result["measurements"].values())
+    assert not profile(measurement().model_copy(update={"year_start":None}), year=None).resolved()["measurements"]["length"]["grounded"]
 
 
 def test_parse_separate_wheel_sizes_and_no_implicit_units_or_angles():
@@ -181,7 +206,7 @@ async def test_discovery_resolves_canonical_vehicle_title(tmp_path):
         return httpx.Response(200,text=HTML.replace("Ferrari F40","McLaren P1").replace("1987–1992","2013–2015"),headers={"content-type":"text/html"})
     async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
         data = await collect_physical_profile("MCLAREN","P1",2015,storage=tmp_path,client=client)
-    assert requests[-1] == "https://en.wikipedia.org/wiki/McLaren_P1"
+    assert "https://en.wikipedia.org/wiki/McLaren_P1" in requests
     assert data.resolved()["overall_grounded"]
 
 

@@ -22,7 +22,7 @@ class CarResearchResult:
     """Structured car data gathered from web research."""
     make: str
     model: str
-    year: int
+    year: int | None
     body_style: str = ""               # sports_car, suv, sedan, etc.
     dimensions: dict = field(default_factory=dict)
     # {length_mm, width_mm, height_mm, wheelbase_mm}
@@ -125,12 +125,12 @@ class CarResearchService:
         return None
 
     @classmethod
-    def build_search_queries(cls, make: str, model: str, year: int) -> list[dict]:
+    def build_search_queries(cls, make: str, model: str, year: int | None) -> list[dict]:
         """Build prioritized search queries for this car.
 
         Returns list of {query, priority, purpose} dicts.
         """
-        car = f"{year} {make} {model}".strip()
+        car = f"{str(year) + ' ' if year is not None else ''}{make} {model}".strip()
         official_domain = cls.get_official_domain(make)
 
         queries = []
@@ -301,7 +301,7 @@ class CarResearchService:
         cls,
         make: str,
         model: str,
-        year: int,
+        year: int | None,
         nhtsa_data: dict | None = None,
         research_data: dict | None = None,
     ) -> CarResearchResult:
@@ -334,7 +334,7 @@ class CarResearchService:
         cls,
         make: str,
         model: str,
-        year: int,
+        year: int | None,
         search_results_text: str,
     ) -> str:
         """Build a prompt for Claude to interpret web search results.
@@ -342,7 +342,7 @@ class CarResearchService:
         Claude reads the search results and outputs structured car data
         for the LEGO design pipeline.
         """
-        return f"""## Web Research Results for {year} {make} {model}
+        return f"""## Web Research Results for {str(year) + ' ' if year is not None else ''}{make} {model}
 
 {search_results_text[:8000]}
 

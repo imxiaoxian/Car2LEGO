@@ -23,7 +23,7 @@ function stageLabel(stage: string) {
   const [phase, section] = stage.split(":");
   if (phase === "reference_images") return `生成${viewNames[section] || "车辆"}参考图`;
   if (phase === "section" || phase === "building") return `构建${viewNames[section] || "车辆部位"}`;
-  return ({ starting: "准备设计", vehicle_research:"采集车辆物理规格",reference_brief:"规划参考角度",reference_consistency:"检查整车与细节一致性",planning: "规划结构", assembly:"模块装配", validation:"数字检查",repair:`局部修复 ${section || ""}`,rendering:"真实零件渲染",instructions:"生成步骤说明",exporting:"导出 Studio",acceptance:"整车验收",draft:"装配草稿",paused:"任务已暂停",cancelled:"任务已取消",completed: "设计已完成", pending: "等待生成", processing: "生成模型", failed: "生成失败" } as Record<string, string>)[phase] || "生成模型";
+  return ({ starting: "准备设计", vehicle_research:"搜索车型尺寸与结构资料",reference_brief:"规划参考角度",reference_consistency:"检查整车与细节一致性",planning: "规划结构", assembly:"模块装配", validation:"数字检查",repair:`局部修复 ${section || ""}`,rendering:"真实零件渲染",instructions:"生成步骤说明",exporting:"导出 Studio",acceptance:"整车验收",draft:"装配草稿",paused:"任务已暂停",cancelled:"任务已取消",completed: "设计已完成", pending: "等待生成", processing: "生成模型", failed: "生成失败" } as Record<string, string>)[phase] || "生成模型";
 }
 
 function failureCallLabel(kind?: string) {
@@ -159,7 +159,7 @@ export default function DesignDetailPage() {
   return <>
     <div className="product-nav"><div className="content-width"><span className="detail-nav-title">{title}</span><div className="product-nav-links"><a href="#references">参考图</a>{available && <><a href="#parts">零件</a><a href="#customize">定制</a></>}</div></div></div>
     <section className="design-experience content-width" id="references">
-      <div className="design-heading"><div><Link href="/" className="back-link"><ArrowLeft size={14} />工作室</Link><h1>{title}</h1><p className="secondary">{design.car?.year || ""} <span className="dot-separator">·</span> {design.requested_scale || "1:38"} · {design.parent_design_id ? "定制版" : "原始设计"}</p></div><span className={`status-label ${completed ? "success" : design.status === "failed" ? "failure" : ""}`}>{completed ? <Check size={15} /> : processing ? <LoaderCircle className="spin" size={15} /> : null}{stateNames[design.status] || design.status}</span></div>
+      <div className="design-heading"><div><Link href="/" className="back-link"><ArrowLeft size={14} />工作室</Link><h1>{title}</h1><p className="secondary">{design.car?.year ? <>{design.car.year} <span className="dot-separator">·</span> </> : null}{design.requested_scale || "1:38"} · {design.parent_design_id ? "定制版" : "原始设计"}</p></div><span className={`status-label ${completed ? "success" : design.status === "failed" ? "failure" : ""}`}>{completed ? <Check size={15} /> : processing ? <LoaderCircle className="spin" size={15} /> : null}{stateNames[design.status] || design.status}</span></div>
       <ScaleRequirements policy={design.scale_requirements} />
       {design.scene_url && <AssemblyViewer id={id} highlightedModule={highlightModule} />}
       {!!design.official_build_references?.length && <details className="quality-issues"><summary>官方搭建参考 · {design.official_build_references.length} 套</summary><p className="secondary">参考真实零件与机构设计，当前比例仍需独立装配验收。</p>{design.official_build_references.map(guide=><div key={guide.set_num}><a className="text-link" href={guide.instructions_url} target="_blank" rel="noreferrer">{guide.name} · {guide.set_num}<ExternalLink size={14}/></a><span className="secondary">{guide.local_pdf ? "本地说明书可用" : "官方说明书"}</span></div>)}</details>}

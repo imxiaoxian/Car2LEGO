@@ -13,7 +13,7 @@ export interface CarResult {
   id: string;
   make: string;
   model: string;
-  year: number;
+  year: number | null;
   trim?: string;
   body_style?: string;
   image_url?: string;
@@ -54,10 +54,12 @@ export interface Design {
 
 export interface PhysicalSpecifications {
   version: string;
-  vehicle: { make: string; model: string; year: number };
+  vehicle: { make: string; model: string; year: number | null };
   scale: string;
   applied_to_design?: boolean;
   overall_grounded: boolean;
+  generation_status?: "ambiguous" | "source_scoped" | "requested_year" | "unknown";
+  source_year_ranges?: { start: number; end: number }[];
   measurements: Record<string, { value: number; unit: string; method: string; grounded: boolean; conflicted: boolean;
     source_url?: string; source_kind: string; source_status: string; vehicle_match: string; confidence: number;
     target_ldu?: number; target_model_mm?: number; evidence: string; definition: string; derivation?: string }>;
@@ -67,7 +69,10 @@ export interface PhysicalSpecifications {
   missing_required?: string[];
   missing_recommended?: string[];
   conflicts: { name: string }[];
-  sources: { url: string; status: string; title?: string; error?: string; note?: string }[];
+  sources: { url: string; status: string; title?: string; error?: string; note?: string; measurement_count?: number }[];
+  research?: { skill: string; version: string; status: string; scale: string; documents_read?: number;
+    started_at?: string; finished_at?: string; missing_fields?: string[];
+    queries: { query: string; purpose: string; status: string; engine?: string; results: { title: string; url: string }[] }[] };
 }
 
 export interface DesignDetail extends Design {
@@ -141,7 +146,7 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
 export async function createDesign(
   make: string,
   model: string,
-  year: number,
+  year?: number | null,
   image_url?: string,
   scale: string = "1:38"
 ): Promise<DesignDetail> {
@@ -170,7 +175,7 @@ export async function getDesign(id: string): Promise<DesignDetail> {
   return fetchApi<DesignDetail>(`/designs/${id}`);
 }
 
-export async function collectVehicleSpecifications(make: string, model: string, year: number, scale: string): Promise<PhysicalSpecifications> {
+export async function collectVehicleSpecifications(make: string, model: string, year: number | null, scale: string): Promise<PhysicalSpecifications> {
   return fetchApi("/research/physical-specifications", {
     method: "POST", body: JSON.stringify({ make, model, year, scale }),
   });
@@ -203,7 +208,7 @@ export async function searchSets(
 }
 
 /** GET /cars/lookup */
-export async function lookupCar(make: string, model: string, year: number) {
+export async function lookupCar(make: string, model: string, year?: number | null) {
   return fetchApi<CarResult>("/cars/lookup", {
     method: "POST",
     body: JSON.stringify({ make, model, year }),

@@ -67,13 +67,13 @@ function CreatePage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (mode === "photo" && !photo) { setError("请选择车辆照片。"); return; }
-    if (mode === "text" && (!make.trim() || !model.trim() || !year)) { setError("请选择品牌，并填写车型和年份。"); return; }
+    if (mode === "text" && (!make.trim() || !model.trim())) { setError("请选择品牌，并填写车型。"); return; }
     if (year && (!Number.isInteger(Number(year)) || Number(year) < 1900 || Number(year) > 2030)) { setError("年份应在 1900 至 2030 之间。"); return; }
     setLoading(true); setError("");
     try {
       const design = mode === "photo" && photo
         ? await createDesignFromImage(photo, { make: make.trim(), model: model.trim(), year: year ? Number(year) : undefined, scale })
-        : await createDesign(make.trim(), model.trim(), Number(year), undefined, scale);
+        : await createDesign(make.trim(), model.trim(), year ? Number(year) : undefined, undefined, scale);
       router.push(`/designs/${design.id}`);
     } catch (err) { setError(err instanceof Error ? err.message : "创建失败，请重试。"); setLoading(false); }
   }
@@ -93,7 +93,7 @@ function CreatePage() {
         <div className="form-fields">
           <BrandSelector value={make} custom={customMake} onChange={(value, custom) => { setMake(value); setCustomMake(custom); }} optional={mode === "photo"} disabled={loading} />
           <label className="field"><span>车型{mode === "photo" ? "（可选）" : ""}</span><input autoComplete="off" value={model} onChange={e => setModel(e.target.value)} placeholder="F40" required={mode === "text"} disabled={loading} /></label>
-          <label className="field"><span>年份{mode === "photo" ? "（可选）" : ""}</span><input type="number" inputMode="numeric" min={1900} max={2030} value={year} onChange={e => setYear(e.target.value)} placeholder="1990" required={mode === "text"} disabled={loading} /></label>
+          <label className="field"><span>年款（选填）</span><input type="number" inputMode="numeric" min={1900} max={2030} value={year} onChange={e => setYear(e.target.value)} placeholder="例如 1990" disabled={loading} /></label>
           <button type="submit" className="button primary create-button" disabled={loading}>{loading ? <><LoaderCircle size={18} className="spin" />{mode === "photo" ? "识别中" : "创建中"}</> : <>创建设计 <ArrowRight size={17} /></>}</button>
         </div>
         <div className="form-bottom"><label className="scale-field"><span>模型比例</span><select aria-label="模型比例" value={scale} disabled={loading} onChange={e => setScale(e.target.value)}>{scales.map(item => <option key={item.ratio} value={item.ratio}>{item.ratio} · {item.requirements?.label || "实验装配"}</option>)}</select></label><span>BrickLink Studio .io</span></div>

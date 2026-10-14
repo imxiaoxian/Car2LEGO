@@ -51,7 +51,7 @@ class PlanInput(BaseModel):
     """Lightweight wrapper for plan_design prompt inputs."""
     make: str
     model: str
-    year: int
+    year: int | None
     scale: str
     flagship_metadata: dict | None = None
 
@@ -76,7 +76,7 @@ async def plan_design_node(state: DesignState) -> dict:
     flagship = state.get("flagship_metadata") or {}
 
     prompt = f"""## Target Car
-{year} {make} {model}
+{str(year) + ' ' if year is not None else ''}{make} {model}
 Scale: {scale}
 Body style: {body_style}
 
@@ -215,7 +215,7 @@ async def create_io_node(state: DesignState) -> dict:
 
     studio_file = StudioService.create_studio_file(
         ldr_content=ldr_content,
-        name=f"{state['make']} {state['model']} {state['year']}",
+        name=f"{state['make']} {state['model']}{' ' + str(state['year']) if state.get('year') is not None else ''}",
         description=design_notes,
     )
     io_path = design_dir / "model.io"

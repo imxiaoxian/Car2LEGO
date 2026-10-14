@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class CarCreate(BaseModel):
     make: str = Field(..., max_length=100, examples=["Porsche"])
     model: str = Field(..., max_length=200, examples=["911 Turbo"])
-    year: int = Field(..., ge=1900, le=2030, examples=[2020])
+    year: int | None = Field(default=None, ge=1900, le=2030, examples=[2020])
     trim: str | None = None
     image_url: str | None = None
 
@@ -20,7 +20,7 @@ class CarResponse(BaseModel):
     id: uuid.UUID
     make: str
     model: str
-    year: int
+    year: int | None = None
     trim: str | None = None
     body_style: str | None = None
     image_url: str | None = None
@@ -34,7 +34,7 @@ class CarResponse(BaseModel):
 class DesignCreate(BaseModel):
     make: str = Field(..., max_length=100)
     model: str = Field(..., max_length=200)
-    year: int = Field(..., ge=1900, le=2030)
+    year: int | None = Field(default=None, ge=1900, le=2030)
     image_url: str | None = None
     scale: Literal["1:8", "1:10", "1:12", "1:16", "1:24", "1:38"] = Field(
         default="1:38",

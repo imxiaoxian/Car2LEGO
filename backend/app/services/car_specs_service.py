@@ -21,12 +21,14 @@ class CarSpecsService:
     """Query and persist car specifications for the LLM design generator."""
 
     @staticmethod
-    async def get_specs(db: AsyncSession, make: str, model: str, year: int) -> CarSpec | None:
+    async def get_specs(db: AsyncSession, make: str, model: str, year: int | None) -> CarSpec | None:
         """Look up car specs by make+model+year.
 
         Tries exact match first, then falls back to same make+model with
         nearest year (±3 years) for same-generation vehicles.
         """
+        if year is None:
+            return None
         # Exact match
         result = await db.execute(
             select(CarSpec).where(
@@ -62,12 +64,15 @@ class CarSpecsService:
         return None
 
     @staticmethod
-    async def save_specs(db: AsyncSession, result: CarResearchResult) -> CarSpec:
+    async def save_specs(db: AsyncSession, result: CarResearchResult) -> CarSpec | None:
         """Persist a CarResearchResult into the car_specs table.
 
         If an entry with the same make+model+year exists, update it;
         otherwise create a new one.
         """
+        # This legacy table stores year-specific records only.
+        if result.year is None:
+            return None
         existing_result = await db.execute(
             select(CarSpec).where(
                 CarSpec.make == result.make,

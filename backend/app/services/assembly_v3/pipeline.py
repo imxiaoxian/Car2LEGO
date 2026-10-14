@@ -12,7 +12,7 @@ from app.agents.models import create_text_llm
 from app.agents.security import mask_api_key
 from app.config import settings
 from app.services.vehicle_physics import VehiclePhysicalProfile, load_profile, physical_prompt
-from app.services.vehicle_research import collect_physical_profile
+from app.services.vehicle_research import collect_physical_profile, research_needed
 from app.services.reference_images import (ReferenceImageService, ReferenceShotRequest, reference_content,
     ALL_REFERENCE_VIEWS, SECTION_DETAILS, model_call, failure_details, design_directory, reference_request_hash)
 from app.services.reference_images import controlled_call
@@ -136,7 +136,7 @@ class AssemblyPipeline:
         self.storage = Path(storage or settings.storage_path)
         self.jobs = JobStore(self.storage)
 
-    async def generate(self, design_id: str, make: str, model: str, year: int, scale: str = "1:38", **kwargs) -> dict:
+    async def generate(self, design_id: str, make: str, model: str, year: int | None, scale: str = "1:38", **kwargs) -> dict:
         if scale not in SCALES:
             raise ValueError("1:8 and 1:10 precision generation is not yet validated")
         request = dict(design_id=design_id, make=make, model=model, year=year, scale=scale,
@@ -167,8 +167,9 @@ class AssemblyPipeline:
             if physical is None and not checkpoint.get("references"):
                 progress("vehicle_research", 2)
                 profile = load_profile(make, model, year, self.storage)
-                if not profile.sources:
-                    profile = await controlled_call(collect_physical_profile(make, model, year, storage=self.storage),
+                if research_needed(profile, scale):
+                    profile = await controlled_call(collect_physical_profile(make, model, year, storage=self.storage,
+                                                    scale=scale, state=state),
                                                     state, "vehicle_research", 2)
                 physical = profile.resolved(scale)
                 atomic_json(directory / "physical_specifications.json", physical)

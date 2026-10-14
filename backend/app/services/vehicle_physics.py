@@ -42,7 +42,7 @@ SOURCE_RANK = {"manufacturer": 5, "repair_manual": 4, "homologation": 4,
                "measurement": 4, "database": 3, "user": 2, "model_estimate": 0}
 
 
-def vehicle_key(make: str, model: str, year: int) -> str:
+def vehicle_key(make: str, model: str, year: int | None) -> str:
     identity = [re.sub(r"[^\w]", "", value.casefold()) for value in (make, model)]
     return hashlib.sha256(json.dumps([*identity, year]).encode()).hexdigest()
 
@@ -103,22 +103,23 @@ class PhysicalMeasurement(BaseModel):
         self.definition = self.definition or definition
         return self
 
-    def grounded(self, year: int) -> bool:
+    def grounded(self, year: int | None) -> bool:
         return bool(self.method != "estimated" and self.source_kind != "model_estimate"
                     and (self.name != "width" or self.width_reference == "body")
                     and self.source_url and self.evidence and self.source_status == "fetched"
                     and self.vehicle_match in ("exact", "generation") and self.confidence >= .7
                     and self.year_start is not None and self.year_end is not None
-                    and self.year_start <= year <= self.year_end)
+                    and (year is None or self.year_start <= year <= self.year_end))
 
 
 class VehiclePhysicalProfile(BaseModel):
     version: Literal["vehicle_physics_v1"] = "vehicle_physics_v1"
     make: str = Field(min_length=1, max_length=100)
     model: str = Field(min_length=1, max_length=200)
-    year: int = Field(ge=1886, le=2100)
+    year: int | None = Field(default=None, ge=1886, le=2100)
     measurements: list[PhysicalMeasurement] = Field(default_factory=list, max_length=500)
     sources: list[dict] = Field(default_factory=list)
+    research: dict = Field(default_factory=dict)
 
     def resolved(self, scale: str = "1:38") -> dict:
         from .assembly_v3.requirements import requirements_for_scale
@@ -126,10 +127,14 @@ class VehiclePhysicalProfile(BaseModel):
         if denominator <= 0:
             raise ValueError("Invalid scale")
         selected, conflicts = {}, []
+        scopes = sorted({(m.year_start, m.year_end) for m in self.measurements
+                         if m.grounded(self.year)})
+        # With no requested year, incompatible source generations must not be mixed.
+        ambiguous_generation = self.year is None and bool(scopes) and max(s[0] for s in scopes) > min(s[1] for s in scopes)
         for name in FIELDS:
             candidates = [m for m in self.measurements if m.name == name and m.vehicle_match != "mismatch"
-                          and (m.year_start is None or m.year_start <= self.year)
-                          and (m.year_end is None or m.year_end >= self.year)]
+                          and (self.year is None or m.year_start is None or m.year_start <= self.year)
+                          and (self.year is None or m.year_end is None or m.year_end >= self.year)]
             if not candidates:
                 continue
             candidates.sort(key=lambda m: (m.grounded(self.year), SOURCE_RANK[m.source_kind], m.confidence), reverse=True)
@@ -139,7 +144,7 @@ class VehiclePhysicalProfile(BaseModel):
                            for m in grounded)
             if conflict:
                 conflicts.append({"name": name, "values": [m.model_dump() for m in grounded]})
-            selected[name] = winner.model_dump() | {"grounded": winner.grounded(self.year) and not conflict,
+            selected[name] = winner.model_dump() | {"grounded": winner.grounded(self.year) and not conflict and not ambiguous_generation,
                 "conflicted": conflict, "target_ldu": round(winner.value / denominator / .4, 4) if winner.unit == "mm" else None,
                 "target_model_mm": round(winner.value / denominator, 4) if winner.unit == "mm" else None}
         # Research can query reserved ratios, which have no assembly policy yet.
@@ -156,14 +161,17 @@ class VehiclePhysicalProfile(BaseModel):
                 "missing_required": [n for n in required if not selected.get(n, {}).get("grounded")],
                 "missing_recommended": [n for n in recommended if not selected.get(n, {}).get("grounded")],
                 "missing": [name for name in FIELDS if name not in selected], "sources": self.sources,
-                "overall_grounded": all(selected.get(n, {}).get("grounded", False) for n in OVERALL)}
+                "overall_grounded": all(selected.get(n, {}).get("grounded", False) for n in OVERALL),
+                "research": self.research,
+                "generation_status": "ambiguous" if ambiguous_generation else "source_scoped" if scopes and self.year is None else "requested_year" if self.year is not None else "unknown",
+                "source_year_ranges": [{"start": start, "end": end} for start, end in scopes]}
 
 
-def profile_path(make: str, model: str, year: int, storage: str | Path | None = None) -> Path:
+def profile_path(make: str, model: str, year: int | None, storage: str | Path | None = None) -> Path:
     return Path(storage or settings.storage_path) / "vehicle_specs" / (vehicle_key(make, model, year) + ".json")
 
 
-def load_profile(make: str, model: str, year: int, storage=None) -> VehiclePhysicalProfile:
+def load_profile(make: str, model: str, year: int | None = None, storage=None) -> VehiclePhysicalProfile:
     path = profile_path(make, model, year, storage)
     profile = VehiclePhysicalProfile.model_validate_json(path.read_text(encoding="utf-8")) if path.is_file() else VehiclePhysicalProfile(make=make, model=model, year=year)
     if vehicle_key(profile.make, profile.model, profile.year) != vehicle_key(make, model, year):

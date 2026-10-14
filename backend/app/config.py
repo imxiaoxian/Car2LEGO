@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     image_size: str = "1536x1024"
     image_timeout: float = 300.0
 
+    # Vehicle research executes public web searches before image generation.
+    vehicle_research_source_limit: int = 12
+    vehicle_research_model_extraction: bool = True
+
     # Legacy Doubao settings (generation uses the OpenAI factories).
     doubao_api_key: str = ""
     doubao_vision_model: str = "doubao-seed-2-1-pro-260628"

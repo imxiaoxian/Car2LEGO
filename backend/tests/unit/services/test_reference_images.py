@@ -29,12 +29,16 @@ def image_api(monkeypatch):
     return client
 
 
-async def test_generation_anchors_details_and_reuses_cached_images(tmp_path, image_api):
-    state = {"design_id": "references-car", "storage_path": str(tmp_path), "make": "Ferrari", "model": "F40", "year": 1990}
+@pytest.mark.parametrize("year", [1990, None])
+async def test_generation_anchors_details_and_reuses_cached_images(tmp_path, image_api, year):
+    state = {"design_id": "references-car", "storage_path": str(tmp_path), "make": "Ferrari", "model": "F40", "year": year}
     result = await refs.ReferenceImageService().generate(state)
     assert [r["view"] for r in result["reference_images"]] == list(refs.REFERENCE_VIEWS)
     assert image_api.images.generate.await_count == 1
     assert image_api.images.edit.await_count == 5
+    prompt = image_api.images.generate.call_args.kwargs["prompt"]
+    assert "None Ferrari" not in prompt
+    assert ("1990 Ferrari F40" in prompt) == (year is not None)
     assert all(call.kwargs["model"] == "gpt-image-2.5-sunburst" and call.kwargs["quality"] == "high"
                for call in image_api.images.edit.await_args_list)
     await refs.ReferenceImageService().generate(state)

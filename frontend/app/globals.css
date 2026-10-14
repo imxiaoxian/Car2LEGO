@@ -368,6 +368,8 @@ a { text-decoration: none; }
 .physical-missing { font-size:13px;line-height:1.8;overflow-wrap:anywhere; }
 .physical-sources>div { flex-wrap:wrap; }
 .physical-sources a { min-width:0; }
+.physical-research-summary { margin:0 0 16px;font-size:13px; }
+.physical-search-query { flex:1;min-width:0;font-size:13px;line-height:1.6;overflow-wrap:anywhere; }
 .quality-issues summary { cursor:pointer;font-size:14px; }
 .quality-issues>div { display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:8px 0; }
 .quality-issues .text-link { overflow-wrap:anywhere;text-align:left; }
