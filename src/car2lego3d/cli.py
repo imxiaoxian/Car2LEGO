@@ -16,6 +16,11 @@ def main():
     commands.add_parser("doctor", help="Show environment and CUDA availability")
     web = commands.add_parser("web", help="Serve the local generation page and brand selector")
     web.add_argument("--port", type=int, default=8765)
+    research = commands.add_parser("research", help="Search live physical specs with the vehicle-spec-search skill")
+    research.add_argument("--brand", required=True)
+    research.add_argument("--model", required=True)
+    research.add_argument("--variant", default="")
+    research.add_argument("--output", type=Path, required=True)
     requirements = commands.add_parser("requirements", help="Export per-scale policies and vehicle-specific plans")
     requirements.add_argument("--scale", choices=SCALES)
     requirements.add_argument("--vehicle-specs", type=Path)
@@ -76,7 +81,11 @@ def main():
         parser.error("--length-studs must be positive")
     if args.command == "run" and vehicle_spec is not None and (args.up_axis != "z" or args.yaw != 0):
         parser.error("Spec-based run uses the calibrated TripoSR X-long/Z-up frame; omit --up-axis and --yaw")
-    if args.command == "web":
+    if args.command == "research":
+        from .research import research_vehicle
+        result = research_vehicle({"brand": args.brand, "model": args.model, "variant": args.variant}, args.output)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+    elif args.command == "web":
         from .web import serve
         serve(args.port)
     elif args.command == "setup":

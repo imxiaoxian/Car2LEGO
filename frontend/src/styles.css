@@ -25,6 +25,25 @@ fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .field input, .field select { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--ink); font-size: 15px; padding: 0; }
 .constraint { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 8px 0 18px; overflow-wrap: anywhere; }
 .blocked { color: #a45116; }
+.research-section { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 0; margin: 18px 0; }
+.research-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.research-heading strong { font-size: 13px; font-weight: 600; }
+.research-command { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: transparent; color: var(--blue); font-size: 12px; min-height: 30px; padding: 4px 0; }
+.research-state { font-size: 12px; line-height: 1.6; color: var(--muted); margin-top: 8px; overflow-wrap: anywhere; }
+.dimension-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.dimension-grid dt { color: var(--muted); font-size: 11px; }
+.dimension-grid dd { margin: 4px 0 0; font-size: 17px; font-variant-numeric: tabular-nums; }
+.dimension-grid small { font-size: 11px; color: var(--muted); }
+.spec-details { margin-top: 12px; }
+.spec-details table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+.spec-details th, .spec-details td { border-bottom: 1px solid #eceef0; padding: 7px 0; text-align: left; overflow-wrap: anywhere; }
+.spec-details th { font-weight: 400; width: 52%; }
+.spec-details td { font-variant-numeric: tabular-nums; }
+.spec-details td a { display: inline-flex; margin-left: 6px; vertical-align: middle; }
+.source-list { padding-left: 18px; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
+.source-list li { margin: 8px 0; }
+.source-list small { display: block; color: var(--muted); }
+.research-note { color: var(--muted); font-size: 11px; line-height: 1.7; margin-top: 8px; overflow-wrap: anywhere; }
 .scale-requirements > p:first-child { font-size: 12px; line-height: 1.7; }
 .scale-requirements > span { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
 .color-field { margin-bottom: 20px; }

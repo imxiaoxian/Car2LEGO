@@ -33,7 +33,8 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 
 脚本创建 `.venv`，安装 PyTorch 2.5.1 CUDA 12.4 和固定依赖，下载并固定 TripoSR 源码。
 首次运行会下载模型权重到 Hugging Face 缓存和背景移除权重到 rembg 缓存，需联网及数 GB 磁盘空间。
-没有全局修改 Python / Conda 环境，不要求 OpenAI API 密钥。显存不足时可用 `--device cpu`，速度更慢。
+没有全局修改 Python / Conda 环境。生图与重建不要求 OpenAI API 密钥；联网规格搜索需要已安装并登录的 Codex CLI。
+显存不足时可用 `--device cpu`，速度更慢。
 
 如果 Git 配置了失效代理，修复本机代理，或仅在本次克隆临时使用 `git -c http.proxy= -c https.proxy= clone ...`。
 
@@ -56,15 +57,28 @@ Studio `.io`、LDraw 和 3D 网格。任务参数、日志和产物保存在 `ru
 刷新页面可恢复最近任务；同一服务每次只运行一个生成任务。
 服务只监听本机地址，写入接口校验同源请求。
 
-当前默认 Ferrari F40 1:24 草稿使用已核对规格。其他比例只展示不同的设计要求，
-缺少独立配方时禁止生成。其他车型可选择自定义车长研究草稿，品牌名会进入生图，
-但通用跑车配方不保证该车型的外观或尺寸还原；品牌目录不等同于规格/配方支持目录。
+输入车型、可选年款/版本后，页面自动调用项目内 [vehicle-spec-search skill](.agents/skills/vehicle-spec-search/SKILL.md)
+实时搜索网页并读取来源，获取尺寸和轮胎等物理参数。初始默认车型需点击“搜索规格”；页面加载不会自动发起模型调用。
+规格按品牌/车型/版本绑定，修改后旧结果立即失效；未公开的门窗参数保留为空，跨代型号要求补充版本。
+生成及自定义车长均采用该次检索结果，无固定 F40 规格回退。每项数值带来源、短原文证据及单位。
+不同尺度继续采用各自的要求；缺少独立配方或超出当前零件范围时禁止生成。
+通用跑车配方不保证车型外观或精确尺寸还原；品牌目录不等同于规格/配方支持目录。
 页面初始图片是已有 F40 草稿渲染，本次生成后展示参考图片和重建网格，不能替代
 Studio GUI、原生零件碰撞或外观验收。
 
 前端开发：在后端运行时，在 `frontend` 目录执行 `npm run dev`（API 代理到 8765）。
 单独启动已构建页面：`.venv/Scripts/python.exe -m car2lego3d web --port 8765`。
 浏览器验收截图、测试和页面实际生成记录见 [验证记录](docs/brand-selector-validation.md)。
+联网 skill 的运行条件和证据边界见 [规格搜索](docs/vehicle-spec-search.md)。
+
+CLI 获取任意车型规格：
+
+```powershell
+.venv/Scripts/python.exe -m car2lego3d research --brand Ferrari --model F40 --output runs/f40-research
+```
+
+年款/版本为选填，可用 `--variant 1987` 补充。成功输出 `spec.json` 后，将其传给 `run --vehicle-specs`。
+下文静态规格属于历史复现实例。
 
 ## 完整流程
 

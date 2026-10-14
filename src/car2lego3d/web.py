@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -15,14 +16,14 @@ from uuid import uuid4
 
 from .common import ROOT, write_json
 from .requirements import SCALES, plan_design, requirements_for_scale
+from .research import ResearchStore
 from .vehicle import load_spec
 
 
 CATALOG = ROOT / "frontend/lib/data/vehicle-brands.json"
-SPEC = ROOT / "data/vehicles/ferrari_f40_1987.json"
 FILES = {"image": "01-image/reference.png", "mesh": "02-mesh/mesh.glb",
          "preview": "03-lego/mesh-preview.png", "ldraw": "03-lego/model.ldr",
-         "studio": "04-studio/model.io", "request": "request.json"}
+         "studio": "04-studio/model.io", "request": "request.json", "specs": "vehicle-specs.json"}
 COLORS = {4: ("红色", "red"), 0: ("黑色", "black"), 15: ("白色", "white"),
           1: ("蓝色", "blue"), 14: ("黄色", "yellow"), 2: ("绿色", "green")}
 
@@ -53,7 +54,7 @@ def text_field(payload, name, limit, required=True):
     return value
 
 
-def prepare_request(payload):
+def vehicle_identity(payload):
     if not isinstance(payload, dict):
         raise ValueError("请求必须为 JSON 对象。")
     custom = payload.get("custom", False)
@@ -64,6 +65,13 @@ def prepare_request(payload):
     if not custom and selected is None:
         raise ValueError("请从目录选择品牌，或选择其他后输入品牌。")
     model = text_field(payload, "model", 64)
+    variant = text_field(payload, "variant", 100, required=False)
+    return {"brand": brand, "model": model, "variant": variant}, selected, custom
+
+
+def prepare_request(payload, research):
+    identity, selected, custom = vehicle_identity(payload)
+    brand, model, variant = (identity[k] for k in ("brand", "model", "variant"))
     description = text_field(payload, "description", 100, required=False)
     scale = payload.get("scale", "1:24")
     if scale not in (*SCALES, "custom"):
@@ -76,40 +84,44 @@ def prepare_request(payload):
         raise ValueError("种子应为 0 到 4294967295 的整数。")
     request = {"brand": brand, "brand_id": selected["id"] if not custom else None,
                "brand_zh": selected["name_zh"] if not custom else brand,
-               "custom": custom, "model": model, "description": description,
+               "custom": custom, "model": model, "variant": variant, "description": description,
                "scale": scale, "color": color, "seed": seed}
-    prompt = f"a {COLORS[color][1]} {brand} {model} sports car"
+    prompt = f"a {COLORS[color][1]} {brand} {model} {variant} car".replace("  ", " ")
     if description:
         prompt += f", {description}"
     arguments = ["--prompt", prompt, "--seed", str(seed), "--steps", "4", "--resolution", "256",
                  "--strategy", "car", "--color", str(color)]
-    plan = None
+    spec_path = research.specification(payload.get("research_id"), identity)
+    spec = load_spec(spec_path)
+    request.update(research_id=payload["research_id"], resolved_model=spec["model"], resolved_variant=spec["variant"])
     if scale != "custom":
-        if custom or selected["id"] != "ferrari" or model.casefold() != "f40":
-            raise ValueError("当前只有 Ferrari F40 有已核对的物理规格。其他车型请选择自定义车长研究草稿。")
-        plan = plan_design(load_spec(SPEC), scale)
-        if not plan["generation"]["draft_recipe_available"]:
-            raise ValueError(f"{scale} 的要求已设置，独立配方尚未实现，不能生成。")
-        arguments += ["--scale", scale, "--vehicle-specs", str(SPEC)]
+        plan = plan_design(spec, scale)
+        arguments += ["--scale", scale]
     else:
         length = payload.get("length_studs", 24)
         if type(length) is not int or not 23 <= length <= 32:
             raise ValueError("当前研究配方的车长范围为 23–32 studs。")
         request["length_studs"] = length
+        plan = plan_design(spec, length_studs=length)
         arguments += ["--length-studs", str(length)]
+    arguments += ["--vehicle-specs", str(spec_path)]
+    request["vehicle_spec_fingerprint"] = plan["vehicle_spec_fingerprint"]
     request["prompt"] = prompt
     return request, arguments, plan
 
 
 class JobStore:
-    def __init__(self, directory):
+    def __init__(self, directory, research):
         self.directory = Path(directory)
+        self.research = research
         self.lock = Lock()
         self.active = None
         self.worker = None
 
     def start(self, payload):
-        request, arguments, plan = prepare_request(payload)
+        request, arguments, plan = prepare_request(payload, self.research)
+        if not plan["generation"]["draft_recipe_available"]:
+            raise ValueError("所选比例或尺寸的生成配方尚未实现：" + " ".join(plan["generation"]["blockers"]))
         with self.lock:
             if self.active is not None:
                 raise RuntimeError("已有生成任务运行中，请等待完成。")
@@ -117,8 +129,11 @@ class JobStore:
             directory = self.directory / job_id
             # CLI run requires an empty output directory; metadata lives beside its artifacts.
             write_json(directory / "request.json", request)
-            if plan:
-                write_json(directory / "requirements.json", plan)
+            write_json(directory / "requirements.json", plan)
+            spec_index = arguments.index("--vehicle-specs") + 1
+            snapshot = directory / FILES["specs"]
+            shutil.copyfile(arguments[spec_index], snapshot)
+            arguments[spec_index] = str(snapshot)
             write_status(directory / "status.json", {"status": "running", "error": None})
             self.active = job_id
             self.worker = Thread(target=self._run, args=(job_id, arguments))
@@ -159,7 +174,7 @@ class JobStore:
         directory = self.job_directory(job_id)
         if kind not in FILES:
             raise FileNotFoundError("文件不存在。")
-        path = directory / (FILES[kind] if kind == "request" else f"artifacts/{FILES[kind]}")
+        path = directory / (FILES[kind] if kind in {"request", "specs"} else f"artifacts/{FILES[kind]}")
         if not path.is_file():
             raise FileNotFoundError("文件尚未生成。")
         return path
@@ -194,6 +209,9 @@ class Handler(SimpleHTTPRequestHandler):
         return self.headers.get("Host") in {f"localhost:{self.server.server_port}",
                                           f"127.0.0.1:{self.server.server_port}"}
 
+    def research(self):
+        return getattr(self.jobs, "research", None)
+
     def json_response(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
@@ -223,6 +241,11 @@ class Handler(SimpleHTTPRequestHandler):
                                            "colors": [{"code": code, "name": name[0]} for code, name in COLORS.items()]})
             if path == "/api/preview":
                 return self.send_file(ROOT / "examples/f40-physical/03-lego/native-ldraw.png")
+            match = re.fullmatch(r"/api/research/([a-f0-9]{32})", path)
+            if match:
+                if not self.research():
+                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                return self.json_response(self.research().get(match[1]))
             match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(?:/files/([a-z]+))?", path)
             if match:
                 if match[2]:
@@ -239,16 +262,30 @@ class Handler(SimpleHTTPRequestHandler):
         if not self.local_host() or origin not in {f"http://127.0.0.1:{self.server.server_port}",
                                                    f"http://localhost:{self.server.server_port}"}:
             return self.json_response({"error": "仅接受同源本机请求。"}, 403)
-        if self.path != "/api/jobs":
+        if self.path not in {"/api/jobs", "/api/research", "/api/plan"}:
             return self.json_response({"error": "接口不存在。"}, 404)
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if not 0 < length <= 8192 or self.headers.get_content_type() != "application/json":
                 raise ValueError("请提交有效 JSON 请求。")
             payload = json.loads(self.rfile.read(length))
+            if self.path == "/api/research":
+                if not self.research():
+                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                identity, _, _ = vehicle_identity(payload)
+                refresh = payload.get("refresh", False)
+                if not isinstance(refresh, bool):
+                    raise ValueError("重新搜索选项无效。")
+                return self.json_response(self.jobs.research.start(identity, refresh), 202)
+            if self.path == "/api/plan":
+                if not self.research():
+                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                return self.json_response(prepare_request(payload, self.research())[2])
             self.json_response(self.jobs.start(payload), 202)
         except (ValueError, UnicodeDecodeError) as error:
             self.json_response({"error": str(error)}, 400)
+        except FileNotFoundError:
+            self.json_response({"error": "请先搜索当前车型的物理规格。"}, 400)
         except RuntimeError as error:
             self.json_response({"error": str(error)}, 409)
 
@@ -257,7 +294,8 @@ def serve(port=8765):
     frontend = ROOT / "frontend/dist"
     if not (frontend / "index.html").is_file():
         raise RuntimeError("Build the page first: cd frontend; npm ci; npm run build")
-    jobs = JobStore(ROOT / "runs/web")
+    research = ResearchStore(ROOT / "runs/vehicle-research")
+    jobs = JobStore(ROOT / "runs/web", research)
     handler = partial(Handler, directory=str(frontend), jobs=jobs)
     with ThreadingHTTPServer(("127.0.0.1", port), handler) as server:
         print(f"Car2LEGO_3D: http://127.0.0.1:{server.server_port}", flush=True)
@@ -268,3 +306,4 @@ def serve(port=8765):
         finally:
             if jobs.worker:
                 jobs.worker.join()
+            research.close()

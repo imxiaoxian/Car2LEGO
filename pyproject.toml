@@ -15,7 +15,7 @@ dependencies = [
   "accelerate==0.34.2", "safetensors==0.4.5", "omegaconf==2.3.0",
   "einops==0.8.0", "jaxtyping==0.2.36", "rembg==2.0.59",
   "onnxruntime==1.19.2", "imageio==2.36.0", "imageio-ffmpeg==0.5.1",
-  "matplotlib==3.9.2"
+  "matplotlib==3.9.2", "jsonschema==4.26.0", "httpx==0.28.1", "beautifulsoup4==4.14.2"
 ]
 
 [project.optional-dependencies]

@@ -39,8 +39,8 @@ def validate_spec(spec):
         if (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
                 or value < 0 or (value == 0 and not allow_zero)):
             raise ValueError(f"{name} must be finite and positive (coordinates may be zero).")
-        if status not in ("manufacturer", "measured", "estimated"):
-            raise ValueError(f"{name} requires manufacturer/measured/estimated status.")
+        if status not in ("manufacturer", "reported", "measured", "estimated"):
+            raise ValueError(f"{name} requires manufacturer/reported/measured/estimated status.")
         source = sources.get(item.get("source"), {})
         if not source.get("title") or not (source.get("url") or source.get("file")):
             raise ValueError(f"{name} requires a traceable source.")
