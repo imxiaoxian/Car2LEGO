@@ -166,12 +166,19 @@ def dimension_report(spec, fit):
               "front_tyre_width": 11.2, "rear_tyre_width": 11.2,
               "door_length": 32, "door_panel_height": 16,
               "windscreen_bottom_width": 48, "windscreen_top_width": 32}
+    if fit.get("recipe") == "coupe-v1":
+        actual["height"] = fit["roof_top_plates"] * 3.2 - fit["ground_y_mm"]
+        for axle, wheel in zip(("front", "rear"), fit["wheel_families"]):
+            actual[f"{axle}_tyre_diameter"] = wheel["diameter_mm"]
+            actual[f"{axle}_tyre_width"] = wheel["width_mm"]
+            actual[f"{axle}_track"] = wheel["track_studs"] * 8
+        actual["windscreen_top_width"] = 48
     errors = {name: {"target_mm": target, "fitted_mm": actual[name],
                      "error_mm": actual[name] - target,
                      "error_percent": None if target == 0 else 100 * (actual[name] / target - 1)}
               for name, target in report["target_model_mm"].items() if name in actual}
     # 65633's central front surface rises 27.5 LDU over approximately 70 LDU.
-    native_angle = math.degrees(math.atan2(27.5, 70))
+    native_angle = fit.get("fitted_windscreen_angle_degrees", math.degrees(math.atan2(27.5, 70)))
     report.update(model=spec["model"], variant=spec["variant"], dimensions=errors,
                   fitted_windscreen_angle_degrees=native_angle,
                   windscreen_angle_error_degrees=None if report["windscreen_angle_degrees"] is None else
@@ -179,7 +186,7 @@ def dimension_report(spec, fit):
                   enforced_constraints=["mesh length/width/height prior", "quantized wheelbase", "body width family"],
                   deferred_constraints=[name for name in ("height", "door_front_x", "windscreen_bottom_x",
                                                           "windscreen_slant_height")
-                                        if measurement(spec, name) is not None],
+                                        if measurement(spec, name) is not None and name not in actual],
                   dimensions_verified=False, appearance_accepted=False,
                   limitations=["Width is the rectangular body core, excluding arches, door skins and mirrors.",
                                "Tyres and glass retain native part dimensions; target mismatches are reported.",

@@ -155,7 +155,10 @@ def main():
                    "--strategy", args.strategy, *(["--no-rear-wing"] if args.no_rear_wing else []), *color_args,
                    *(["--width-studs", args.width_studs] if args.width_studs is not None else []),
                    *(["--requirements-snapshot", requirements_snapshot] if requirements_snapshot else []), *spec_args)
-            thumbnail = args.output / "03-lego" / "lego-preview.png"
+            from .native import configured_preview
+            native = configured_preview(args.output / "03-lego" / "model.ldr", args.output / "03-lego")
+            record["native_preview"] = "03-lego/native-ldraw.png" if native else None
+            thumbnail = native or args.output / "03-lego" / "lego-preview.png"
             thumbnail_args = ["--thumbnail", thumbnail] if thumbnail.exists() else []
             invoke("studio", "--ldraw", args.output / "03-lego" / "model.ldr",
                    "--output", args.output / "04-studio", *thumbnail_args)

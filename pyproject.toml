@@ -21,6 +21,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest==8.3.3"]
 brands = ["httpx==0.28.1", "beautifulsoup4==4.14.2"]
+native = ["ldraw-mcp==0.3.1"]
 
 [project.scripts]
 car2lego3d = "car2lego3d.cli:main"

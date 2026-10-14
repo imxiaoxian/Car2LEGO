@@ -1,0 +1,47 @@
+{
+  "method": "axis-aligned bounding-box prior; independent X/Y/Z scaling",
+  "target_dimensions_mm": [
+    4794,
+    1887,
+    1393
+  ],
+  "source_extents": [
+    0.9535876207544853,
+    0.6072072877981111,
+    0.37260705232620234
+  ],
+  "mm_per_source_unit_xyz": [
+    5027.330363419518,
+    3107.670210683315,
+    3738.5229058426007
+  ],
+  "front_direction_verified": false,
+  "physical_measurement_verified": false,
+  "limitations": [
+    "Calibration enforces a prior; it does not recover missing CAD detail.",
+    "Mirrors, spoiler and mesh artefacts can bias the source bounding box."
+  ],
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "6c73fdeccf9a70fe33db148912fd91a332bceed99f101b36c6ee1f05898885b7",
+    "model": "BMW M4 G82 Coupe",
+    "variant": "G82 3.0 480 hp, rear-wheel drive, 6-speed manual; source scope 2020-January 2024",
+    "unknown_fields": [
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "glb_units": "metres",
+  "obj_units": "mm"
+}

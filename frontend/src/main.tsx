@@ -64,7 +64,10 @@ function App() {
   const [description, setDescription] = useState("");
   const [seed, setSeed] = useState(42);
   const [job, setJob] = useState<Job>();
-  const [jobId, setJobId] = useState(() => localStorage.getItem("car2lego3d.job") || "");
+  const [jobId, setJobId] = useState(() => {
+    const linked = new URLSearchParams(window.location.search).get("job");
+    return linked && /^[a-f0-9]{32}$/.test(linked) ? linked : localStorage.getItem("car2lego3d.job") || "";
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const busy = submitting || job?.status === "running";
@@ -241,8 +244,8 @@ function App() {
           <span className={job?.files.mesh ? "done" : ""}><Box size={16} />3D 网格</span><ArrowRight size={14} />
           <span className={job?.files.studio ? "done" : ""}><Blocks size={16} />Studio 文件</span></div>
         <figure className="preview">
-          <img src={job?.files.preview || job?.files.image || "/api/preview"} alt={job?.files.preview ? "本次重建网格" : job?.files.image ? "本次生成参考图片" : "已有 F40 乐高研究草稿的原生零件渲染"} />
-          <figcaption>{job ? (job.files.preview ? "本次重建网格" : job.files.image ? "本次参考图片" : "已有 F40 草稿 · 等待本次结果") : "原生 LEGO 零件渲染 · 外观未验收"}</figcaption>
+          <img src={job?.files.native || job?.files.preview || job?.files.image || "/api/preview"} alt={job?.files.native ? "本次乐高模型" : job?.files.preview ? "本次重建网格" : job?.files.image ? "本次生成参考图片" : "已有 F40 乐高研究草稿的原生零件渲染"} />
+          <figcaption>{job ? (job.files.native ? "原生 LEGO 零件渲染 · 外观未验收" : job.files.preview ? "本次重建网格" : job.files.image ? "本次参考图片" : "已有 F40 草稿 · 等待本次结果") : "原生 LEGO 零件渲染 · 外观未验收"}</figcaption>
         </figure>
         {job?.files.studio && <div className="downloads"><a className="primary-button" href={job.files.studio}><Download size={17} />Studio .io</a>
           {[['ldraw', 'LDraw'], ['mesh', '3D 网格'], ['specs', '物理规格'], ['request', '生成参数']].map(([key, label]) => job.files[key] && <a key={key} href={job.files[key]}><Download size={15} />{label}</a>)}</div>}

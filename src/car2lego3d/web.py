@@ -22,6 +22,7 @@ from .vehicle import load_spec
 
 CATALOG = ROOT / "frontend/lib/data/vehicle-brands.json"
 FILES = {"image": "01-image/reference.png", "mesh": "02-mesh/mesh.glb",
+         "native": "03-lego/native-ldraw.png",
          "preview": "03-lego/mesh-preview.png", "ldraw": "03-lego/model.ldr",
          "studio": "04-studio/model.io", "request": "request.json", "specs": "vehicle-specs.json"}
 COLORS = {4: ("红色", "red"), 0: ("黑色", "black"), 15: ("白色", "white"),

@@ -141,8 +141,12 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
         fit["physical_calibration"] = calibration
         fit["target_scale_denominator"] = plan["target_scale_denominator"]
         fit["requirements_plan"] = plan
+        from .coupe import fit_coupe, is_coupe
+        if is_coupe(specifications, profile, length):
+            fit_coupe(fit, specifications)
         fit["physical_constraints"] = dimension_report(specifications, fit)
-        fit["inferred_parameters"].remove("axle positions")
+        if "axle positions" in fit["inferred_parameters"]:
+            fit["inferred_parameters"].remove("axle positions")
     return fit
 
 
@@ -211,6 +215,9 @@ class Car:
 
 
 def design(fit, rear_wing=True):
+    if fit.get("recipe") == "coupe-v1":
+        from .coupe import design_coupe
+        return design_coupe(fit)
     car = Car(fit)
     length, width, paint = fit["length_studs"], fit["width_studs"], fit["body_color"]
     center = (width-1)/2
@@ -350,7 +357,7 @@ def design(fit, rear_wing=True):
 
 
 def export(car, directory):
-    lines = ["0 Car2LEGO_3D mesh-conditioned sports car", "0 Author: imxiaoxian",
+    lines = ["0 Car2LEGO_3D mesh-conditioned vehicle", "0 Author: imxiaoxian",
              "0 // Constrained part-family fit; physical buildability unverified."]
     for step in sorted({p.step for p in car.parts}):
         for part in car.parts:
@@ -403,7 +410,9 @@ def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=
         export(car, directory)
         write_json(directory / "fit.json", fit)
         report = {"strategy": "car", "part_count": len(car.parts), "body_color": fit["body_color"],
-                  "tyre_count": 4, "native_wheel_count": 4, "native_windscreens": 1,
+                  "recipe": fit.get("recipe", "sports-v1"),
+                  "tyre_count": 4, "native_wheel_count": 4,
+                  "native_windscreens": sum("windscreen" in p.module for p in car.parts),
                   "standard_part_scaling": False, "body_cells_exact": True,
                   "buildability": "unverified", "studio_verified": False, "physical_verified": False,
                   "appearance_accepted": False,
@@ -411,7 +420,7 @@ def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=
                   "delivery_accepted": False,
                   "limitations": ["Vehicle part-family prior approximates mesh; exact coverage is not a goal.",
                                   "No native collision, clutch or physical assembly verification.",
-                                  "No decals, working doors, steering or verified Ferrari details."]}
+                                  "No decals, working doors, steering or verified model-specific detail recovery."]}
         write_json(directory / "validation.json", report)
         if specifications is not None:
             write_json(directory / "dimensions.json", fit["physical_constraints"])

@@ -1,0 +1,5439 @@
+{
+  "units": "LDraw LDU",
+  "parts": [
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -170.0,
+        -24,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -50.0,
+        -24,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        70.0,
+        -24,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        150.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        190.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3666",
+      "color": 0,
+      "position": [
+        220.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -170.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -50.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        70.0,
+        -24,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -170.0,
+        -24,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -50.0,
+        -24,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        70.0,
+        -24,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 1
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -210.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -90.0,
+        -32,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        30.0,
+        -32,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3666",
+      "color": 0,
+      "position": [
+        100.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        170.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        210.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3020",
+      "color": 0,
+      "position": [
+        -170.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3020",
+      "color": 0,
+      "position": [
+        130.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -90.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        30.0,
+        -32,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        -90.0,
+        -32,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3795",
+      "color": 0,
+      "position": [
+        30.0,
+        -32,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 2
+    },
+    {
+      "part": "3023",
+      "color": 0,
+      "position": [
+        -240.0,
+        -40,
+        -80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        -220.0,
+        -40,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        -90.0,
+        -56,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        -40.0,
+        -56,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        10.0,
+        -40,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        60.0,
+        -40,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        190.0,
+        -56,
+        -60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        220.0,
+        -56,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3666",
+      "color": 0,
+      "position": [
+        240.0,
+        -40,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3710",
+      "color": 0,
+      "position": [
+        110.0,
+        -40,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        -200.0,
+        -40,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        -110.0,
+        -56,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 3
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        -60.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        -20.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3004",
+      "color": 1,
+      "position": [
+        10.0,
+        -56,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        40.0,
+        -40,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        90.0,
+        -40,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        160.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3710",
+      "color": 0,
+      "position": [
+        -240.0,
+        -40,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        20.0,
+        -40,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        -110.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        190.0,
+        -56,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        0.0,
+        -40,
+        40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        -220.0,
+        -40,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 4
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        -110.0,
+        -56,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3010",
+      "color": 1,
+      "position": [
+        -40.0,
+        -56,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        60.0,
+        -40,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3010",
+      "color": 1,
+      "position": [
+        220.0,
+        -56,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3710",
+      "color": 0,
+      "position": [
+        240.0,
+        -40,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3023",
+      "color": 0,
+      "position": [
+        -240.0,
+        -40,
+        80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3001",
+      "color": 1,
+      "position": [
+        -90.0,
+        -56,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        -20.0,
+        -56,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        40.0,
+        -56,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3710",
+      "color": 0,
+      "position": [
+        110.0,
+        -40,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3003",
+      "color": 1,
+      "position": [
+        190.0,
+        -56,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        10.0,
+        -40,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 5
+    },
+    {
+      "part": "3700",
+      "color": 0,
+      "position": [
+        -170.0,
+        -48,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "axle mounting",
+      "step": 6
+    },
+    {
+      "part": "3700",
+      "color": 0,
+      "position": [
+        -170.0,
+        -48,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "axle mounting",
+      "step": 6
+    },
+    {
+      "part": "3700",
+      "color": 0,
+      "position": [
+        130.0,
+        -48,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "axle mounting",
+      "step": 6
+    },
+    {
+      "part": "3700",
+      "color": 0,
+      "position": [
+        130.0,
+        -48,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "axle mounting",
+      "step": 6
+    },
+    {
+      "part": "3003",
+      "color": 1,
+      "position": [
+        10.0,
+        -64,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3004",
+      "color": 1,
+      "position": [
+        60.0,
+        -64,
+        -80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        -20.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        40.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3004",
+      "color": 0,
+      "position": [
+        110.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -210.0,
+        -48,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        70.0,
+        -48,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        -240.0,
+        -48,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 6
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        -170.0,
+        -48,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3020",
+      "color": 0,
+      "position": [
+        50.0,
+        -48,
+        -20.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        110.0,
+        -48,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        140.0,
+        -48,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3010",
+      "color": 1,
+      "position": [
+        240.0,
+        -64,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3020",
+      "color": 0,
+      "position": [
+        30.0,
+        -48,
+        20.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3023",
+      "color": 0,
+      "position": [
+        80.0,
+        -48,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        50.0,
+        -48,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3003",
+      "color": 1,
+      "position": [
+        10.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3004",
+      "color": 1,
+      "position": [
+        60.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3004",
+      "color": 0,
+      "position": [
+        110.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 7
+    },
+    {
+      "part": "3737",
+      "color": 0,
+      "position": [
+        -170.0,
+        -38.0,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "axles",
+      "step": 8
+    },
+    {
+      "part": "3737",
+      "color": 0,
+      "position": [
+        130.0,
+        -38.0,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "axles",
+      "step": 8
+    },
+    {
+      "part": "3009",
+      "color": 1,
+      "position": [
+        -160.0,
+        -72,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        90.0,
+        -56,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        110.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        140.0,
+        -56,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        50.0,
+        -56,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3023",
+      "color": 1,
+      "position": [
+        130.0,
+        -56,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 8
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -110.0,
+        -64,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -70.0,
+        -64,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        -40.0,
+        -64,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3021",
+      "color": 1,
+      "position": [
+        200.0,
+        -64,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        -140.0,
+        -64,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        -20.0,
+        -64,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        80.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        220.0,
+        -64,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        -90.0,
+        -64,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        -40.0,
+        -64,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        80.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3020",
+      "color": 1,
+      "position": [
+        -90.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 9
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        -20.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 10
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        40.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 10
+    },
+    {
+      "part": "3021",
+      "color": 1,
+      "position": [
+        200.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 10
+    },
+    {
+      "part": "87087",
+      "color": 1,
+      "position": [
+        -20.0,
+        -64,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "door mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 1,
+      "position": [
+        40.0,
+        -64,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "door mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        80.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        140.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 1,
+      "position": [
+        -20.0,
+        -64,
+        90.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "door mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 1,
+      "position": [
+        40.0,
+        -64,
+        90.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "door mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        80.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "intake mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        140.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "intake mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        -240.0,
+        -48,
+        -50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "grille mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "rear panel mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        -240.0,
+        -48,
+        50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "grille mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "rear panel mounts",
+      "step": 11
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "tail light mounts",
+      "step": 12
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        -70.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "tail light mounts",
+      "step": 12
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        70.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "tail light mounts",
+      "step": 12
+    },
+    {
+      "part": "87087",
+      "color": 0,
+      "position": [
+        240.0,
+        -64,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "tail light mounts",
+      "step": 12
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -90.0,
+        -72,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3666",
+      "color": 0,
+      "position": [
+        -20.0,
+        -72,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        110.0,
+        -72,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -90.0,
+        -72,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3795",
+      "color": 1,
+      "position": [
+        -90.0,
+        -72,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3710",
+      "color": 1,
+      "position": [
+        110.0,
+        -72,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 12
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        100.0,
+        -96,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 13
+    },
+    {
+      "part": "3023",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 13
+    },
+    {
+      "part": "3005",
+      "color": 1,
+      "position": [
+        100.0,
+        -96,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 13
+    },
+    {
+      "part": "3023",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 13
+    },
+    {
+      "part": "18974",
+      "color": 1,
+      "position": [
+        -170.0,
+        -80,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel arches",
+      "step": 14
+    },
+    {
+      "part": "18974",
+      "color": 1,
+      "position": [
+        -170.0,
+        -80,
+        80.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel arches",
+      "step": 14
+    },
+    {
+      "part": "18974",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel arches",
+      "step": 14
+    },
+    {
+      "part": "18974",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        80.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel arches",
+      "step": 14
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        110.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake bridge",
+      "step": 15
+    },
+    {
+      "part": "4070",
+      "color": 1,
+      "position": [
+        -20.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "mirror mounts",
+      "step": 15
+    },
+    {
+      "part": "3666",
+      "color": 1,
+      "position": [
+        110.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake bridge",
+      "step": 15
+    },
+    {
+      "part": "4070",
+      "color": 1,
+      "position": [
+        -20.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "mirror mounts",
+      "step": 15
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        100.0,
+        -104,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 15
+    },
+    {
+      "part": "3024",
+      "color": 1,
+      "position": [
+        100.0,
+        -104,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "body and chassis",
+      "step": 15
+    },
+    {
+      "part": "30363",
+      "color": 1,
+      "position": [
+        -180.0,
+        -72,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "sloped bonnet",
+      "step": 15
+    },
+    {
+      "part": "30363",
+      "color": 1,
+      "position": [
+        -180.0,
+        -72,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "sloped bonnet",
+      "step": 15
+    },
+    {
+      "part": "30363",
+      "color": 1,
+      "position": [
+        -180.0,
+        -72,
+        40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "sloped bonnet",
+      "step": 15
+    },
+    {
+      "part": "3022",
+      "color": 0,
+      "position": [
+        -230.0,
+        -48,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "headlamp bases",
+      "step": 15
+    },
+    {
+      "part": "3022",
+      "color": 0,
+      "position": [
+        -230.0,
+        -48,
+        80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "headlamp bases",
+      "step": 15
+    },
+    {
+      "part": "6636",
+      "color": 1,
+      "position": [
+        110.0,
+        -80,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake lip",
+      "step": 16
+    },
+    {
+      "part": "6636",
+      "color": 1,
+      "position": [
+        110.0,
+        -80,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "intake lip",
+      "step": 16
+    },
+    {
+      "part": "6636",
+      "color": 1,
+      "position": [
+        -180.0,
+        -80,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "bonnet stud finish",
+      "step": 16
+    },
+    {
+      "part": "3069b",
+      "color": 0,
+      "position": [
+        -240.0,
+        -56,
+        -80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "headlamp recesses",
+      "step": 16
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -190.0,
+        -64,
+        -80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "front shoulder curves",
+      "step": 16
+    },
+    {
+      "part": "3069b",
+      "color": 0,
+      "position": [
+        -240.0,
+        -56,
+        80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "headlamp recesses",
+      "step": 16
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -190.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "front shoulder curves",
+      "step": 16
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        -130.0,
+        -80,
+        -40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "bonnet finish",
+      "step": 16
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        -130.0,
+        -80,
+        0.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "bonnet finish",
+      "step": 16
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        -130.0,
+        -80,
+        40.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "bonnet finish",
+      "step": 16
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        -70.0,
+        -80,
+        -20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "bonnet finish",
+      "step": 16
+    },
+    {
+      "part": "3068b",
+      "color": 1,
+      "position": [
+        -70.0,
+        -80,
+        40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "bonnet finish",
+      "step": 16
+    },
+    {
+      "part": "6636",
+      "color": 1,
+      "position": [
+        -40.0,
+        -80,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "bonnet finish",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -170.0,
+        -80,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel arch caps",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -170.0,
+        -80,
+        80.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel arch caps",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel arch caps",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        130.0,
+        -80,
+        80.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel arch caps",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -150.0,
+        -64,
+        -80.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "bonnet shoulders",
+      "step": 17
+    },
+    {
+      "part": "15068",
+      "color": 1,
+      "position": [
+        -150.0,
+        -64,
+        80.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "bonnet shoulders",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -120.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -120.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -100.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -100.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -80.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 17
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -80.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -60.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -60.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -40.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -40.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -20.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -20.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        0.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        0.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        20.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        20.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        40.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 18
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        40.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        180.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        180.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        200.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        200.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        220.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        220.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        240.0,
+        -72,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        240.0,
+        -72,
+        90.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "shoulder finish",
+      "step": 19
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        230.0,
+        -72,
+        -20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "rear deck",
+      "step": 19
+    },
+    {
+      "part": "3068b",
+      "color": 1,
+      "position": [
+        230.0,
+        -72,
+        40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "rear deck",
+      "step": 19
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        100.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        100.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        120.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        120.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        140.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        140.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        160.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        160.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        180.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        180.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        200.0,
+        -64,
+        -50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3024",
+      "color": 72,
+      "position": [
+        200.0,
+        -64,
+        50.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "engine details",
+      "step": 20
+    },
+    {
+      "part": "3069b",
+      "color": 47,
+      "position": [
+        -220.0,
+        -56,
+        -80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "headlamps",
+      "step": 21
+    },
+    {
+      "part": "3069b",
+      "color": 47,
+      "position": [
+        -220.0,
+        -56,
+        80.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "headlamps",
+      "step": 21
+    },
+    {
+      "part": "4079",
+      "color": 0,
+      "position": [
+        30.0,
+        -56,
+        -20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "seats",
+      "step": 21
+    },
+    {
+      "part": "4079",
+      "color": 0,
+      "position": [
+        30.0,
+        -56,
+        20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "seats",
+      "step": 21
+    },
+    {
+      "part": "3829c01",
+      "color": 0,
+      "position": [
+        0.0,
+        -40,
+        -20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "steering wheel",
+      "step": 21
+    },
+    {
+      "part": "65633",
+      "color": 47,
+      "position": [
+        80.0,
+        -104,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "integrated windscreen",
+      "step": 22
+    },
+    {
+      "part": "4286",
+      "color": 1,
+      "position": [
+        100.0,
+        -104,
+        -50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "rear roof buttresses",
+      "step": 22
+    },
+    {
+      "part": "4286",
+      "color": 1,
+      "position": [
+        100.0,
+        -104,
+        50.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "rear roof buttresses",
+      "step": 22
+    },
+    {
+      "part": "57783",
+      "color": 47,
+      "position": [
+        100.0,
+        -104,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "module": "rear window",
+      "step": 22
+    },
+    {
+      "part": "87079",
+      "color": 47,
+      "position": [
+        170.0,
+        -72,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "engine cover",
+      "step": 22
+    },
+    {
+      "part": "87079",
+      "color": 47,
+      "position": [
+        170.0,
+        -72,
+        40.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "engine cover",
+      "step": 22
+    },
+    {
+      "part": "6636",
+      "color": 47,
+      "position": [
+        200.0,
+        -72,
+        -20.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "engine cover",
+      "step": 22
+    },
+    {
+      "part": "3069b",
+      "color": 47,
+      "position": [
+        200.0,
+        -72,
+        60.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "engine cover",
+      "step": 22
+    },
+    {
+      "part": "18977",
+      "color": 0,
+      "position": [
+        -170.0,
+        -38.0,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "tyres",
+      "step": 23
+    },
+    {
+      "part": "18976",
+      "color": 71,
+      "position": [
+        -170.0,
+        -38.0,
+        -90.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel rims",
+      "step": 23
+    },
+    {
+      "part": "18977",
+      "color": 0,
+      "position": [
+        -170.0,
+        -38.0,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "tyres",
+      "step": 23
+    },
+    {
+      "part": "18976",
+      "color": 71,
+      "position": [
+        -170.0,
+        -38.0,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel rims",
+      "step": 23
+    },
+    {
+      "part": "18977",
+      "color": 0,
+      "position": [
+        130.0,
+        -38.0,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "tyres",
+      "step": 23
+    },
+    {
+      "part": "18976",
+      "color": 71,
+      "position": [
+        130.0,
+        -38.0,
+        -90.0
+      ],
+      "rotation": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        -1
+      ],
+      "module": "wheel rims",
+      "step": 23
+    },
+    {
+      "part": "18977",
+      "color": 0,
+      "position": [
+        130.0,
+        -38.0,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "tyres",
+      "step": 23
+    },
+    {
+      "part": "18976",
+      "color": 71,
+      "position": [
+        130.0,
+        -38.0,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "wheel rims",
+      "step": 23
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        10.0,
+        -54.0,
+        -108.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0
+      ],
+      "module": "door skin",
+      "step": 23
+    },
+    {
+      "part": "87079",
+      "color": 0,
+      "position": [
+        110.0,
+        -54.0,
+        -88.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0
+      ],
+      "module": "recessed side intake",
+      "step": 23
+    },
+    {
+      "part": "24246",
+      "color": 1,
+      "position": [
+        -20.0,
+        -62.0,
+        -104.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        1,
+        0
+      ],
+      "module": "mirror faces",
+      "step": 23
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -20.0,
+        -80,
+        -90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "mirror caps",
+      "step": 23
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        10.0,
+        -54.0,
+        108.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -1,
+        0
+      ],
+      "module": "door skin",
+      "step": 24
+    },
+    {
+      "part": "87079",
+      "color": 0,
+      "position": [
+        110.0,
+        -54.0,
+        88.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -1,
+        0
+      ],
+      "module": "recessed side intake",
+      "step": 24
+    },
+    {
+      "part": "24246",
+      "color": 1,
+      "position": [
+        -20.0,
+        -62.0,
+        103.99999999999999
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -1,
+        0
+      ],
+      "module": "mirror faces",
+      "step": 24
+    },
+    {
+      "part": "3070b",
+      "color": 1,
+      "position": [
+        -20.0,
+        -80,
+        90.0
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "module": "mirror caps",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        -258.0,
+        -38.0,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "module": "front grille",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        258.0,
+        -54.0,
+        -40.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "rear grille",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        -258.0,
+        -38.0,
+        0.0
+      ],
+      "rotation": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "module": "front grille",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        258.0,
+        -54.0,
+        0.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "rear grille",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        -258.0,
+        -38.0,
+        40.0
+      ],
+      "rotation": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "module": "front grille",
+      "step": 24
+    },
+    {
+      "part": "2412b",
+      "color": 0,
+      "position": [
+        258.0,
+        -54.0,
+        40.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "rear grille",
+      "step": 24
+    },
+    {
+      "part": "98138",
+      "color": 36,
+      "position": [
+        258.0,
+        -54.0,
+        -90.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "tail lights",
+      "step": 24
+    },
+    {
+      "part": "98138",
+      "color": 36,
+      "position": [
+        258.0,
+        -54.0,
+        -70.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "tail lights",
+      "step": 24
+    },
+    {
+      "part": "98138",
+      "color": 36,
+      "position": [
+        258.0,
+        -54.0,
+        70.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "tail lights",
+      "step": 25
+    },
+    {
+      "part": "98138",
+      "color": 36,
+      "position": [
+        258.0,
+        -54.0,
+        90.0
+      ],
+      "rotation": [
+        0,
+        -1,
+        0,
+        0,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      "module": "tail lights",
+      "step": 25
+    },
+    {
+      "part": "87079",
+      "color": 1,
+      "position": [
+        70.0,
+        -112,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "smooth roof",
+      "step": 25
+    },
+    {
+      "part": "6636",
+      "color": 1,
+      "position": [
+        100.0,
+        -112,
+        0.0
+      ],
+      "rotation": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0
+      ],
+      "module": "rear roof strip",
+      "step": 25
+    }
+  ]
+}

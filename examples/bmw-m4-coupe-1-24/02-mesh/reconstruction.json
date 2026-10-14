@@ -1,0 +1,86 @@
+{
+  "stage": "reconstruction",
+  "status": "completed",
+  "started_at": "2026-10-14T15:28:24.897199+00:00",
+  "inputs": {
+    "image": "reference.png",
+    "sha256": "e13eb41d83b63f9a52a5fd19e96f5f404c17d1e058473f46f5119a1d221c01c2",
+    "resolution": 256,
+    "chunk_size": 4096,
+    "device": "cuda:0",
+    "remove_background": true,
+    "foreground_ratio": 0.85
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "vertices": 46418,
+  "faces": 92820,
+  "watertight": true,
+  "bounds": [
+    [
+      -0.5005804300308228,
+      -0.42275741696357727,
+      -0.18033725023269653
+    ],
+    [
+      0.4395509958267212,
+      0.500546932220459,
+      0.19226980209350586
+    ]
+  ],
+  "backend": "TripoSR + scikit-image marching cubes",
+  "outputs": {
+    "input.png": "e3732d0e2be87c71b15833e06efaae835cab8a68f9e3addd47d87d070ef81041",
+    "mesh.glb": "79c6b918b4f46023385de47e9c06e6ea4e7b315b356e69bfb21bdd2ec9564b28",
+    "mesh.obj": "c949dc440cb9fd9f711f243e478924517f7811e339f20f35be15f6cec4f9d4b9",
+    "calibrated.glb": "22508ba244b045ae518f9c0a5b3e233927d8080ae60916d05a256646a3e90430",
+    "calibrated-mm.obj": "11592bf449c641e6f566820cf397ccbb74d988b59a5b9e8f8b73a3466dff3259",
+    "physical-calibration.json": "72533f6fdf25abe44cecadf4ca81bb3db31c350631a312ec54b9dd9d83bea0dd"
+  },
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "6c73fdeccf9a70fe33db148912fd91a332bceed99f101b36c6ee1f05898885b7",
+    "model": "BMW M4 G82 Coupe",
+    "variant": "G82 3.0 480 hp, rear-wheel drive, 6-speed manual; source scope 2020-January 2024",
+    "unknown_fields": [
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "peak_gpu_allocated_mb": 2378.54,
+  "seconds": 28.521
+}

@@ -13,7 +13,7 @@ def verify():
     count = 0
     policies = base / "scale-requirements/requirements.json"
     if policies.exists():
-        snapshot = json.loads(policies.read_text())
+        snapshot = json.loads(policies.read_text(encoding="utf-8"))
         spec = load_spec(ROOT / "data/vehicles/ferrari_f40_1987.json")
         assert snapshot["policies"] == {scale: requirements_for_scale(scale) for scale in snapshot["policies"]}
         assert snapshot["plans"] == {scale: plan_design(spec, scale) for scale in snapshot["plans"]}
@@ -33,8 +33,8 @@ def verify():
     for path in base.rglob("model.ldr"):
         folder = path.parent
         parts = [line.split() for line in path.read_text().splitlines() if line.startswith("1 ")]
-        report = json.loads((folder / "validation.json").read_text())
-        assembly = json.loads((folder / "assembly.json").read_text())
+        report = json.loads((folder / "validation.json").read_text(encoding="utf-8"))
+        assembly = json.loads((folder / "assembly.json").read_text(encoding="utf-8"))
         with (folder / "inventory.csv").open(newline="") as stream:
             total = sum(int(row["quantity"]) for row in csv.DictReader(stream))
         assert len(parts) == total == report["part_count"] == len(assembly.get("parts", assembly.get("plates", [])))
@@ -43,14 +43,14 @@ def verify():
         if report.get("strategy") == "car":
             assert report["body_cells_exact"] and report["appearance_accepted"] is False
             if (folder / "requirements.json").exists():
-                plan = json.loads((folder / "requirements.json").read_text())
-                fit = json.loads((folder / "fit.json").read_text())
+                plan = json.loads((folder / "requirements.json").read_text(encoding="utf-8"))
+                fit = json.loads((folder / "fit.json").read_text(encoding="utf-8"))
                 spec = load_spec(folder.parent / "00-vehicle/spec.json")
                 validate_plan(plan, spec, fit["length_studs"], fit["width_studs"], plan["requested_scale"])
                 assert fit["requirements_plan"] == plan
                 counts = list(Counter(part["step"] for part in assembly["parts"]).values())
-                dimensions = json.loads((folder / "dimensions.json").read_text())
-                assessment = json.loads((folder / "requirements-report.json").read_text())
+                dimensions = json.loads((folder / "dimensions.json").read_text(encoding="utf-8"))
+                assessment = json.loads((folder / "requirements-report.json").read_text(encoding="utf-8"))
                 assert assessment == assess_requirements(plan, dimensions, counts)
                 assert max(counts) <= plan["policy"]["max_parts_per_step"]
                 assert not report["delivery_accepted"] and not assessment["delivery_accepted"]
@@ -58,20 +58,27 @@ def verify():
             assert report["coverage_exact"]
         native = folder / "native-render.json"
         if native.exists():
-            assert digest(path) == json.loads(native.read_text())["model_sha256"]
+            record = json.loads(native.read_text(encoding="utf-8"))
+            if record.get("status", "completed") == "completed":
+                if "model_sha256" in record:
+                    assert digest(path) == record["model_sha256"]
+                else:
+                    assert (folder / "native-ldraw.json").is_file()
+                if record.get("preview"):
+                    assert digest(folder / record["preview"]) == record["image_sha256"]
         native = folder / "native-ldraw.json"
         if native.exists():
-            record = json.loads(native.read_text())
+            record = json.loads(native.read_text(encoding="utf-8"))
             assert digest(path) == record["model_sha256"]
             assert digest(native.with_suffix(".png")) == record["image_sha256"]
             assert not record["missing_parts"] and not record["appearance_accepted"]
             count += 2
     for path in base.rglob("pipeline.json"):
-        record = json.loads(path.read_text())
+        record = json.loads(path.read_text(encoding="utf-8"))
         assert record["status"] == "completed"
         folder = path.parent
-        reconstruction = json.loads((folder / "02-mesh/reconstruction.json").read_text())
-        lego = json.loads((folder / "03-lego/lego.json").read_text())
+        reconstruction = json.loads((folder / "02-mesh/reconstruction.json").read_text(encoding="utf-8"))
+        lego = json.loads((folder / "03-lego/lego.json").read_text(encoding="utf-8"))
         if record["inputs"]["mode"] == "prompt":
             source = folder / "01-image" / reconstruction["inputs"]["image"]
             assert digest(source) == reconstruction["inputs"]["sha256"]
@@ -86,11 +93,11 @@ def verify():
             for stage in (folder / "01-image/image.json", folder / "02-mesh/reconstruction.json",
                           folder / "03-lego/lego.json"):
                 if stage.exists():
-                    assert json.loads(stage.read_text())["vehicle_spec"]["sha256"] == digest(snapshot)
+                    assert json.loads(stage.read_text(encoding="utf-8"))["vehicle_spec"]["sha256"] == digest(snapshot)
             count += 1
         if "studio_file" in record:
             archive = folder / record["studio_file"]
-            studio = json.loads((archive.parent / "studio.json").read_text())
+            studio = json.loads((archive.parent / "studio.json").read_text(encoding="utf-8"))
             source = folder / "03-lego" / studio["inputs"]["ldraw"]
             assert digest(source) == studio["inputs"]["sha256"]
             assert digest(archive) == studio["outputs"][archive.name]
@@ -100,6 +107,15 @@ def verify():
             assert digest(snapshot) == record["requirements"]["sha256"]
             assert digest(snapshot) == digest(folder / "03-lego/requirements.json")
             count += 2
+    for path in base.rglob("controlled-comparison.json"):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        before, after = (path.parent / name for name in ("comparison-before", "comparison-after"))
+        assert digest(before / "02-mesh/calibrated.glb") == record["source_mesh_sha256"]
+        assert digest(after / "02-mesh/calibrated.glb") == record["source_mesh_sha256"]
+        assert digest(before / "03-lego/model.ldr") == record["old_ldraw_sha256"]
+        assert digest(after / "03-lego/model.ldr") == record["new_ldraw_sha256"]
+        assert digest(path.parent / "comparison.png") == record["comparison_image_sha256"]
+        count += 5
     print(f"Verified {count} recorded file hashes and all LDraw/BOM part totals.")
 
 

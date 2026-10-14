@@ -11,7 +11,9 @@
                                      LDraw + BOM → Studio .io
 ```
 
-默认 `car` 策略使用网格条件下的跑车零件先验，生成原生轮组、玻璃、斜坡、进气口、座椅和尾翼。
+默认 `car` 策略根据网格轮廓和规格选择跑车或前置发动机轿跑布局，生成原生轮组、玻璃、斜坡和座椅。
+轿跑配方保留连续车顶区间，按缩尺尺寸选择轮胎、车高和轮距，使用独立前后窗和封闭后备箱。
+BMW M4 G82 另采用明确记录的双肾格栅先验；其他车型不会自动套用这一前脸。
 它是有限零件家族的近似拟合，不是通用网格到任意乐高装配的恢复算法。
 `plates` 策略保留早期的车形板件雕塑路线，便于对照。
 当前仍未达到参考图的外观交付标准，未验证实体拼装、碰撞、转向或开门机构。
@@ -62,9 +64,22 @@ Studio `.io`、LDraw 和 3D 网格。任务参数、日志和产物保存在 `ru
 规格按品牌/车型/版本绑定，修改后旧结果立即失效；未公开的门窗参数保留为空，跨代型号要求补充版本。
 生成及自定义车长均采用该次检索结果，无固定 F40 规格回退。每项数值带来源、短原文证据及单位。
 不同尺度继续采用各自的要求；缺少独立配方或超出当前零件范围时禁止生成。
-通用跑车配方不保证车型外观或精确尺寸还原；品牌目录不等同于规格/配方支持目录。
-页面初始图片是已有 F40 草稿渲染，本次生成后展示参考图片和重建网格，不能替代
+车辆配方不保证车型外观或精确尺寸还原；品牌目录不等同于规格/配方支持目录。
+配置原生渲染器后，生成流程在 Studio 打包前渲染真实零件，网页优先展示这一渲染图；
+未配置时展示参考图片和重建网格。页面初始图片是已有 F40 草稿渲染，不能替代
 Studio GUI、原生零件碰撞或外观验收。
+
+可选原生预览需要安装 `.[native]`，并配置自己的 LDraw 库、Blender 和 ImportLDraw 插件目录：
+
+```powershell
+uv pip install --python .venv/Scripts/python.exe -e ".[native]"
+powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1 -Port 8766 `
+  -LDrawLibrary "C:/your/ldraw" -Blender "C:/your/blender.exe" -BlenderAddons "C:/your/blender-scripts"
+```
+
+CLI `run` 同样读取 `LDRAW_LIBRARY_PATH`、`LDRAW_MCP_BLENDER`、`BLENDER_USER_SCRIPTS`。
+已配置的渲染失败会使流程失败并记录原因，不会把网格图片冒充积木渲染。
+M4 的算法改进、同网格对照和剩余问题见 [轿跑实验](docs/coupe-fitting.md)。
 
 前端开发：在后端运行时，在 `frontend` 目录执行 `npm run dev`（API 代理到 8765）。
 单独启动已构建页面：`.venv/Scripts/python.exe -m car2lego3d web --port 8765`。
@@ -165,6 +180,8 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 | `03-lego/dimensions.json` | 比例、轴距、轮距、轮胎等目标和当前零件偏差（规格模式） |
 | `03-lego/requirements.json`、`requirements-report.json` | 本次采用的分比例标准、尺寸/资料/步骤/机构/证据检查（规格模式） |
 | `03-lego/mesh-preview.png` | 重建网格静态预览 |
+| `03-lego/native-ldraw.png`、`native-ldraw.json` | 可选原生零件渲染和来源哈希 |
+| `03-lego/native-render.json` | 渲染完成、未配置或失败状态 |
 | `03-lego/validation.json` | 当前策略的数字检查与未验证状态 |
 | `04-studio/model.io`、`studio.json` | ZIP .io 与颜色/变换/步骤回读校验 |
 

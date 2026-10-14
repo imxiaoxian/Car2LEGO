@@ -1,0 +1,90 @@
+{
+  "stage": "lego",
+  "status": "completed",
+  "started_at": "2026-10-14T15:31:35.300167+00:00",
+  "inputs": {
+    "mesh": "calibrated.glb",
+    "sha256": "638aaa7fd7d6b30c742cc15a8d705a9b4c03e2907610d603bbe84ae97cc70afa",
+    "strategy": "car",
+    "length_studs": null,
+    "rear_wing": true,
+    "scale": "1:24",
+    "width_studs": null
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "6c73fdeccf9a70fe33db148912fd91a332bceed99f101b36c6ee1f05898885b7",
+    "model": "BMW M4 G82 Coupe",
+    "variant": "G82 3.0 480 hp, rear-wheel drive, 6-speed manual; source scope 2020-January 2024",
+    "unknown_fields": [
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "strategy": "car",
+  "part_count": 338,
+  "body_color": 1,
+  "recipe": "coupe-v1",
+  "tyre_count": 4,
+  "native_wheel_count": 4,
+  "native_windscreens": 2,
+  "standard_part_scaling": false,
+  "body_cells_exact": true,
+  "buildability": "unverified",
+  "studio_verified": false,
+  "physical_verified": false,
+  "appearance_accepted": false,
+  "scale_requirements_status": "draft",
+  "delivery_accepted": false,
+  "limitations": [
+    "Vehicle part-family prior approximates mesh; exact coverage is not a goal.",
+    "No native collision, clutch or physical assembly verification.",
+    "No decals, working doors, steering or verified model-specific detail recovery."
+  ],
+  "outputs": {
+    "model.ldr": "2c045f0862468f5ead950ec1724d4944cb7308a3e03cb3b653ac964288f5fcf8",
+    "inventory.csv": "af187dfe3eb53211c7e114409059c2d2df844bccb05ae46d7bb6a75b404791c4",
+    "assembly.json": "7ce5a417ee0f075ba8ee2610b7ff955a08066e7c4ad9f90849516c08ebaea59f",
+    "fit.json": "69eb21e601db752b031896869d21ecf613c6704ee2b198df6a318136213a81b8",
+    "dimensions.json": "e5646e42520c9a95dcfcb2cf101237c27873bdabcc3efbfdaec3e8ac71f9de8b",
+    "requirements.json": "65f6928f61c5e92fa3dd936c1901c603ed78695aa79bc5901969334877aae8ed",
+    "requirements-report.json": "b482726eaeb23192e423888ddfd17f60b9ef625731570d98e9aeef37bb70fd87"
+  },
+  "seconds": 8.507
+}

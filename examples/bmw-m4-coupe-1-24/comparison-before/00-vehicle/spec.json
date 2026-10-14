@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "model": "BMW M4 G82 Coupe",
+  "variant": "G82 3.0 480 hp, rear-wheel drive, 6-speed manual; source scope 2020-January 2024",
+  "sources": {
+    "auto_data": {
+      "id": "auto_data",
+      "title": "BMW M4 (G82) 3.0 (480 Hp) | Technical Specs, Fuel consumption, Dimensions",
+      "url": "https://www.auto-data.net/en/bmw-m4-g82-3.0-480hp-41299",
+      "kind": "reference",
+      "accessed": "2026-10-14"
+    }
+  },
+  "measurements": {
+    "length": {
+      "value": 4794,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "4794",
+      "note": "Published overall length in mm."
+    },
+    "width": {
+      "value": 1887,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "1887",
+      "note": "Body width; the source separately lists 2081 mm including mirrors."
+    },
+    "height": {
+      "value": 1393,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "1393",
+      "note": "Published overall height in mm."
+    },
+    "wheelbase": {
+      "value": 2857,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "2857",
+      "note": "Published wheelbase in mm."
+    },
+    "front_track": {
+      "value": 1617,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "1617",
+      "note": "Published front track in mm."
+    },
+    "rear_track": {
+      "value": 1605,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "1605",
+      "note": "Published rear track in mm."
+    },
+    "front_overhang": {
+      "value": 860,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "860",
+      "note": "Published front overhang in mm."
+    },
+    "rear_overhang": {
+      "value": 1077,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "1077",
+      "note": "Published rear overhang in mm."
+    },
+    "door_length": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "door_panel_height": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "door_front_x": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "windscreen_bottom_x": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "windscreen_bottom_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "windscreen_top_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "windscreen_slant_height": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "seat_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "engine_length": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "engine_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "engine_height": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "windscreen_angle_to_horizontal": {
+      "value": null,
+      "unit": "deg",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "door_opening_angle": {
+      "value": null,
+      "unit": "deg",
+      "status": "unknown",
+      "source": null,
+      "evidence": "",
+      "note": "未从已读取的来源取得。"
+    },
+    "front_tyre_width": {
+      "value": 275,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "275/40 ZR18",
+      "note": "Front axle: section width in mm."
+    },
+    "front_tyre_aspect": {
+      "value": 40,
+      "unit": "%",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "275/40 ZR18",
+      "note": "Front axle: aspect ratio in percent."
+    },
+    "front_rim_diameter": {
+      "value": 18,
+      "unit": "inch",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "275/40 ZR18",
+      "note": "Front axle: rim diameter in inches."
+    },
+    "rear_tyre_width": {
+      "value": 285,
+      "unit": "mm",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "285/35 ZR19",
+      "note": "Rear axle: section width in mm."
+    },
+    "rear_tyre_aspect": {
+      "value": 35,
+      "unit": "%",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "285/35 ZR19",
+      "note": "Rear axle: aspect ratio in percent."
+    },
+    "rear_rim_diameter": {
+      "value": 19,
+      "unit": "inch",
+      "status": "reported",
+      "source": "auto_data",
+      "evidence": "285/35 ZR19",
+      "note": "Rear axle: rim diameter in inches."
+    }
+  },
+  "notes": [
+    "年款输入为空；本次示例明确选用 G82 双门标准版。来源限定为 480 hp、后驱、6 挡手动，不混用 Competition、xDrive、CSL 或敞篷版。",
+    "宝马官方页面读取超时。本次尺寸来自已实际读取的 Auto-Data 技术资料，标记 reported，不冒充原厂数据或独立实测。",
+    "skill 已完成实时搜索和来源读取，但补充门窗资料时超过 300 秒；本次从保留的网页证据人工恢复基础规格，并通过相同来源校验。",
+    "未取得的门窗、座椅和发动机外廓尺寸保留为空；这不代表规格或外观交付已验收。"
+  ],
+  "width_reference": "excluding_mirrors",
+  "research_input": {
+    "brand": "BMW",
+    "model": "M4",
+    "variant": "G82 Coupe standard trim"
+  },
+  "acquisition": "vehicle-spec-search / live web",
+  "physical_measurement_verified": false
+}

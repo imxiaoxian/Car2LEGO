@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "model_sha256": "2c045f0862468f5ead950ec1724d4944cb7308a3e03cb3b653ac964288f5fcf8",
+  "image_sha256": "4471ec61f8bef02b9624c5d98ad142042626e0d137448ed52c44c84bd76b8742",
+  "part_count": 338,
+  "distinct_parts": 37,
+  "missing_parts": [],
+  "renderer": "ldraw-mcp 0.3.1 / Blender / ImportLDraw",
+  "azimuths": [
+    135.0,
+    315.0
+  ],
+  "resolution_per_view": 900,
+  "samples": 32,
+  "appearance_accepted": false,
+  "collision_verified": false,
+  "physical_verified": false
+}

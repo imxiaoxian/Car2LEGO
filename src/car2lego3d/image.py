@@ -3,6 +3,19 @@ from pathlib import Path
 from .common import device_name, digest, model_lock, stage
 
 
+def compose_prompt(prompt, specifications=None):
+    from .coupe import styling
+    detail = ""
+    if styling(specifications) == "bmw-m4-g82":
+        detail = " G82 generation, tall vertical twin kidney grille, slim headlights, black roof."
+    composed = (f"Product photo of {prompt}.{detail} Full car, front three quarter view, "
+                "white studio background, entire vehicle visible, no text.")
+    if specifications is not None:
+        from .vehicle import prompt_hint
+        composed += " " + prompt_hint(specifications)
+    return composed
+
+
 def generate(prompt, directory, seed=42, steps=4, device="auto", vehicle_spec=None):
     import torch
     from diffusers import AutoPipelineForText2Image
@@ -10,13 +23,11 @@ def generate(prompt, directory, seed=42, steps=4, device="auto", vehicle_spec=No
     directory = Path(directory)
     device = device_name(device)
     spec = model_lock()["sd_turbo"]
-    composed = (f"Product photo of {prompt}. Single complete car, three quarter view, "
-                "isolated on white, entire vehicle visible, no text.")
     specifications = None
     if vehicle_spec is not None:
-        from .vehicle import load_spec, prompt_hint, spec_record
+        from .vehicle import load_spec, spec_record
         specifications = load_spec(vehicle_spec)
-        composed += " " + prompt_hint(specifications)
+    composed = compose_prompt(prompt, specifications)
     with stage(directory, "image", {"prompt": prompt, "composed_prompt": composed,
                                     "seed": seed, "steps": steps, "device": device}) as record:
         if specifications is not None:

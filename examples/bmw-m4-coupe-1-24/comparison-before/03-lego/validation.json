@@ -1,0 +1,21 @@
+{
+  "strategy": "car",
+  "part_count": 247,
+  "body_color": 1,
+  "tyre_count": 4,
+  "native_wheel_count": 4,
+  "native_windscreens": 1,
+  "standard_part_scaling": false,
+  "body_cells_exact": true,
+  "buildability": "unverified",
+  "studio_verified": false,
+  "physical_verified": false,
+  "appearance_accepted": false,
+  "scale_requirements_status": "draft",
+  "delivery_accepted": false,
+  "limitations": [
+    "Vehicle part-family prior approximates mesh; exact coverage is not a goal.",
+    "No native collision, clutch or physical assembly verification.",
+    "No decals, working doors, steering or verified Ferrari details."
+  ]
+}

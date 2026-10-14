@@ -1,0 +1,561 @@
+{
+  "length_studs": 25,
+  "width_studs": 10,
+  "body_color": 1,
+  "body_color_source": "override",
+  "axles_studs": [
+    3.5,
+    18.5
+  ],
+  "roof_start_stud": 12,
+  "roof_end_stud": 16,
+  "source_axles_studs": [
+    6.5,
+    20.5
+  ],
+  "axle_position_source": "physical front overhang and wheelbase",
+  "source_roof_interval_studs": [
+    11,
+    19
+  ],
+  "source_extents_in_studs": [
+    24.0,
+    9.446808510638299,
+    6.973717146433041
+  ],
+  "height_profile_studs": [
+    3.545541814100774,
+    4.130755958454931,
+    4.570930962387715,
+    4.810996598685655,
+    4.98464570626663,
+    5.116543734369772,
+    5.221946239723163,
+    5.373796107652646,
+    5.657489956050997,
+    6.0361535756290685,
+    6.407345186863404,
+    6.702319926971053,
+    6.886319601017393,
+    6.940238357684748,
+    6.937505075823321,
+    6.920956951343449,
+    6.888210423847253,
+    6.836170389023048,
+    6.769459057505578,
+    6.6673765745873395,
+    6.484120994341821,
+    6.1610371615699115,
+    5.734800032405819,
+    5.201644194859151,
+    4.685663707845997
+  ],
+  "wheel_evidence_histogram": [
+    2.3361269479521285,
+    21.670394771056163,
+    67.13674732247418,
+    98.00779742228201,
+    124.67961672151944,
+    181.1899775834472,
+    215.19978867477198,
+    211.51751888645578,
+    165.64071737463223,
+    121.63699315029967,
+    105.67520077552513,
+    100.74501104954271,
+    94.12463938561615,
+    96.40531487790157,
+    100.09208474417943,
+    103.06880823872626,
+    103.94512313192075,
+    114.28392513545307,
+    155.33555910820684,
+    215.52221046110992,
+    246.0307941316907,
+    240.2137674522803,
+    187.06703403768927,
+    104.0412741212813,
+    50.43357449398637
+  ],
+  "principal_axis_alignment_degrees": 179.9999999867367,
+  "front_orientation_flipped": true,
+  "design_prior": "front-engine coupe; separate six-stud glazing; mesh roof interval; native wheel selection",
+  "inferred_parameters": [
+    "connected roof interval",
+    "paint",
+    "native wheel family",
+    "body height"
+  ],
+  "fixed_parameters": [
+    "six-stud glazing width",
+    "six-plate native windscreen height",
+    "symmetric body"
+  ],
+  "limitations": [
+    "Low side dark regions are wheel hypotheses, not trained semantic segmentation.",
+    "Part-family dimensions constrain the mesh fit; no exact vehicle CAD recovery.",
+    "Coupe classification and G82 grille are explicit design priors, not mesh semantics.",
+    "Native tyre diameter and width may not simultaneously meet the scale tolerances."
+  ],
+  "physical_calibration": {
+    "method": "axis-aligned bounding-box prior; independent X/Y/Z scaling",
+    "target_dimensions_mm": [
+      4794,
+      1887,
+      1393
+    ],
+    "source_extents": [
+      4.7940001488029695,
+      1.8869999646748563,
+      1.3930000066757202
+    ],
+    "mm_per_source_unit_xyz": [
+      999.999968960583,
+      1000.0000187202672,
+      999.9999952076668
+    ],
+    "front_direction_verified": false,
+    "physical_measurement_verified": false,
+    "limitations": [
+      "Calibration enforces a prior; it does not recover missing CAD detail.",
+      "Mirrors, spoiler and mesh artefacts can bias the source bounding box."
+    ]
+  },
+  "target_scale_denominator": 24,
+  "requirements_plan": {
+    "policy": {
+      "version": "car2lego3d-scale-v1",
+      "scale": "1:24",
+      "label": "exterior",
+      "visual_requirements": [
+        "recognizable silhouette and stance",
+        "wheel arches",
+        "front and rear lights",
+        "transparent glazing",
+        "vehicle-specific intakes and rear treatment",
+        "continuous body surfaces",
+        "dimensioned windscreen",
+        "simplified seats and dashboard",
+        "simplified engine bay"
+      ],
+      "required_measurements": [
+        "length",
+        "width",
+        "height",
+        "wheelbase",
+        "front_tyre_diameter",
+        "rear_tyre_diameter",
+        "front_tyre_width",
+        "rear_tyre_width",
+        "windscreen_bottom_width",
+        "windscreen_slant_height",
+        "windscreen_angle_to_horizontal"
+      ],
+      "required_mechanisms": {
+        "rolling_wheels": 4,
+        "front_hood": 1,
+        "engine_cover": 1
+      },
+      "reference_views": [
+        "front_three_quarter",
+        "rear_three_quarter",
+        "front",
+        "rear",
+        "side",
+        "top",
+        "cockpit",
+        "engine_bay",
+        "hood_open",
+        "engine_cover_open",
+        "hinges",
+        "intakes",
+        "lights",
+        "seats"
+      ],
+      "dimension_tolerances_percent": {
+        "length": 3,
+        "width": 5,
+        "height": 5,
+        "wheelbase": 3,
+        "front_track": 5,
+        "rear_track": 5,
+        "door_length": 5,
+        "door_panel_height": 5,
+        "seat_width": 5,
+        "windscreen_bottom_width": 5,
+        "windscreen_slant_height": 5,
+        "engine_length": 5,
+        "engine_width": 5,
+        "engine_height": 5,
+        "front_tyre_diameter": 5,
+        "front_tyre_width": 10,
+        "front_rim_diameter": 3,
+        "rear_tyre_diameter": 5,
+        "rear_tyre_width": 10,
+        "rear_rim_diameter": 3
+      },
+      "angle_tolerances_degrees": {
+        "windscreen_angle_to_horizontal": 5,
+        "door_opening_angle": 5
+      },
+      "max_parts_per_step": 12,
+      "motion_sample_count": 9,
+      "required_evidence": [
+        "native_dimensions",
+        "native_collision",
+        "connectivity",
+        "appearance_comparison",
+        "studio_open",
+        "physical_build"
+      ],
+      "standard_part_scaling_allowed": false,
+      "applicability": "Engine, intakes and wing follow the exact vehicle variant; exceptions require evidence.",
+      "excluded_mechanisms": [
+        "gearbox",
+        "powered_drivetrain"
+      ]
+    },
+    "selection": "explicit_scale",
+    "requested_scale": "1:24",
+    "target_scale_denominator": 24,
+    "vehicle_spec_fingerprint": "7b7d84a72d7d06d8696610f2d524a390944efb59a4751e97f5a76de11ef0aa73",
+    "grid": {
+      "length_studs": 25,
+      "width_studs": 10,
+      "target_length_mm": 199.75,
+      "target_width_mm": 78.625,
+      "effective_core_length_scale_denominator": 23.97
+    },
+    "physical_data": [
+      {
+        "field": "length",
+        "value": 4794,
+        "status": "sourced",
+        "source_fields": [
+          "length"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "width",
+        "value": 1887,
+        "status": "sourced",
+        "source_fields": [
+          "width"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "height",
+        "value": 1393,
+        "status": "sourced",
+        "source_fields": [
+          "height"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "wheelbase",
+        "value": 2857,
+        "status": "sourced",
+        "source_fields": [
+          "wheelbase"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "front_tyre_diameter",
+        "value": 677.2,
+        "status": "sourced",
+        "source_fields": [
+          "front_tyre_width",
+          "front_tyre_aspect",
+          "front_rim_diameter"
+        ],
+        "source_statuses": [
+          "reported",
+          "reported",
+          "reported"
+        ]
+      },
+      {
+        "field": "rear_tyre_diameter",
+        "value": 682.0999999999999,
+        "status": "sourced",
+        "source_fields": [
+          "rear_tyre_width",
+          "rear_tyre_aspect",
+          "rear_rim_diameter"
+        ],
+        "source_statuses": [
+          "reported",
+          "reported",
+          "reported"
+        ]
+      },
+      {
+        "field": "front_tyre_width",
+        "value": 275,
+        "status": "sourced",
+        "source_fields": [
+          "front_tyre_width"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "rear_tyre_width",
+        "value": 285,
+        "status": "sourced",
+        "source_fields": [
+          "rear_tyre_width"
+        ],
+        "source_statuses": [
+          "reported"
+        ]
+      },
+      {
+        "field": "windscreen_bottom_width",
+        "value": null,
+        "status": "missing",
+        "source_fields": [
+          "windscreen_bottom_width"
+        ],
+        "source_statuses": [
+          "unknown"
+        ]
+      },
+      {
+        "field": "windscreen_slant_height",
+        "value": null,
+        "status": "missing",
+        "source_fields": [
+          "windscreen_slant_height"
+        ],
+        "source_statuses": [
+          "unknown"
+        ]
+      },
+      {
+        "field": "windscreen_angle_to_horizontal",
+        "value": null,
+        "status": "missing",
+        "source_fields": [
+          "windscreen_angle_to_horizontal"
+        ],
+        "source_statuses": [
+          "unknown"
+        ]
+      }
+    ],
+    "missing_measurements": [
+      "windscreen_bottom_width",
+      "windscreen_slant_height",
+      "windscreen_angle_to_horizontal"
+    ],
+    "estimated_measurements": [],
+    "generation": {
+      "draft_recipe_available": true,
+      "blockers": [],
+      "delivery_ready": false
+    },
+    "notes": [
+      "Grid dimensions are nominal core dimensions, not native exterior bounds.",
+      "Reference views are an evidence plan; single-image TripoSR does not consume this view set.",
+      "Sourced specifications are not independent physical verification."
+    ]
+  },
+  "recipe": "coupe-v1",
+  "styling_prior": "bmw-m4-g82",
+  "roof_top_plates": 18,
+  "deck_top_plates": 10,
+  "ground_y_mm": 1.7763568394002505e-15,
+  "wheel_families": [
+    {
+      "tyre": "58090",
+      "rim": "55982",
+      "diameter_mm": 30.4,
+      "width_mm": 14.0,
+      "arch": "62361",
+      "arch_span_studs": 6,
+      "target_diameter_mm": 28.21666666666667,
+      "target_width_mm": 11.458333333333332,
+      "center_height_plates": 4.75,
+      "track_studs": 8.5
+    },
+    {
+      "tyre": "58090",
+      "rim": "55982",
+      "diameter_mm": 30.4,
+      "width_mm": 14.0,
+      "arch": "62361",
+      "arch_span_studs": 6,
+      "target_diameter_mm": 28.420833333333327,
+      "target_width_mm": 11.875,
+      "center_height_plates": 4.75,
+      "track_studs": 8.5
+    }
+  ],
+  "windscreen_part": "92583",
+  "fitted_windscreen_angle_degrees": 45.0,
+  "layout": {
+    "bonnet_interval_studs": [
+      0,
+      8
+    ],
+    "front_glass_interval_studs": [
+      9,
+      11
+    ],
+    "roof_interval_studs": [
+      11,
+      17
+    ],
+    "rear_glass_interval_studs": [
+      17,
+      19
+    ],
+    "trunk_interval_studs": [
+      20,
+      24
+    ],
+    "engine_position": "front",
+    "rear_wing_default": false
+  },
+  "physical_constraints": {
+    "scale_denominator": 24.0,
+    "model_mm_per_real_mm": 0.041666666666666664,
+    "target_model_mm": {
+      "length": 199.75,
+      "width": 78.625,
+      "height": 58.041666666666664,
+      "wheelbase": 119.04166666666666,
+      "front_track": 67.375,
+      "rear_track": 66.875,
+      "front_overhang": 35.83333333333333,
+      "rear_overhang": 44.875,
+      "front_tyre_width": 11.458333333333332,
+      "rear_tyre_width": 11.875,
+      "front_tyre_diameter": 28.21666666666667,
+      "rear_tyre_diameter": 28.420833333333327
+    },
+    "angle_reference": "horizontal ground plane",
+    "windscreen_angle_degrees": null,
+    "unknown_fields": [
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ],
+    "model": "BMW M4 G82 Coupe",
+    "variant": "G82 3.0 480 hp, rear-wheel drive, 6-speed manual; source scope 2020-January 2024",
+    "dimensions": {
+      "length": {
+        "target_mm": 199.75,
+        "fitted_mm": 200,
+        "error_mm": 0.25,
+        "error_percent": 0.12515644555695093
+      },
+      "width": {
+        "target_mm": 78.625,
+        "fitted_mm": 80,
+        "error_mm": 1.375,
+        "error_percent": 1.748807631160565
+      },
+      "height": {
+        "target_mm": 58.041666666666664,
+        "fitted_mm": 57.6,
+        "error_mm": -0.4416666666666629,
+        "error_percent": -0.7609475951184441
+      },
+      "wheelbase": {
+        "target_mm": 119.04166666666666,
+        "fitted_mm": 120.0,
+        "error_mm": 0.9583333333333428,
+        "error_percent": 0.805040252012601
+      },
+      "front_track": {
+        "target_mm": 67.375,
+        "fitted_mm": 68.0,
+        "error_mm": 0.625,
+        "error_percent": 0.927643784786647
+      },
+      "rear_track": {
+        "target_mm": 66.875,
+        "fitted_mm": 68.0,
+        "error_mm": 1.125,
+        "error_percent": 1.6822429906542036
+      },
+      "front_overhang": {
+        "target_mm": 35.83333333333333,
+        "fitted_mm": 32.0,
+        "error_mm": -3.8333333333333286,
+        "error_percent": -10.697674418604642
+      },
+      "rear_overhang": {
+        "target_mm": 44.875,
+        "fitted_mm": 48.0,
+        "error_mm": 3.125,
+        "error_percent": 6.9637883008356605
+      },
+      "front_tyre_width": {
+        "target_mm": 11.458333333333332,
+        "fitted_mm": 14.0,
+        "error_mm": 2.541666666666668,
+        "error_percent": 22.18181818181819
+      },
+      "rear_tyre_width": {
+        "target_mm": 11.875,
+        "fitted_mm": 14.0,
+        "error_mm": 2.125,
+        "error_percent": 17.894736842105253
+      },
+      "front_tyre_diameter": {
+        "target_mm": 28.21666666666667,
+        "fitted_mm": 30.4,
+        "error_mm": 2.18333333333333,
+        "error_percent": 7.7377436503248465
+      },
+      "rear_tyre_diameter": {
+        "target_mm": 28.420833333333327,
+        "fitted_mm": 30.4,
+        "error_mm": 1.9791666666666714,
+        "error_percent": 6.963788300835683
+      }
+    },
+    "fitted_windscreen_angle_degrees": 45.0,
+    "windscreen_angle_error_degrees": null,
+    "enforced_constraints": [
+      "mesh length/width/height prior",
+      "quantized wheelbase",
+      "body width family"
+    ],
+    "deferred_constraints": [],
+    "dimensions_verified": false,
+    "appearance_accepted": false,
+    "limitations": [
+      "Width is the rectangular body core, excluding arches, door skins and mirrors.",
+      "Tyres and glass retain native part dimensions; target mismatches are reported.",
+      "Door/window size or angle targets are reported, not forced by scaling LEGO parts.",
+      "Assembly height and complete exterior bounds require native geometry verification."
+    ]
+  }
+}
