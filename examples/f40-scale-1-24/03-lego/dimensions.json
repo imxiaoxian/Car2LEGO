@@ -1,0 +1,111 @@
+{
+  "scale_denominator": 24.0,
+  "model_mm_per_real_mm": 0.041666666666666664,
+  "target_model_mm": {
+    "length": 184.58333333333331,
+    "width": 82.5,
+    "height": 47.08333333333333,
+    "wheelbase": 102.08333333333333,
+    "front_track": 66.41666666666666,
+    "rear_track": 67.08333333333333,
+    "front_tyre_width": 10.208333333333332,
+    "rear_tyre_width": 13.958333333333332,
+    "front_tyre_diameter": 26.15833333333333,
+    "rear_tyre_diameter": 27.762499999999996
+  },
+  "angle_reference": "horizontal ground plane",
+  "windscreen_angle_degrees": null,
+  "unknown_fields": [
+    "front_overhang",
+    "rear_overhang",
+    "door_length",
+    "door_panel_height",
+    "door_front_x",
+    "windscreen_bottom_x",
+    "windscreen_bottom_width",
+    "windscreen_top_width",
+    "windscreen_slant_height",
+    "seat_width",
+    "engine_length",
+    "engine_width",
+    "engine_height",
+    "windscreen_angle_to_horizontal",
+    "door_opening_angle"
+  ],
+  "model": "Ferrari F40",
+  "variant": "1987 international sales brochure 479/87",
+  "dimensions": {
+    "length": {
+      "target_mm": 184.58333333333331,
+      "fitted_mm": 184,
+      "error_mm": -0.5833333333333144,
+      "error_percent": -0.31602708803610824
+    },
+    "width": {
+      "target_mm": 82.5,
+      "fitted_mm": 80,
+      "error_mm": -2.5,
+      "error_percent": -3.0303030303030276
+    },
+    "wheelbase": {
+      "target_mm": 102.08333333333333,
+      "fitted_mm": 104.0,
+      "error_mm": 1.9166666666666714,
+      "error_percent": 1.8775510204081636
+    },
+    "front_track": {
+      "target_mm": 66.41666666666666,
+      "fitted_mm": 72,
+      "error_mm": 5.583333333333343,
+      "error_percent": 8.40652446675032
+    },
+    "rear_track": {
+      "target_mm": 67.08333333333333,
+      "fitted_mm": 72,
+      "error_mm": 4.916666666666671,
+      "error_percent": 7.3291925465838625
+    },
+    "front_tyre_width": {
+      "target_mm": 10.208333333333332,
+      "fitted_mm": 11.2,
+      "error_mm": 0.9916666666666671,
+      "error_percent": 9.714285714285719
+    },
+    "rear_tyre_width": {
+      "target_mm": 13.958333333333332,
+      "fitted_mm": 11.2,
+      "error_mm": -2.758333333333333,
+      "error_percent": -19.76119402985075
+    },
+    "front_tyre_diameter": {
+      "target_mm": 26.15833333333333,
+      "fitted_mm": 24,
+      "error_mm": -2.1583333333333314,
+      "error_percent": -8.251035361580117
+    },
+    "rear_tyre_diameter": {
+      "target_mm": 27.762499999999996,
+      "fitted_mm": 24,
+      "error_mm": -3.7624999999999957,
+      "error_percent": -13.552453849617274
+    }
+  },
+  "fitted_windscreen_angle_degrees": 21.44773632710535,
+  "windscreen_angle_error_degrees": null,
+  "enforced_constraints": [
+    "mesh length/width/height prior",
+    "quantized wheelbase",
+    "body width family"
+  ],
+  "deferred_constraints": [
+    "height"
+  ],
+  "dimensions_verified": false,
+  "appearance_accepted": false,
+  "limitations": [
+    "Width is the rectangular body core, excluding arches, door skins and mirrors.",
+    "Tyres and glass retain native part dimensions; target mismatches are reported.",
+    "Door/window size or angle targets are reported, not forced by scaling LEGO parts.",
+    "Assembly height and complete exterior bounds require native geometry verification."
+  ]
+}

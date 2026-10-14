@@ -67,8 +67,10 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 重建分辨率支持 64 / 128 / 192 / 256，默认 128；`--chunk-size 4096` 控制密度查询分块。
 网格上方向默认 Z，其他模型可设置 `--up-axis y`；`--yaw` 旋转水平方向。
 转换通过水平主成分方向将车身长轴放到 X。
-`car` 支持 24–32 studs 长度和 8 / 10 / 12 studs 核心宽度，`--width-studs` 可覆盖选择。
-提供规格时，统一比例按核心车长 `length_studs × 8mm` 计算，并选择最近的宽度家族、量化轴距。
+`car` 当前支持 23–32 studs 长度和 8 / 10 / 12 studs 核心宽度，`--width-studs` 可覆盖选择。
+提供规格时，`--scale 1:24` 保留精确目标比例，分别报告网格取整误差；与 `--length-studs` 互斥。
+自定义长度仍按核心车长 `length_studs × 8mm` 定义比例，并选择最近比例档的要求。
+宽度先按实车比例规划，不可实现的宽度/比例会明确阻止推理，不压回当前零件家族。
 不提供规格时默认 8 studs 宽度，轴位置来自网格低侧暗色区域假设。
 `--color 4` 在 `car` 中只覆盖车身颜色，在 `plates` 中覆盖全部颜色；`--no-rear-wing` 去除尾翼。
 生图会检查 SD-Turbo 的 77-token 上限，提示词过长时报错。
@@ -83,11 +85,31 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 尺寸先验用于提示词和网格边界校准，并约束乐高宽度、轴距。
 轮胎/玻璃保留标准零件原有尺寸；`dimensions.json` 报告无法满足的目标，不缩放真实 LEGO 零件。
 
+## 分比例要求
+
+| 比例 | 细节和机构目标 | 当前状态 |
+| --- | --- | --- |
+| 1:38 | 可辨识外观、透明座舱、四轮滚动，内饰可简化 | 要求与规划已设置，独立配方未实现 |
+| 1:24 | 完整外观、简化内饰与发动机舱、前后盖开合 | 可生成草稿，开盖等机构未验收 |
+| 1:16 | 精细座舱、双门开合、前轮转向 | 要求与规划已设置，独立配方未实现 |
+| 1:12 | 分层车身、精细底盘与发动机、独立悬挂 | 要求与规划已设置，独立配方未实现 |
+
+尺寸容差、必需物理资料、视图计划和每步零件上限分别设置，见 [分比例要求](docs/scale-requirements.md)。
+这些是设计目标，不代表功能已经实现。1:8 / 1:10 仍未开放。
+
+```powershell
+.venv/Scripts/python.exe -m car2lego3d requirements --vehicle-specs data/vehicles/ferrari_f40_1987.json --output runs/requirements
+```
+
+新规格运行保存规则快照和逐项报告，缺资料、未测量或未验证机构不会被标记为交付通过。
+`--scale 1:24` 已完整实跑，见 `examples/f40-scale-1-24/`；上述旧样例保留原结果，不自动改验收标签。
+
 ## 输出
 
 | 路径 | 内容 |
 | --- | --- |
 | `00-vehicle/spec.json` | 本次物理规格快照（仅规格模式） |
+| `00-requirements/requirements.json` | 首次模型调用前保存的比例要求与网格规划（规格模式） |
 | `01-image/reference.png`、`image.json` | 生图与提示词、种子、权重版本、耗时、哈希 |
 | `02-mesh/input.png`、`foreground.png` | 实际重建输入和去背景结果 |
 | `02-mesh/mesh.glb`、`mesh.obj` | TripoSR 带顶点颜色网格 |
@@ -98,6 +120,7 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 | `03-lego/inventory.csv` | 零件编号、LDraw 颜色编号、数量；不是 BrickLink 颜色编号 |
 | `03-lego/assembly.json`、`fit.json` | 零件放置、网格证据、拟合参数；`fit.json` 仅 `car` |
 | `03-lego/dimensions.json` | 比例、轴距、轮距、轮胎等目标和当前零件偏差（规格模式） |
+| `03-lego/requirements.json`、`requirements-report.json` | 本次采用的分比例标准、尺寸/资料/步骤/机构/证据检查（规格模式） |
 | `03-lego/mesh-preview.png` | 重建网格静态预览 |
 | `03-lego/validation.json` | 当前策略的数字检查与未验证状态 |
 | `04-studio/model.io`、`studio.json` | ZIP .io 与颜色/变换/步骤回读校验 |

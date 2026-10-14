@@ -12,8 +12,10 @@ UNITS = {name: "mm" for name in (
     "length", "width", "height", "wheelbase", "front_track", "rear_track",
     "front_overhang", "rear_overhang", "door_length", "door_panel_height",
     "door_front_x", "windscreen_bottom_x", "windscreen_bottom_width",
-    "windscreen_top_width", "windscreen_slant_height")}
+    "windscreen_top_width", "windscreen_slant_height", "seat_width",
+    "engine_length", "engine_width", "engine_height")}
 UNITS["windscreen_angle_to_horizontal"] = "deg"
+UNITS["door_opening_angle"] = "deg"
 for axle in ("front", "rear"):
     UNITS.update({f"{axle}_tyre_width": "mm", f"{axle}_tyre_aspect": "%",
                   f"{axle}_rim_diameter": "inch"})
@@ -44,6 +46,8 @@ def validate_spec(spec):
             raise ValueError(f"{name} requires a traceable source.")
         if name == "windscreen_angle_to_horizontal" and value >= 90:
             raise ValueError("Windscreen angle must be between 0 and 90 degrees from horizontal.")
+        if name == "door_opening_angle" and value > 180:
+            raise ValueError("Door opening angle must not exceed 180 degrees.")
         if name.endswith("_tyre_aspect") and value > 100:
             raise ValueError("Tyre aspect ratio must not exceed 100 percent.")
     for name in ("length", "width", "height", "wheelbase"):
@@ -116,8 +120,8 @@ def calibrate_mesh(mesh, spec):
                                         "Mirrors, spoiler and mesh artefacts can bias the source bounding box."]}
 
 
-def constraint_targets(spec, length_studs):
-    scale = length_studs * 8 / measurement(spec, "length")
+def constraint_targets(spec, length_studs, scale_denominator=None):
+    scale = 1 / scale_denominator if scale_denominator is not None else length_studs * 8 / measurement(spec, "length")
     targets = {name: measurement(spec, name) * scale for name, unit in UNITS.items()
                if unit == "mm" and measurement(spec, name) is not None}
     for axle in ("front", "rear"):
@@ -130,8 +134,8 @@ def constraint_targets(spec, length_studs):
             "unknown_fields": [name for name in UNITS if measurement(spec, name) is None]}
 
 
-def constrained_axles(spec, length, mesh_axles):
-    targets = constraint_targets(spec, length)["target_model_mm"]
+def constrained_axles(spec, length, mesh_axles, scale_denominator=None):
+    targets = constraint_targets(spec, length, scale_denominator)["target_model_mm"]
     wheelbase = targets["wheelbase"] / 8
     front_overhang, rear_overhang = targets.get("front_overhang"), targets.get("rear_overhang")
     if front_overhang is not None:
@@ -151,7 +155,7 @@ def constrained_axles(spec, length, mesh_axles):
 
 
 def dimension_report(spec, fit):
-    report = constraint_targets(spec, fit["length_studs"])
+    report = constraint_targets(spec, fit["length_studs"], fit.get("target_scale_denominator"))
     actual = {"length": fit["length_studs"] * 8, "width": fit["width_studs"] * 8,
               "wheelbase": (fit["axles_studs"][1] - fit["axles_studs"][0]) * 8,
               "front_overhang": (fit["axles_studs"][0] + .5) * 8,

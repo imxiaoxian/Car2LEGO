@@ -1,5 +1,12 @@
 # Measured Examples
 
+- `scale-requirements/`: generated policy and grid plans for all four scales;
+  these are planning records, not four completed LEGO assemblies.
+- `f40-scale-1-24/`: complete prompt-to-Studio run using an exact 1:24 target,
+  snapshotted policy, per-field draft checks and a maximum of 12 parts per step.
+  Nominal grid is 23 x 10 studs. Missing glazing measurements, mechanisms and
+  native acceptance remain explicit in `03-lego/requirements-report.json`.
+
 - `f40-physical/`: full prompt-to-Studio run with a sourced Ferrari F40 physical
   profile, raw and calibrated TripoSR meshes, native car parts, dimensions report
   and `.io` archive. Native renderer preview uses real part geometry. Door/glass

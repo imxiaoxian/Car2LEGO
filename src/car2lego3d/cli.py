@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .common import model_lock, stage, write_json
+from .requirements import SCALES, plan_design, requirements_for_scale
 
 
 def main():
@@ -13,6 +14,10 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("setup", help="Clone and pin upstream TripoSR source")
     commands.add_parser("doctor", help="Show environment and CUDA availability")
+    requirements = commands.add_parser("requirements", help="Export per-scale policies and vehicle-specific plans")
+    requirements.add_argument("--scale", choices=SCALES)
+    requirements.add_argument("--vehicle-specs", type=Path)
+    requirements.add_argument("--output", type=Path, required=True)
     studio = commands.add_parser("studio", help="Package a flat LDraw assembly as Studio .io")
     studio.add_argument("--ldraw", type=Path, required=True)
     studio.add_argument("--output", type=Path, required=True)
@@ -40,7 +45,9 @@ def main():
         if name in ("lego", "run"):
             if name == "lego":
                 child.add_argument("--mesh", type=Path, required=True)
-            child.add_argument("--length-studs", type=int, default=24)
+            size = child.add_mutually_exclusive_group()
+            size.add_argument("--length-studs", type=int, help="Custom nominal core length; default 24")
+            size.add_argument("--scale", choices=SCALES, help="Exact target scale; requires --vehicle-specs")
             child.add_argument("--strategy", choices=["plates", "car"], default="car")
             child.add_argument("--width-studs", type=int, choices=[8, 10, 12],
                                help="Body core width; spec mode selects the nearest family if omitted")
@@ -48,6 +55,8 @@ def main():
             child.add_argument("--up-axis", choices=["x", "y", "z"], default="z")
             child.add_argument("--yaw", type=float, default=0)
             child.add_argument("--color", type=int, help="Body color for car strategy; uniform color for plates")
+            if name == "lego":
+                child.add_argument("--requirements-snapshot", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     vehicle_spec = getattr(args, "vehicle_specs", None)
     if vehicle_spec is not None:
@@ -59,11 +68,21 @@ def main():
             parser.error(str(error))
     if getattr(args, "strategy", None) == "plates" and (vehicle_spec is not None or args.width_studs is not None):
         parser.error("--vehicle-specs and --width-studs currently require --strategy car")
+    if args.command in ("run", "lego") and args.scale is not None and (vehicle_spec is None or args.strategy != "car"):
+        parser.error("--scale requires --vehicle-specs and --strategy car")
+    if args.command in ("run", "lego") and args.length_studs is not None and args.length_studs <= 0:
+        parser.error("--length-studs must be positive")
     if args.command == "run" and vehicle_spec is not None and (args.up_axis != "z" or args.yaw != 0):
         parser.error("Spec-based run uses the calibrated TripoSR X-long/Z-up frame; omit --up-axis and --yaw")
     if args.command == "setup":
         from .reconstruction import setup_source
         print(setup_source())
+    elif args.command == "requirements":
+        scales = [args.scale] if args.scale is not None else SCALES
+        plans = {scale: plan_design(load_spec(vehicle_spec), scale) for scale in scales} if vehicle_spec else {}
+        output = args.output / "requirements.json"
+        write_json(output, {"policies": {scale: requirements_for_scale(scale) for scale in scales}, "plans": plans})
+        print(output)
     elif args.command == "doctor":
         import torch
         info = {"python": sys.version, "platform": platform.platform(), "torch": torch.__version__,
@@ -77,15 +96,32 @@ def main():
             parser.error("run requires exactly one of --prompt or --image")
         if args.output.exists() and any(args.output.iterdir()):
             parser.error("run --output must be empty to preserve prior artifacts")
+        plan = None
+        if vehicle_spec is not None:
+            plan = plan_design(load_spec(vehicle_spec), args.scale, args.length_studs, args.width_studs)
         args.output.mkdir(parents=True, exist_ok=True)
+        requirements_snapshot = None
+        if plan is not None:
+            requirements_snapshot = args.output / "00-requirements" / "requirements.json"
+            write_json(requirements_snapshot, plan)
+            if not plan["generation"]["draft_recipe_available"]:
+                parser.error(" ".join(plan["generation"]["blockers"]) + f" Plan saved to {requirements_snapshot}.")
         if vehicle_spec is not None:
             snapshot = args.output / "00-vehicle" / "spec.json"
             write_json(snapshot, load_spec(vehicle_spec))
             vehicle_spec = snapshot.resolve()
         spec_args = ["--vehicle-specs", vehicle_spec] if vehicle_spec is not None else []
+        core_length = args.length_studs if args.length_studs is not None else 24
+        size_args = ["--scale", args.scale] if args.scale else ["--length-studs", core_length]
         with stage(args.output, "pipeline", {"mode": "prompt" if args.prompt else "image", "seed": args.seed,
-                                             "resolution": args.resolution, "length_studs": args.length_studs,
+                                             "resolution": args.resolution,
+                                             "length_studs": plan["grid"]["length_studs"] if plan else core_length,
+                                             "requested_scale": args.scale,
                                              "strategy": args.strategy}) as record:
+            if requirements_snapshot is not None:
+                from .common import digest
+                record["requirements"] = {"file": "00-requirements/requirements.json",
+                                          "sha256": digest(requirements_snapshot)}
             if vehicle_spec is not None:
                 from .vehicle import spec_record
                 record["vehicle_spec"] = spec_record(vehicle_spec)
@@ -101,9 +137,10 @@ def main():
             mesh = args.output / "02-mesh" / ("calibrated.glb" if vehicle_spec is not None else "mesh.glb")
             color_args = ["--color", args.color] if args.color is not None else []
             invoke("lego", "--mesh", mesh, "--output", args.output / "03-lego",
-                   "--length-studs", args.length_studs, "--up-axis", args.up_axis, "--yaw", args.yaw,
+                   *size_args, "--up-axis", args.up_axis, "--yaw", args.yaw,
                    "--strategy", args.strategy, *(["--no-rear-wing"] if args.no_rear_wing else []), *color_args,
-                   *(["--width-studs", args.width_studs] if args.width_studs is not None else []), *spec_args)
+                   *(["--width-studs", args.width_studs] if args.width_studs is not None else []),
+                   *(["--requirements-snapshot", requirements_snapshot] if requirements_snapshot else []), *spec_args)
             thumbnail = args.output / "03-lego" / "lego-preview.png"
             thumbnail_args = ["--thumbnail", thumbnail] if thumbnail.exists() else []
             invoke("studio", "--ldraw", args.output / "03-lego" / "model.ldr",
@@ -111,6 +148,7 @@ def main():
             record["studio_file"] = "04-studio/model.io"
             record["buildability"] = "unverified"
             record["appearance_accepted"] = False
+            record["delivery_accepted"] = False
     elif args.command == "image":
         from .image import generate
         print(generate(args.prompt, args.output, args.seed, args.steps, args.device, vehicle_spec))
@@ -122,10 +160,13 @@ def main():
         if args.strategy == "car":
             from .carfit import convert_car
             print(convert_car(args.mesh, args.output, args.length_studs, args.up_axis, args.yaw,
-                              args.color, not args.no_rear_wing, vehicle_spec, args.width_studs))
+                              args.color, not args.no_rear_wing, vehicle_spec, args.width_studs, args.scale,
+                              json.loads(args.requirements_snapshot.read_text(encoding="utf-8"))
+                              if args.requirements_snapshot else None))
         else:
             from .lego import convert
-            print(convert(args.mesh, args.output, args.length_studs, args.up_axis, args.yaw, args.color))
+            print(convert(args.mesh, args.output, args.length_studs if args.length_studs is not None else 24,
+                          args.up_axis, args.yaw, args.color))
     elif args.command == "studio":
         from .studio import export_studio
         print(export_studio(args.ldraw, args.output, args.thumbnail))

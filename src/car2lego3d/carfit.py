@@ -4,7 +4,7 @@ This is a constrained vehicle approximation, not arbitrary mesh-to-brick recover
 """
 import csv
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +14,7 @@ from scipy.spatial import cKDTree
 
 from .common import digest, stage, write_json
 from .lego import PALETTE, color_visual, load_mesh, orient
+from .requirements import RECIPE_LENGTH_RANGE, RECIPE_WIDTHS
 
 
 IDENTITY = (1, 0, 0, 0, 1, 0, 0, 0, 1)
@@ -38,24 +39,42 @@ class Placement:
     step: int
 
 
-def fit_mesh(mesh, length=24, up_axis="z", yaw=0, color=None, specifications=None, width=None):
-    if not 24 <= length <= 32:
-        raise ValueError("The sports-car part family currently supports 24..32 studs.")
+def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=None, width=None,
+             scale=None, requirements_plan=None):
+    plan = None
+    if specifications is not None:
+        from .requirements import plan_design, validate_plan
+        if requirements_plan is not None:
+            grid = requirements_plan["grid"]
+            validate_plan(requirements_plan, specifications, grid["length_studs"], grid["width_studs"], scale)
+            if ((length is not None and length != grid["length_studs"])
+                    or (width is not None and width != grid["width_studs"])):
+                raise ValueError("Grid arguments conflict with the requirements snapshot.")
+            plan = requirements_plan
+        else:
+            plan = plan_design(specifications, scale, length, width)
+        if not plan["generation"]["draft_recipe_available"]:
+            raise ValueError(" ".join(plan["generation"]["blockers"]))
+        length, width = (plan["grid"][key] for key in ("length_studs", "width_studs"))
+    elif scale is not None or requirements_plan is not None:
+        raise ValueError("Scale requirements need sourced vehicle specifications.")
+    length = 24 if length is None else length
+    if (isinstance(length, bool) or not isinstance(length, int)
+            or not RECIPE_LENGTH_RANGE[0] <= length <= RECIPE_LENGTH_RANGE[1]):
+        raise ValueError(f"The sports-car part family currently supports {RECIPE_LENGTH_RANGE[0]}.."
+                         f"{RECIPE_LENGTH_RANGE[1]} integer studs.")
     color_override = color is not None
     mesh, alignment = orient(mesh, up_axis, yaw)
     if mesh.extents[0] < 1e-8 or mesh.extents[2] < 1e-8:
         raise ValueError("Mesh is degenerate; a volumetric vehicle is required.")
     calibration = None
     if specifications is not None:
-        from .vehicle import calibrate_mesh, constraint_targets, validate_spec
+        from .vehicle import calibrate_mesh, validate_spec
         validate_spec(specifications)
         mesh, calibration = calibrate_mesh(mesh, specifications)
-        if width is None:
-            target_width = constraint_targets(specifications, length)["target_model_mm"]["width"] / 8
-            width = min((8, 10, 12), key=lambda value: abs(value-target_width))
     if width is None:
         width = 8
-    if width not in (8, 10, 12):
+    if width not in RECIPE_WIDTHS:
         raise ValueError("Supported body widths are 8, 10 and 12 studs.")
     points, _ = trimesh.sample.sample_surface(mesh, 16000, seed=0)
     points = (points - mesh.bounds[0]) * (length - 1) / mesh.extents[0]
@@ -91,7 +110,8 @@ def fit_mesh(mesh, length=24, up_axis="z", yaw=0, color=None, specifications=Non
     axle_source = "mesh wheel hypotheses"
     if specifications is not None:
         from .vehicle import constrained_axles
-        axles, axle_source = constrained_axles(specifications, length, mesh_axles)
+        axles, axle_source = constrained_axles(specifications, length, mesh_axles,
+                                               plan["target_scale_denominator"])
     chroma = rgb.max(axis=1) - rgb.min(axis=1)
     paint = np.median(rgb[chroma > 35], axis=0) if np.any(chroma > 35) else rgb.mean(axis=0)
     if color is None:
@@ -119,6 +139,8 @@ def fit_mesh(mesh, length=24, up_axis="z", yaw=0, color=None, specifications=Non
     if calibration is not None:
         from .vehicle import dimension_report
         fit["physical_calibration"] = calibration
+        fit["target_scale_denominator"] = plan["target_scale_denominator"]
+        fit["requirements_plan"] = plan
         fit["physical_constraints"] = dimension_report(specifications, fit)
         fit["inferred_parameters"].remove("axle positions")
     return fit
@@ -345,19 +367,39 @@ def export(car, directory):
     write_json(directory / "assembly.json", {"units": "LDraw LDU", "parts": [asdict(p) for p in car.parts]})
 
 
-def convert_car(source, directory, length_studs=24, up_axis="z", yaw=0, color=None, rear_wing=True,
-                vehicle_spec=None, width_studs=None):
+def split_steps(car, limit):
+    parts, new_step = [], 0
+    for old_step in sorted({part.step for part in car.parts}):
+        group = [part for part in car.parts if part.step == old_step]
+        for offset in range(0, len(group), limit):
+            new_step += 1
+            parts.extend(replace(part, step=new_step) for part in group[offset:offset+limit])
+    car.parts = parts
+
+
+def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=None, rear_wing=True,
+                vehicle_spec=None, width_studs=None, scale=None, requirements_plan=None):
     source, directory = Path(source), Path(directory)
     with stage(directory, "lego", {"mesh": source.name, "sha256": digest(source), "strategy": "car",
-                                   "length_studs": length_studs, "rear_wing": rear_wing}) as record:
+                                   "length_studs": length_studs, "rear_wing": rear_wing,
+                                   "scale": scale, "width_studs": width_studs}) as record:
         mesh = load_mesh(source)
         specifications = None
         if vehicle_spec is not None:
             from .vehicle import load_spec, spec_record
             specifications = load_spec(vehicle_spec)
             record["vehicle_spec"] = spec_record(vehicle_spec)
-        fit = fit_mesh(mesh, length_studs, up_axis, yaw, color, specifications, width_studs)
+        fit = fit_mesh(mesh, length_studs, up_axis, yaw, color, specifications, width_studs, scale, requirements_plan)
         car = design(fit, rear_wing)
+        requirements_report = None
+        if specifications is not None:
+            from .requirements import assess_requirements
+            plan = fit["requirements_plan"]
+            split_steps(car, plan["policy"]["max_parts_per_step"])
+            requirements_report = assess_requirements(plan, fit["physical_constraints"],
+                                                      list(Counter(p.step for p in car.parts).values()))
+            write_json(directory / "requirements.json", plan)
+            write_json(directory / "requirements-report.json", requirements_report)
         export(car, directory)
         write_json(directory / "fit.json", fit)
         report = {"strategy": "car", "part_count": len(car.parts), "body_color": fit["body_color"],
@@ -365,6 +407,8 @@ def convert_car(source, directory, length_studs=24, up_axis="z", yaw=0, color=No
                   "standard_part_scaling": False, "body_cells_exact": True,
                   "buildability": "unverified", "studio_verified": False, "physical_verified": False,
                   "appearance_accepted": False,
+                  "scale_requirements_status": "draft" if requirements_report else "not_evaluated_missing_vehicle_specs",
+                  "delivery_accepted": False,
                   "limitations": ["Vehicle part-family prior approximates mesh; exact coverage is not a goal.",
                                   "No native collision, clutch or physical assembly verification.",
                                   "No decals, working doors, steering or verified Ferrari details."]}
@@ -375,6 +419,8 @@ def convert_car(source, directory, length_studs=24, up_axis="z", yaw=0, color=No
                                        ("model.ldr", "inventory.csv", "assembly.json", "fit.json")})
         if specifications is not None:
             record["outputs"]["dimensions.json"] = digest(directory / "dimensions.json")
+            record["outputs"].update({name: digest(directory / name) for name in
+                                      ("requirements.json", "requirements-report.json")})
         from .preview import render
         render(orient(mesh, up_axis, yaw)[0], directory / "mesh-preview.png")
     return directory / "model.ldr"

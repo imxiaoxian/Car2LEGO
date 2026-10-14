@@ -1,7 +1,9 @@
 """Check published artifacts against their measured stage records, without model downloads."""
 import csv
 import json
+from collections import Counter
 from car2lego3d.common import ROOT, digest
+from car2lego3d.requirements import assess_requirements, plan_design, requirements_for_scale, validate_plan
 from car2lego3d.studio import verify_archive
 from car2lego3d.vehicle import load_spec
 
@@ -9,6 +11,12 @@ from car2lego3d.vehicle import load_spec
 def verify():
     base = ROOT / "examples"
     count = 0
+    policies = base / "scale-requirements/requirements.json"
+    if policies.exists():
+        snapshot = json.loads(policies.read_text())
+        spec = load_spec(ROOT / "data/vehicles/ferrari_f40_1987.json")
+        assert snapshot["policies"] == {scale: requirements_for_scale(scale) for scale in snapshot["policies"]}
+        assert snapshot["plans"] == {scale: plan_design(spec, scale) for scale in snapshot["plans"]}
     for name in ("image.json", "reconstruction.json", "lego.json", "studio.json", "measurement.json"):
         for record_path in base.rglob(name):
             record = json.loads(record_path.read_text(encoding="utf-8"))
@@ -34,6 +42,18 @@ def verify():
         assert report["physical_verified"] is False
         if report.get("strategy") == "car":
             assert report["body_cells_exact"] and report["appearance_accepted"] is False
+            if (folder / "requirements.json").exists():
+                plan = json.loads((folder / "requirements.json").read_text())
+                fit = json.loads((folder / "fit.json").read_text())
+                spec = load_spec(folder.parent / "00-vehicle/spec.json")
+                validate_plan(plan, spec, fit["length_studs"], fit["width_studs"], plan["requested_scale"])
+                assert fit["requirements_plan"] == plan
+                counts = list(Counter(part["step"] for part in assembly["parts"]).values())
+                dimensions = json.loads((folder / "dimensions.json").read_text())
+                assessment = json.loads((folder / "requirements-report.json").read_text())
+                assert assessment == assess_requirements(plan, dimensions, counts)
+                assert max(counts) <= plan["policy"]["max_parts_per_step"]
+                assert not report["delivery_accepted"] and not assessment["delivery_accepted"]
         else:
             assert report["coverage_exact"]
         native = folder / "native-render.json"
@@ -74,6 +94,11 @@ def verify():
             source = folder / "03-lego" / studio["inputs"]["ldraw"]
             assert digest(source) == studio["inputs"]["sha256"]
             assert digest(archive) == studio["outputs"][archive.name]
+            count += 2
+        if "requirements" in record:
+            snapshot = folder / record["requirements"]["file"]
+            assert digest(snapshot) == record["requirements"]["sha256"]
+            assert digest(snapshot) == digest(folder / "03-lego/requirements.json")
             count += 2
     print(f"Verified {count} recorded file hashes and all LDraw/BOM part totals.")
 

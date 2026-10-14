@@ -1,0 +1,220 @@
+{
+  "policy_version": "car2lego3d-scale-v1",
+  "scale": "1:24",
+  "dimension_checks": [
+    {
+      "field": "length",
+      "status": "within_nominal_tolerance",
+      "error": -0.31602708803610824,
+      "tolerance": 3,
+      "unit": "%",
+      "basis": "nominal_core",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "width",
+      "status": "within_nominal_tolerance",
+      "error": -3.0303030303030276,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_core",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "height",
+      "status": "not_measured",
+      "error": null,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "wheelbase",
+      "status": "within_nominal_tolerance",
+      "error": 1.8775510204081636,
+      "tolerance": 3,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "front_tyre_diameter",
+      "status": "out_of_tolerance",
+      "error": -8.251035361580117,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "rear_tyre_diameter",
+      "status": "out_of_tolerance",
+      "error": -13.552453849617274,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "front_tyre_width",
+      "status": "within_nominal_tolerance",
+      "error": 9.714285714285719,
+      "tolerance": 10,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "rear_tyre_width",
+      "status": "out_of_tolerance",
+      "error": -19.76119402985075,
+      "tolerance": 10,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "windscreen_bottom_width",
+      "status": "missing_data",
+      "error": null,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "windscreen_slant_height",
+      "status": "missing_data",
+      "error": null,
+      "tolerance": 5,
+      "unit": "%",
+      "basis": "nominal_part_family",
+      "native_measurement_verified": false
+    },
+    {
+      "field": "windscreen_angle_to_horizontal",
+      "status": "missing_data",
+      "error": null,
+      "tolerance": 5,
+      "unit": "deg",
+      "basis": "not_measured",
+      "native_measurement_verified": false
+    }
+  ],
+  "mechanism_checks": [
+    {
+      "mechanism": "rolling_wheels",
+      "required_instances": 4,
+      "verified_instances": 0,
+      "status": "unverified"
+    },
+    {
+      "mechanism": "front_hood",
+      "required_instances": 1,
+      "verified_instances": 0,
+      "status": "unverified"
+    },
+    {
+      "mechanism": "engine_cover",
+      "required_instances": 1,
+      "verified_instances": 0,
+      "status": "unverified"
+    }
+  ],
+  "reference_checks": [
+    {
+      "view": "front_three_quarter",
+      "status": "unverified"
+    },
+    {
+      "view": "rear_three_quarter",
+      "status": "unverified"
+    },
+    {
+      "view": "front",
+      "status": "unverified"
+    },
+    {
+      "view": "rear",
+      "status": "unverified"
+    },
+    {
+      "view": "side",
+      "status": "unverified"
+    },
+    {
+      "view": "top",
+      "status": "unverified"
+    },
+    {
+      "view": "cockpit",
+      "status": "unverified"
+    },
+    {
+      "view": "engine_bay",
+      "status": "unverified"
+    },
+    {
+      "view": "hood_open",
+      "status": "unverified"
+    },
+    {
+      "view": "engine_cover_open",
+      "status": "unverified"
+    },
+    {
+      "view": "hinges",
+      "status": "unverified"
+    },
+    {
+      "view": "intakes",
+      "status": "unverified"
+    },
+    {
+      "view": "lights",
+      "status": "unverified"
+    },
+    {
+      "view": "seats",
+      "status": "unverified"
+    }
+  ],
+  "evidence_checks": [
+    {
+      "evidence": "native_dimensions",
+      "status": "unverified"
+    },
+    {
+      "evidence": "native_collision",
+      "status": "unverified"
+    },
+    {
+      "evidence": "connectivity",
+      "status": "unverified"
+    },
+    {
+      "evidence": "appearance_comparison",
+      "status": "unverified"
+    },
+    {
+      "evidence": "studio_open",
+      "status": "unverified"
+    },
+    {
+      "evidence": "physical_build",
+      "status": "unverified"
+    }
+  ],
+  "step_check": {
+    "maximum_parts": 12,
+    "limit": 12,
+    "status": "passed",
+    "assembly_order_verified": false
+  },
+  "status": "draft",
+  "delivery_accepted": false,
+  "limitations": [
+    "Nominal dimensions do not certify native geometry, motion, appearance or physical assembly."
+  ]
+}

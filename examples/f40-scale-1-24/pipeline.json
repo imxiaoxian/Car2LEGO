@@ -1,0 +1,70 @@
+{
+  "stage": "pipeline",
+  "status": "completed",
+  "started_at": "2026-10-14T12:04:23.112864+00:00",
+  "inputs": {
+    "mode": "prompt",
+    "seed": 42,
+    "resolution": 256,
+    "length_studs": 23,
+    "requested_scale": "1:24",
+    "strategy": "car"
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "requirements": {
+    "file": "00-requirements/requirements.json",
+    "sha256": "45f5329000429be1c76ea0f5b9a3c655bef695fc134885d6253e9592bf663d71"
+  },
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "3b83c632067c0b017a330e0961a89f2366d9418f452851ea00857ded5b33491f",
+    "model": "Ferrari F40",
+    "variant": "1987 international sales brochure 479/87",
+    "unknown_fields": [
+      "front_overhang",
+      "rear_overhang",
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "studio_file": "04-studio/model.io",
+  "buildability": "unverified",
+  "appearance_accepted": false,
+  "delivery_accepted": false,
+  "seconds": 89.58
+}

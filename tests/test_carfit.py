@@ -58,7 +58,7 @@ def test_door_skin_sockets_align_with_native_side_studs():
 
 
 def test_fixed_part_family_rejects_too_small_scale_and_flat_mesh():
-    with pytest.raises(ValueError, match="24..32"):
+    with pytest.raises(ValueError, match="23..32"):
         fit_mesh(vehicle(), length=20)
     mesh = vehicle()
     mesh.vertices[:, 2] = 0

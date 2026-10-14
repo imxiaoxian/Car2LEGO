@@ -151,3 +151,44 @@
 **完整技术流程可复现，外观仍未达到用户参考图标准。** 生图已出现车型细节偏差，单图重建也有纹理和形状损失；
 标准零件拟合仍是有限跑车先验，未恢复真实 F40 CAD，也未验证开门、转向、碰撞或实物拼装。
 `appearance_accepted=false`、`studio_open_verified=false`、`physical_verified=false` 保持独立。
+
+## 分比例规则与精确 1:24 实跑
+
+新增规则版本为 `car2lego3d-scale-v1`，四档详细要求见 [分比例说明](scale-requirements.md)。
+`examples/scale-requirements/requirements.json` 是生成的要求和车型规划，不能解释成四个已完成模型。
+历史样例与哈希未回写。
+
+```powershell
+.venv/Scripts/python.exe -m car2lego3d run `
+  --prompt "a red Ferrari F40 sports car, black tires, transparent windows" `
+  --seed 42 --steps 4 --resolution 256 --scale 1:24 --strategy car --color 4 `
+  --vehicle-specs data/vehicles/ferrari_f40_1987.json `
+  --output runs/f40-scale-1-24 --device cuda:0
+```
+
+完整运行成功，记录 **89.580 秒**，产物保存于 `examples/f40-scale-1-24/`。
+本次启动时 Hugging Face 版本查询超时后加载了缓存权重，不能把总耗时当作纯推理基准。
+SD-Turbo 阶段记录 28.240 秒；TripoSR 阶段 41.812 秒，39,892 顶点 / 79,768 面。
+本次同提示词和种子的生图与重建仍实际执行，没有用已有网格代替推理。
+
+采用精确目标比例 1:24，网格核心为 **23 × 10 studs**，239 件零件，28 个步骤。
+最多每步 12 件；LDraw、装配 JSON 和 `.io` 回读一致。
+原生 135° / 315° 渲染成功，缺失零件 0，已查看结果；外观仍未达到参考标准。
+
+| 名义尺寸检查 | 偏差 | 1:24 要求 | 状态 |
+| --- | --- | --- | --- |
+| 核心长度 | −0.316% | 3% | 名义值在容差内 |
+| 核心宽度 | −3.030% | 5% | 名义值在容差内；不含完整外框 |
+| 轴距 | +1.878% | 3% | 名义值在容差内 |
+| 前胎外径 | −8.251% | 5% | 超差 |
+| 后胎外径 | −13.552% | 5% | 超差 |
+| 后胎宽度 | −19.761% | 10% | 超差 |
+| 整车高度 | 未测量 | 5% | 不通过 |
+| 风挡下宽、斜高、倾角 | 缺实车资料 | 5% / 5% / 5° | 不通过 |
+
+规则快照 SHA256：`45f5329000429be1c76ea0f5b9a3c655bef695fc134885d6253e9592bf663d71`。
+`.io` SHA256：`e3c34fdbdab9d91ed845cc241cf511452d4ca019f916c9d5625a4cb7b0d4a8d8`。
+名义容差内不等于原生零件完整几何通过。四轮滚动、前盖/发动机盖开合、视图、碰撞、
+连接、外观、Studio GUI 和实物均未取得本次验收证据，`delivery_accepted=false`。
+测试共 **47 项通过**，新增各档独立规划、精确缩尺、角度保持、规则快照一致性、
+缺资料/超差报告、未实现档位在推理前退出、步骤拆分和 Studio 导出一致性测试。

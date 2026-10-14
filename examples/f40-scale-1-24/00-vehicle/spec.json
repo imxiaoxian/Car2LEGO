@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "model": "Ferrari F40",
+  "variant": "1987 international sales brochure 479/87",
+  "sources": {
+    "ferrari_brochure": {
+      "title": "Ferrari F40 international sales brochure (manufacturer document, archived copy)",
+      "url": "https://www.auto-brochures.com/makes/Ferrari/Ferrari_int%20F40_1987.pdf",
+      "pdf_page": 5,
+      "accessed": "2026-10-14",
+      "sha256": "0ec1437e5c1f4b6c22e60b09632db4665f7611c8a183dafaa96b960a542cc48d",
+      "notes": "Dimensions and tyre specifications visually transcribed from page 5. Original PDF is not redistributed."
+    },
+    "pirelli": {
+      "title": "Pirelli: With new P7 tires for the GTO, Pirelli equips all Ferrari supercars",
+      "url": "https://www.pirelli.com/tires/en-us/car/press-releases/ferrari-supercars",
+      "accessed": "2026-10-14",
+      "notes": "Independent manufacturer confirmation of 245/40 R17 front and 335/35 R17 rear."
+    }
+  },
+  "measurements": {
+    "length": {
+      "value": 4430,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "width": {
+      "value": 1980,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "height": {
+      "value": 1130,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "wheelbase": {
+      "value": 2450,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "front_track": {
+      "value": 1594,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "rear_track": {
+      "value": 1610,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "ferrari_brochure"
+    },
+    "front_tyre_width": {
+      "value": 245,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "front_tyre_aspect": {
+      "value": 40,
+      "unit": "%",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "front_rim_diameter": {
+      "value": 17,
+      "unit": "inch",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "rear_tyre_width": {
+      "value": 335,
+      "unit": "mm",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "rear_tyre_aspect": {
+      "value": 35,
+      "unit": "%",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "rear_rim_diameter": {
+      "value": 17,
+      "unit": "inch",
+      "status": "manufacturer",
+      "source": "pirelli"
+    },
+    "front_overhang": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "rear_overhang": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "door_front_x": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "door_length": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "door_panel_height": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "windscreen_bottom_x": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "windscreen_bottom_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "windscreen_top_width": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "windscreen_slant_height": {
+      "value": null,
+      "unit": "mm",
+      "status": "unknown"
+    },
+    "windscreen_angle_to_horizontal": {
+      "value": null,
+      "unit": "deg",
+      "status": "unknown"
+    }
+  },
+  "notes": [
+    "Do not mix dimensions from other F40 market variants or secondary spec tables.",
+    "Tyre diameter is nominal rim plus two sidewalls, not a measured loaded rolling diameter.",
+    "Unknown door and windscreen dimensions require an orthographic drawing, measured vehicle or licensed CAD."
+  ]
+}

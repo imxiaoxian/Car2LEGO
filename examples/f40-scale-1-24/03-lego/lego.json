@@ -1,0 +1,91 @@
+{
+  "stage": "lego",
+  "status": "completed",
+  "started_at": "2026-10-14T12:05:48.164827+00:00",
+  "inputs": {
+    "mesh": "calibrated.glb",
+    "sha256": "17bda28781eea792f13d636219f2218794ef4cc385c973a18e4e3704479fa699",
+    "strategy": "car",
+    "length_studs": null,
+    "rear_wing": true,
+    "scale": "1:24",
+    "width_studs": null
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "3b83c632067c0b017a330e0961a89f2366d9418f452851ea00857ded5b33491f",
+    "model": "Ferrari F40",
+    "variant": "1987 international sales brochure 479/87",
+    "unknown_fields": [
+      "front_overhang",
+      "rear_overhang",
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "strategy": "car",
+  "part_count": 239,
+  "body_color": 4,
+  "tyre_count": 4,
+  "native_wheel_count": 4,
+  "native_windscreens": 1,
+  "standard_part_scaling": false,
+  "body_cells_exact": true,
+  "buildability": "unverified",
+  "studio_verified": false,
+  "physical_verified": false,
+  "appearance_accepted": false,
+  "scale_requirements_status": "draft",
+  "delivery_accepted": false,
+  "limitations": [
+    "Vehicle part-family prior approximates mesh; exact coverage is not a goal.",
+    "No native collision, clutch or physical assembly verification.",
+    "No decals, working doors, steering or verified Ferrari details."
+  ],
+  "outputs": {
+    "model.ldr": "21e8ea45bf74c3fbc6a84b00acc6fa8ed077634913e6e65caa4b6b2380507f28",
+    "inventory.csv": "be40567deabb1f1bb64ea5b19ce3f3479ac4b79b90e86c912b116429e98e6f1f",
+    "assembly.json": "647b1261048e039de80225235334ba6f5f4e5db700c3245d288550d8e7afdb0a",
+    "fit.json": "36d9a7b2dd106762ce868e7b418e7a12099c98233086a556dba3890b8008c7cc",
+    "dimensions.json": "44a170888ab42fa50536e19b6b4340a978bd49d0ff47bde1088d09be3026c532",
+    "requirements.json": "45f5329000429be1c76ea0f5b9a3c655bef695fc134885d6253e9592bf663d71",
+    "requirements-report.json": "127e3465f0c2261cf0b6ff58fb7a97ca83c0fb97515dedb7bc1f9c9c155aaa59"
+  },
+  "seconds": 3.897
+}

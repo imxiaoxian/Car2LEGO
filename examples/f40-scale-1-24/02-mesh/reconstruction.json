@@ -1,0 +1,88 @@
+{
+  "stage": "reconstruction",
+  "status": "completed",
+  "started_at": "2026-10-14T12:05:03.511811+00:00",
+  "inputs": {
+    "image": "reference.png",
+    "sha256": "e5f917234027e4c5b5c4b5113f1b0d3b3804e4e7520958fb2125069dd6dcbcdf",
+    "resolution": 256,
+    "chunk_size": 4096,
+    "device": "cuda:0",
+    "remove_background": true,
+    "foreground_ratio": 0.85
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "vertices": 39892,
+  "faces": 79768,
+  "watertight": true,
+  "bounds": [
+    [
+      -0.4829272925853729,
+      -0.41882041096687317,
+      -0.14166277647018433
+    ],
+    [
+      0.4403184652328491,
+      0.5050040483474731,
+      0.15629637241363525
+    ]
+  ],
+  "backend": "TripoSR + scikit-image marching cubes",
+  "outputs": {
+    "input.png": "83587be5e7c085e3acda6c656d16d38451027928b2c6f0a7ecf09278f2341841",
+    "mesh.glb": "8bffdd57d493fd146bae18d47eaa815926ab362cf6849cafc65cf802825d7189",
+    "mesh.obj": "34e575e4ffac74ec1dbf31640ddbc6ecec35ebe06fac886b4081dcae3ed826c5",
+    "calibrated.glb": "17bda28781eea792f13d636219f2218794ef4cc385c973a18e4e3704479fa699",
+    "calibrated-mm.obj": "1780f4212b7455fc961622f2a6901e0e5648c04ded58c3bf35126ee101a9e61a",
+    "physical-calibration.json": "b2d952e034c38155443f6b317e7403987458066af7f40dc3fe8aeb33e402e57c"
+  },
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "3b83c632067c0b017a330e0961a89f2366d9418f452851ea00857ded5b33491f",
+    "model": "Ferrari F40",
+    "variant": "1987 international sales brochure 479/87",
+    "unknown_fields": [
+      "front_overhang",
+      "rear_overhang",
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "seat_width",
+      "engine_length",
+      "engine_width",
+      "engine_height",
+      "windscreen_angle_to_horizontal",
+      "door_opening_angle"
+    ]
+  },
+  "peak_gpu_allocated_mb": 2378.54,
+  "seconds": 41.812
+}
