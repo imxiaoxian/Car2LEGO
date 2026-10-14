@@ -1,5 +1,8 @@
 * text=auto eol=lf
 # Experiment hashes refer to exact exported bytes, including their original newlines.
 examples/** -text whitespace=cr-at-eol
+# Trimesh OBJ exports retain their terminal blank line for recorded hashes.
+examples/**/*.obj whitespace=cr-at-eol,-blank-at-eof
 *.png binary
 *.glb binary
+*.io binary

@@ -4,7 +4,7 @@ import types
 from functools import partial
 from pathlib import Path
 
-from .common import ROOT, device_name, digest, model_lock, stage
+from .common import ROOT, device_name, digest, model_lock, stage, write_json
 
 
 def setup_source():
@@ -74,7 +74,8 @@ def preprocess(source, directory, remove_background=True, foreground_ratio=0.85)
     return output
 
 
-def reconstruct(source, directory, resolution=128, chunk_size=4096, device="auto", remove_background=True):
+def reconstruct(source, directory, resolution=128, chunk_size=4096, device="auto", remove_background=True,
+                vehicle_spec=None):
     import torch
     from huggingface_hub import snapshot_download
 
@@ -104,6 +105,18 @@ def reconstruct(source, directory, resolution=128, chunk_size=4096, device="auto
         record.update(vertices=len(mesh.vertices), faces=len(mesh.faces), watertight=bool(mesh.is_watertight),
                       bounds=mesh.bounds.tolist(), backend="TripoSR + scikit-image marching cubes",
                       outputs={name: digest(directory / name) for name in ("input.png", "mesh.glb", "mesh.obj")})
+        if vehicle_spec is not None:
+            from .lego import orient
+            from .vehicle import calibrate_mesh, load_spec, spec_record
+            calibrated, calibration = calibrate_mesh(orient(mesh)[0], load_spec(vehicle_spec))
+            calibrated.export(directory / "calibrated-mm.obj")
+            calibrated.convert_units("m")
+            calibrated.export(directory / "calibrated.glb")
+            write_json(directory / "physical-calibration.json", {**calibration,
+                       "vehicle_spec": spec_record(vehicle_spec), "glb_units": "metres", "obj_units": "mm"})
+            record["vehicle_spec"] = spec_record(vehicle_spec)
+            record["outputs"].update({name: digest(directory / name) for name in
+                                      ("calibrated.glb", "calibrated-mm.obj", "physical-calibration.json")})
         if device.startswith("cuda"):
             record["peak_gpu_allocated_mb"] = round(torch.cuda.max_memory_allocated() / 2**20, 2)
         del codes, model

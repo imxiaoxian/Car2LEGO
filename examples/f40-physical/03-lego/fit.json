@@ -1,0 +1,223 @@
+{
+  "length_studs": 24,
+  "width_studs": 10,
+  "body_color": 4,
+  "body_color_source": "override",
+  "axles_studs": [
+    5.5,
+    18.5
+  ],
+  "roof_start_stud": 13,
+  "roof_end_stud": 14,
+  "source_axles_studs": [
+    6.5,
+    18.5
+  ],
+  "axle_position_source": "physical wheelbase; overhang split from mesh wheel hypotheses",
+  "source_roof_interval_studs": [
+    10,
+    16
+  ],
+  "source_extents_in_studs": [
+    23.0,
+    10.279909706546276,
+    5.866817155756208
+  ],
+  "height_profile_studs": [
+    2.408094323740035,
+    2.8686201553343187,
+    3.3231666346364825,
+    3.615565675486807,
+    3.7649562604222995,
+    3.8422735525275282,
+    3.9264544615845525,
+    4.154692362180183,
+    4.603351120966085,
+    5.151603133988033,
+    5.614365229665573,
+    5.7741086288046795,
+    5.767776188284957,
+    5.7343001408924374,
+    5.687384813797703,
+    5.618808570722756,
+    5.439927763123462,
+    5.152275151516292,
+    4.884182878439411,
+    4.646204607579845,
+    4.482988848288507,
+    4.411930845715064,
+    4.249926836544896,
+    3.9424151470558444
+  ],
+  "wheel_evidence_histogram": [
+    9.496224820075387,
+    41.58841932746733,
+    91.39427292127857,
+    119.32367177400262,
+    146.04614653275036,
+    187.94047548117072,
+    193.78466360480564,
+    172.74139878198383,
+    138.7490379579632,
+    134.6258002678129,
+    139.9781992862969,
+    140.22781402977444,
+    135.46721389164492,
+    136.19255117006753,
+    152.9484358487295,
+    162.77831385517595,
+    176.89052326518288,
+    226.37416168972763,
+    256.79840587234247,
+    250.10090196782352,
+    210.67453199723482,
+    166.16119752574673,
+    114.98352067015122,
+    54.734117460791566
+  ],
+  "principal_axis_alignment_degrees": 179.99999998323625,
+  "front_orientation_flipped": true,
+  "design_prior": "8/10/12-stud sports car; 24mm tyre family; 6-stud native windscreen; symmetric body",
+  "inferred_parameters": [
+    "roof position"
+  ],
+  "fixed_parameters": [
+    "native tyre and windscreen size",
+    "body deck height",
+    "two-stud roof on native six-stud integrated canopy"
+  ],
+  "limitations": [
+    "Low side dark regions are wheel hypotheses, not trained semantic segmentation.",
+    "Part-family dimensions constrain the mesh fit; no exact vehicle CAD recovery."
+  ],
+  "physical_calibration": {
+    "method": "axis-aligned bounding-box prior; independent X/Y/Z scaling",
+    "target_dimensions_mm": [
+      4430,
+      1980,
+      1130
+    ],
+    "source_extents": [
+      4.429999828457117,
+      1.980000019258487,
+      1.1299999952316284
+    ],
+    "mm_per_source_unit_xyz": [
+      1000.000038723,
+      999.9999902734914,
+      1000.0000042197979
+    ],
+    "front_direction_verified": false,
+    "physical_measurement_verified": false,
+    "limitations": [
+      "Calibration enforces a prior; it does not recover missing CAD detail.",
+      "Mirrors, spoiler and mesh artefacts can bias the source bounding box."
+    ]
+  },
+  "physical_constraints": {
+    "scale_denominator": 23.072916666666668,
+    "model_mm_per_real_mm": 0.04334085778781038,
+    "target_model_mm": {
+      "length": 192.0,
+      "width": 85.81489841986456,
+      "height": 48.97516930022573,
+      "wheelbase": 106.18510158013544,
+      "front_track": 69.08532731376975,
+      "rear_track": 69.77878103837472,
+      "front_tyre_width": 10.618510158013544,
+      "rear_tyre_width": 14.519187358916477,
+      "front_tyre_diameter": 27.209390519187355,
+      "rear_tyre_diameter": 28.878013544018057
+    },
+    "angle_reference": "horizontal ground plane",
+    "windscreen_angle_degrees": null,
+    "unknown_fields": [
+      "front_overhang",
+      "rear_overhang",
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "windscreen_angle_to_horizontal"
+    ],
+    "model": "Ferrari F40",
+    "variant": "1987 international sales brochure 479/87",
+    "dimensions": {
+      "length": {
+        "target_mm": 192.0,
+        "fitted_mm": 192,
+        "error_mm": 0.0,
+        "error_percent": 0.0
+      },
+      "width": {
+        "target_mm": 85.81489841986456,
+        "fitted_mm": 80,
+        "error_mm": -5.814898419864562,
+        "error_percent": -6.77609427609428
+      },
+      "wheelbase": {
+        "target_mm": 106.18510158013544,
+        "fitted_mm": 104.0,
+        "error_mm": -2.185101580135438,
+        "error_percent": -2.0578231292517013
+      },
+      "front_track": {
+        "target_mm": 69.08532731376975,
+        "fitted_mm": 72,
+        "error_mm": 2.9146726862302472,
+        "error_percent": 4.218946047678784
+      },
+      "rear_track": {
+        "target_mm": 69.77878103837472,
+        "fitted_mm": 72,
+        "error_mm": 2.221218961625283,
+        "error_percent": 3.18322981366459
+      },
+      "front_tyre_width": {
+        "target_mm": 10.618510158013544,
+        "fitted_mm": 11.2,
+        "error_mm": 0.5814898419864551,
+        "error_percent": 5.476190476190479
+      },
+      "rear_tyre_width": {
+        "target_mm": 14.519187358916477,
+        "fitted_mm": 11.2,
+        "error_mm": -3.319187358916478,
+        "error_percent": -22.860696517412936
+      },
+      "front_tyre_diameter": {
+        "target_mm": 27.209390519187355,
+        "fitted_mm": 24,
+        "error_mm": -3.2093905191873553,
+        "error_percent": -11.795157693532964
+      },
+      "rear_tyre_diameter": {
+        "target_mm": 28.878013544018057,
+        "fitted_mm": 24,
+        "error_mm": -4.8780135440180565,
+        "error_percent": -16.89179048476661
+      }
+    },
+    "fitted_windscreen_angle_degrees": 21.44773632710535,
+    "windscreen_angle_error_degrees": null,
+    "enforced_constraints": [
+      "mesh length/width/height prior",
+      "quantized wheelbase",
+      "body width family"
+    ],
+    "deferred_constraints": [
+      "height"
+    ],
+    "dimensions_verified": false,
+    "appearance_accepted": false,
+    "limitations": [
+      "Width is the rectangular body core, excluding arches, door skins and mirrors.",
+      "Tyres and glass retain native part dimensions; target mismatches are reported.",
+      "Door/window size or angle targets are reported, not forced by scaling LEGO parts.",
+      "Assembly height and complete exterior bounds require native geometry verification."
+    ]
+  }
+}

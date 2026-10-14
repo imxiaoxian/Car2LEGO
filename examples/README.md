@@ -1,5 +1,10 @@
 # Measured Examples
 
+- `f40-physical/`: full prompt-to-Studio run with a sourced Ferrari F40 physical
+  profile, raw and calibrated TripoSR meshes, native car parts, dimensions report
+  and `.io` archive. Native renderer preview uses real part geometry. Door/glass
+  dimensions remain unknown; appearance, collision and physical assembly are
+  not accepted. See `00-vehicle/spec.json` for provenance and unknown fields.
 - `f40/`: SD-Turbo seed 42 generated image, actual TripoSR reconstruction at
   resolution 128, and mesh-derived color plates at 32 studs. Model inputs,
   hashes, timings and package versions are recorded in JSON beside each stage.

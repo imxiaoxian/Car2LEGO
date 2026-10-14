@@ -1,0 +1,44 @@
+{
+  "method": "axis-aligned bounding-box prior; independent X/Y/Z scaling",
+  "target_dimensions_mm": [
+    4430,
+    1980,
+    1130
+  ],
+  "source_extents": [
+    0.9653569298747919,
+    0.5459370449474792,
+    0.2979591488838196
+  ],
+  "mm_per_source_unit_xyz": [
+    4588.97622517153,
+    3626.7918037884424,
+    3792.4661962321898
+  ],
+  "front_direction_verified": false,
+  "physical_measurement_verified": false,
+  "limitations": [
+    "Calibration enforces a prior; it does not recover missing CAD detail.",
+    "Mirrors, spoiler and mesh artefacts can bias the source bounding box."
+  ],
+  "vehicle_spec": {
+    "file": "spec.json",
+    "sha256": "3b83c632067c0b017a330e0961a89f2366d9418f452851ea00857ded5b33491f",
+    "model": "Ferrari F40",
+    "variant": "1987 international sales brochure 479/87",
+    "unknown_fields": [
+      "front_overhang",
+      "rear_overhang",
+      "door_length",
+      "door_panel_height",
+      "door_front_x",
+      "windscreen_bottom_x",
+      "windscreen_bottom_width",
+      "windscreen_top_width",
+      "windscreen_slant_height",
+      "windscreen_angle_to_horizontal"
+    ]
+  },
+  "glb_units": "metres",
+  "obj_units": "mm"
+}

@@ -1,0 +1,45 @@
+{
+  "stage": "studio",
+  "status": "completed",
+  "started_at": "2026-10-14T11:41:39.241451+00:00",
+  "inputs": {
+    "ldraw": "model.ldr",
+    "sha256": "c1721523cd18dfe497dfa984e52e9d73f9882f0146514fc728653a94338857ac"
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "part_count": 246,
+  "step_count": 17,
+  "archive_roundtrip_verified": true,
+  "studio_open_verified": false,
+  "buildability": "unverified",
+  "physical_verified": false,
+  "format": "unencrypted ZIP with standard LDraw library references",
+  "outputs": {
+    "model.io": "9bc7422eb20293fce71ef99ebf0ca99786ce57313096ff4efc0f7cd453c15473"
+  },
+  "seconds": 0.022
+}

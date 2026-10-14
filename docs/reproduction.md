@@ -12,12 +12,12 @@
 - SD-Turbo 权重：`b261bac6fd2cf515557d5d0707481eafa0485ec2`。
 - DINO 配置、其余依赖见 `models.lock.json`、`requirements.lock.txt` 与产物 JSON。
 
-## 汽车完整流程
+## 早期板件流程（历史对照）
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d run `
   --prompt "a red Ferrari F40 sports car, realistic proportions, black tires, transparent windows" `
-  --seed 42 --resolution 128 --length-studs 32 `
+  --seed 42 --resolution 128 --length-studs 32 --strategy plates `
   --output runs/f40-release --device cuda:0
 ```
 
@@ -53,7 +53,7 @@
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d lego `
-  --mesh examples/f40/02-mesh/mesh.glb --color 4 --length-studs 32 `
+  --mesh examples/f40/02-mesh/mesh.glb --color 4 --length-studs 32 --strategy plates `
   --output runs/f40-uniform-control
 ```
 
@@ -72,14 +72,14 @@
 成功退出，19.252 秒，2,407 顶点 / 4,814 面，封闭网格。
 该样例验证 CPU 路径与 Windows 网格适配可以运行；低分辨率结果不代表上游完整质量。
 
-## 代码和产物验证
+## 早期代码和产物验证
 
 - 本机 10 项测试通过：非等距网格比例、对角长轴对齐、逐体素颜色覆盖、stud 连接、重叠报告、LDraw 旋转和层高、marching-cubes 轴约定、透明预处理、原模型导入、彩色 GLB 到完整导出。
 - `scripts/verify_examples.py` 校验 13 个记录中的文件 SHA256，以及 LDraw / BOM / 装配 JSON 的数量一致性。
 - 使用真实 LDraw 渲染发现并修正了长方形板件的轴映射：长轴在 LDraw X 方向；当前零件表与本机标准 `.dat` 文件的外框尺寸一致。
 - GitHub Actions 配置 CPU 几何与导出测试。它不运行生图或神经网络重建；不以 CI 通过声称模型质量。
 
-## 当前结论
+## 早期结论
 
 **生图 → 真实开源图片重建 → 乐高板件模型的技术流程已跑通。**
 当前彩色样例仍有断连、下层支撑、颜色噪声及细节损失问题，不能标记为可搭建成品。
@@ -87,3 +87,67 @@
 没有进行 Studio GUI 碰撞审查、实物搭建、承重、机构或严格车型相似度评测。
 
 下一阶段应先解决网格部件分割与颜色去光照，再联合优化板件覆盖和跨层连接，最后引入真实轮组、底盘和曲面零件。
+
+## 物理规格约束的完整流程
+
+以下是本次更新后的实际完整运行，包含生图、TripoSR、尺寸校准、车辆零件拟合和 Studio 归档。
+与上面的历史板件结果分开保存在 `examples/f40-physical/`。
+
+```powershell
+.venv/Scripts/python.exe -m car2lego3d run `
+  --prompt "a red Ferrari F40 sports car, black tires, transparent windows" `
+  --seed 42 --steps 4 --resolution 256 --length-studs 24 `
+  --strategy car --color 4 --vehicle-specs data/vehicles/ferrari_f40_1987.json `
+  --output runs/f40-physical-delivery --device cuda:0
+```
+
+完整命令成功退出，`pipeline.json` 为 `completed`，记录耗时 **64.209 秒**（缓存权重，单次运行）。
+规格快照、原始网格、校准网格、零件模型和 `.io` 均随样例发布。
+
+| 阶段 | 本次实测 |
+| --- | --- |
+| SD-Turbo | 512×512，4 步，种子 42；12.512 秒；显存峰值 3,096.61 MiB；56/77 tokens，无提示词截断 |
+| TripoSR | CUDA float32，256 分辨率，4,096 查询分块；25.769 秒；显存峰值 2,378.54 MiB |
+| 原始网格 | 39,892 顶点 / 79,768 三角面，`watertight=true` |
+| 尺寸校准 | 4430 / 1980 / 1130 mm；保留原始网格；GLB 使用米，OBJ 使用毫米 |
+| LEGO | 246 个原生零件，35 个不同编号；10-stud 核心宽度；前后轴位置 5.5 / 18.5 studs |
+| Studio 归档 | 17 个步骤标记；颜色、变换、零件与步骤回读一致；GUI 打开尚未验证 |
+| 原生渲染 | Blender / ImportLDraw，135° / 315°，每视图 900px、32 samples；缺失零件 0，已查看渲染 |
+
+![本次生图](../examples/f40-physical/01-image/reference.png)
+
+![本次 TripoSR 网格预览](../examples/f40-physical/03-lego/mesh-preview.png)
+
+![物理约束后的原生零件渲染](../examples/f40-physical/03-lego/native-ldraw.png)
+
+统一名义缩尺为 **1:23.073**，核心车长 192 mm。当前零件家族的尺寸偏差如下：
+
+| 量 | 缩尺后的目标 | 当前名义值 | 偏差 |
+| --- | --- | --- | --- |
+| 车宽与车身核心宽 | 85.815 mm | 80 mm | −6.776% |
+| 轴距 | 106.185 mm | 104 mm | −2.058% |
+| 前胎外径 | 27.209 mm | 24 mm | −11.795% |
+| 后胎外径 | 28.878 mm | 24 mm | −16.892% |
+| 后胎宽度 | 14.519 mm | 11.2 mm | −22.861% |
+
+车宽目标对应实车整体宽度，但当前报告只比较矩形核心，不包含轮拱、门皮和后视镜，
+不能当作最终模型整体外框的误差。8-stud 核心的对应偏差约 −25.421%，只是名义核心宽的对照。
+轮胎名义直径来自规格换算，不是受载实测值。实际轮组、车门和风挡仍受固定零件家族限制。
+门窗尺寸、风挡倾角和前后悬没有可靠值，规格中保留为未知；侧视图标注工具的测试使用构造数据，
+没有将其包装成 F40 实测数据。来源和测量方法见 [physical-priors.md](physical-priors.md)。
+
+关键产物 SHA256：
+
+| 文件 | SHA256 |
+| --- | --- |
+| `00-vehicle/spec.json` | `3b83c632067c0b017a330e0961a89f2366d9418f452851ea00857ded5b33491f` |
+| `03-lego/model.ldr` | `c1721523cd18dfe497dfa984e52e9d73f9882f0146514fc728653a94338857ac` |
+| `04-studio/model.io` | `9bc7422eb20293fce71ef99ebf0ca99786ce57313096ff4efc0f7cd453c15473` |
+
+本次代码验证为 **34 项测试通过**，覆盖原有网格和板件路径，以及物理规格、单位、来源、
+轮胎推导、网格单位导出、轴距约束、8/10/12 宽度家族、侧面连接变换、标注测量和 Studio 归档回读。
+样例校验脚本检查各阶段哈希、规格快照、原生渲染以及 LDraw / BOM / 装配数量一致性。
+
+**完整技术流程可复现，外观仍未达到用户参考图标准。** 生图已出现车型细节偏差，单图重建也有纹理和形状损失；
+标准零件拟合仍是有限跑车先验，未恢复真实 F40 CAD，也未验证开门、转向、碰撞或实物拼装。
+`appearance_accepted=false`、`studio_open_verified=false`、`physical_verified=false` 保持独立。
