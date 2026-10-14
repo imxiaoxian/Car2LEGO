@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import SiteHeader from "@/components/SiteHeader";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Car2LEGO — Turn Any Car into LEGO",
+  title: "Car2LEGO | 你的下一辆，逐块成形",
   description:
-    "Input any car make, model and year. Get LEGO building instructions, parts list, and BrickLink shopping list.",
+    "Car2LEGO 车辆设计工作室。创建你的车型设计，查看参考图与零件清单，下载 BrickLink Studio 文件。",
 };
 
 export default function RootLayout({
@@ -13,36 +15,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body className="min-h-screen flex flex-col">
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🧱</span>
-              <span className="font-bold text-xl tracking-tight">
-                Car<span className="text-brick-red">2</span>LEGO
-              </span>
-            </a>
-            <nav className="flex gap-6 text-sm font-medium text-gray-600">
-              <a href="/" className="hover:text-gray-900 transition-colors">
-                Home
-              </a>
-              <a
-                href="/sets"
-                className="hover:text-gray-900 transition-colors"
-              >
-                Browse
-              </a>
-            </nav>
-          </div>
-        </header>
-
+        <SiteHeader />
         <main className="flex-1">{children}</main>
 
-        <footer className="bg-white border-t border-gray-200 py-8 text-center text-sm text-gray-500">
-          <p>
-            Car2LEGO — LEGO® is a trademark of the LEGO Group. Not affiliated.
-          </p>
+        <footer className="site-footer">
+          <div className="content-width">
+            <p>LEGO® 是 LEGO Group 的注册商标。Car2LEGO 与 LEGO Group 无关联。</p>
+            <div className="footer-bottom"><span>Car2LEGO</span><div><Link href="/">创作</Link><Link href="/sets">车型目录</Link></div><span>中国大陆 · 简体中文</span></div>
+          </div>
         </footer>
       </body>
     </html>

@@ -19,7 +19,7 @@ from app.models.user import User
 
 # ── Engine & Session fixtures ──────────────────────────
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///test_unit.db"
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 
 @pytest.fixture(scope="session")
@@ -99,7 +99,7 @@ class MockChatModel:
     def bind_tools(self, tools):
         return MockToolsRunnable(self._tool_response)
 
-    def with_structured_output(self, schema):
+    def with_structured_output(self, schema, **kwargs):
         return MockStructuredRunnable(self._structured_output)
 
     async def ainvoke(self, messages, config=None):
@@ -119,6 +119,73 @@ def mock_chat_model():
             tool_response=tool_response,
         )
     return _make
+
+
+@pytest.fixture
+def mock_reference_images(monkeypatch):
+    """Local constructed images for offline pipeline tests."""
+    import json
+    from PIL import Image
+    from app.services.reference_images import ReferenceImageService, REFERENCE_VIEWS, design_directory
+
+    async def generate(self, state):
+        directory = design_directory(state) / "references"
+        directory.mkdir(exist_ok=True)
+        images = []
+        for view in REFERENCE_VIEWS:
+            Image.new("RGB", (64, 48), "red").save(directory / f"{view}.png")
+            images.append({"view": view, "path": f"references/{view}.png",
+                           "model": "gpt-image-2.5-sunburst", "synthetic": True})
+        brief = {"body_style": "sports_car", "paint": "red",
+                 "visual_description": "Constructed test car", "distinctive_features": []}
+        (directory / "manifest.json").write_text(json.dumps({"images": images, "brief": brief}))
+        return {"reference_images": images, "reference_brief": brief}
+
+    monkeypatch.setattr(ReferenceImageService, "generate", generate)
+    return generate
+
+
+@pytest.fixture
+def mock_image_guided_llm(monkeypatch):
+    import re
+    from langchain_core.messages import AIMessage
+    from app.agents import design_graph, section_graph
+    from app.agents.section_schemas import DesignPlan, SectionParts, SectionEvaluation
+    from app.services.section_planner import compute_section_bounds
+
+    placements = {
+        "chassis": [{"part_num": "3020.dat", "color_id": 7, "x": 40, "y": 8, "z": 100}],
+        "front": [{"part_num": "3298.dat", "color_id": 4, "x": 40, "y": 40, "z": 280}],
+        "body": [{"part_num": "3823.dat", "color_id": 47, "x": 0, "y": 88, "z": 150}],
+        "rear": [{"part_num": "3298.dat", "color_id": 4, "x": 40, "y": 40, "z": 40}],
+        "wheels": [{"part_num": part, "color_id": 0, "x": 60, "y": 16, "z": z}
+                   for z in (60, 200) for part in ("4624.dat", "3641.dat")],
+    }
+    calls = []
+
+    class FakeLLM:
+        def bind_tools(self, tools):
+            return MockToolsRunnable(AIMessage(content="Use the attached vehicle references."))
+
+        def with_structured_output(self, schema, **kwargs):
+            class Runnable:
+                async def ainvoke(self, messages):
+                    calls.append((schema.__name__, messages))
+                    if schema is DesignPlan:
+                        return DesignPlan(body_color_id=4, accent_color_id=0,
+                                          overall_dimensions={"length": 360, "width": 160, "height": 144},
+                                          section_bounds=compute_section_bounds("1:38", "sports_car"),
+                                          section_highlights={})
+                    if schema is SectionParts:
+                        section = re.search(r"Return SectionParts for (\w+)", messages[-1].content).group(1)
+                        return SectionParts(section=section, parts=placements[section])
+                    return SectionEvaluation(quality_score=90, needs_retry=False)
+            return Runnable()
+
+    llm = FakeLLM()
+    monkeypatch.setattr(design_graph, "create_text_llm", lambda: llm)
+    monkeypatch.setattr(section_graph, "create_text_llm", lambda: llm)
+    return calls
 
 
 @pytest.fixture

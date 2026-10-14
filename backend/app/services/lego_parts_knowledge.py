@@ -28,6 +28,7 @@ CAR_PARTS_CATALOG: list[PartInfo] = [
     PartInfo("3021.dat", "3021", "Plate 2x3", "chassis", "2x3", "Chassis sections"),
     PartInfo("3022.dat", "3022", "Plate 2x2", "chassis", "2x2", "Chassis corner fill"),
     PartInfo("3023.dat", "3023", "Plate 1x2", "chassis", "1x2", "Chassis rails, narrow sections"),
+    PartInfo("3710.dat", "3710", "Plate 1x4", "chassis", "1x4", "Crossmembers, chassis rails"),
     PartInfo("3024.dat", "3024", "Plate 1x1", "chassis", "1x1", "Fill gaps, detail"),
     PartInfo("3666.dat", "3666", "Plate 1x6", "chassis", "1x6", "Side rails, long chassis"),
     PartInfo("3460.dat", "3460", "Plate 1x8", "chassis", "1x8", "Long chassis beams"),

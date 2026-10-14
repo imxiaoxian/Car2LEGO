@@ -17,6 +17,15 @@ from app.services.export_service import ExportService
 router = APIRouter()
 
 
+@router.get("/mpd/{design_id}")
+async def export_mpd(design_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    await _get_design_with_parts(design_id, db)
+    path = Path(settings.storage_path) / str(design_id) / "model.mpd"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="MPD not generated")
+    return FileResponse(path, filename=f"car2lego-{design_id}.mpd")
+
+
 async def _get_design_with_parts(design_id: uuid.UUID, db: AsyncSession) -> Design:
     """Helper: load a design with its parts or raise 404."""
     stmt = (

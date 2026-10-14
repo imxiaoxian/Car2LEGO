@@ -25,6 +25,11 @@ class DesignState(TypedDict, total=False):
     mod_ids: list[str]
     custom_request: str
     flagship_metadata: dict | None
+    vehicle_features: dict
+    source_image_path: str
+    storage_path: str
+    reference_brief: dict
+    reference_images: list[dict]
 
     # ── Intermediate state (populated by deterministic nodes) ──
     template_ldr: str
@@ -61,13 +66,15 @@ class DesignState(TypedDict, total=False):
     section_index: int                     # 0-4
     committed_parts: list[dict]            # 已通过评估的零件（不可变）
     pending_parts: list[dict]              # 本步生成、待评估
-    section_feedback: Annotated[list, add_messages]  # 驳回原因累积
+    section_feedback: list[str]
     inspection_snapshot: dict | None       # 最近一次 inspect_ldr 输出
     evaluation_result: dict | None         # 最近一次 llm_evaluate 输出
     section_retry_count: int               # 当前部位重试计数
     final_validation_issues: list[str]     # final_validate 失败时定位部位
     fallback_used: bool                    # 是否降级到 single-shot
     progress: str                          # "1/5" 形式的进度字符串
+    completed_sections: list[str]
+    section_failure: str
 
 
 class CustomizationState(TypedDict, total=False):

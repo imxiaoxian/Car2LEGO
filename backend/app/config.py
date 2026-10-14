@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     # Storage
     storage_path: str = str(Path(__file__).parent.parent / "storage")
+    studio_ldraw_path: str = str(Path(__file__).resolve().parents[2] / "Studio 2.0" / "ldraw")
 
     # External APIs
     rebrickable_api_key: str = ""
@@ -27,15 +28,15 @@ class Settings(BaseSettings):
     bricklink_api_secret: str = ""
 
     # AI Providers
-    ai_text_provider: str = "deepseek"       # "deepseek" | "anthropic" | "openai"
-    ai_vision_provider: str = "doubao"        # "doubao" | "openai" | "anthropic"
+    ai_text_provider: str = "openai"
+    ai_vision_provider: str = "openai"
 
     # Anthropic (backward compat)
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-6"
     anthropic_vision_model: str = "claude-sonnet-4-6"
 
-    # DeepSeek (default for text generation)
+    # Legacy provider settings retained for existing environment files.
     deepseek_api_key: str = ""
     deepseek_model: str = "deepseek-chat"
     # Both deepseek-chat and deepseek-v4-pro work. v4-pro needs:
@@ -43,13 +44,16 @@ class Settings(BaseSettings):
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_reasoning_effort: str = ""   # "high" | "medium" | "low" | "" — enables thinking mode (incompatible with structured output)
 
-    # OpenAI (for vision analysis)
+    # One OpenAI-compatible multimodal model for recognition, planning and design.
     openai_api_key: str = ""
-    openai_vision_model: str = "gpt-4o"
-    openai_text_model: str = "gpt-4o-mini"
-    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-6.1-sol"
+    openai_base_url: str = "https://api.lundong.ai/v1"
+    openai_image_model: str = "gpt-image-2.5-sunburst"
+    image_quality: str = "high"
+    image_size: str = "1536x1024"
+    image_timeout: float = 300.0
 
-    # Doubao / ByteDance Volcano Engine (for vision analysis)
+    # Legacy Doubao settings (generation uses the OpenAI factories).
     doubao_api_key: str = ""
     doubao_vision_model: str = "doubao-seed-2-1-pro-260628"
     doubao_base_url: str = "https://ark.cn-beijing.volces.com/api/v3"
@@ -67,7 +71,18 @@ class Settings(BaseSettings):
     ]
 
     # Design workflow version
-    design_workflow: str = "v2"  # "v2" (section-by-section) | "legacy" (template-first)
+    design_workflow: str = "assembly_v3"
+    assembly_text_call_limit: int = 64
+    assembly_text_retry_attempts: int = 3
+    assembly_module_repair_limit: int = 3
+    assembly_replan_limit: int = 2
+    assembly_lease_seconds: int = 900
+    assembly_external_checks_enabled: bool = True
+    assembly_external_check_timeout_seconds: int = 300
+    assembly_ldraw_mcp_python: str = ""
+    assembly_ldraw_mcp_command: str = ""
+    assembly_ldraw_mcp_blender: str = ""
+    assembly_legolization_python: str = ""
 
 
 settings = Settings()

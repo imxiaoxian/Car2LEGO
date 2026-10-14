@@ -1,6 +1,7 @@
 """Pydantic schemas for API request/response validation."""
 
 import uuid
+from typing import Literal
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -35,9 +36,9 @@ class DesignCreate(BaseModel):
     model: str = Field(..., max_length=200)
     year: int = Field(..., ge=1900, le=2030)
     image_url: str | None = None
-    scale: str = Field(
+    scale: Literal["1:8", "1:10", "1:12", "1:16", "1:24", "1:38"] = Field(
         default="1:38",
-        description="Scale ratio: 1:8, 1:10, 1:12, or 1:38 (default)",
+        description="assembly_v3: 1:38, 1:24, 1:16, 1:12; 1:8 and 1:10 are reserved",
     )
 
 
@@ -78,6 +79,24 @@ class DesignResponse(BaseModel):
 
 
 class DesignDetailResponse(DesignResponse):
+    workflow_version: str | None = None
+    requested_scale: str = "1:38"
+    actual_dimensions_mm: dict = Field(default_factory=dict)
+    scale_deviation_percent: dict = Field(default_factory=dict)
+    scale_requirements: dict = Field(default_factory=dict)
+    physical_specifications: dict = Field(default_factory=dict)
+    mechanisms: list[dict] = Field(default_factory=list)
+    quality_report: dict | None = None
+    external_checks: dict = Field(default_factory=dict)
+    job: dict | None = None
+    scene_url: str | None = None
+    renders: list[dict] = Field(default_factory=list)
+    external_renders: list[dict] = Field(default_factory=list)
+    assembly_preview_url: str | None = None
+    assembly_preview_rear_url: str | None = None
+    quality_level: str | None = None
+    reference_images: list[dict] = Field(default_factory=list)
+    official_build_references: list[dict] = Field(default_factory=list)
     car: CarResponse | None = None
     parts: list[DesignPartResponse] = []
     file_urls: dict[str, str] = {}
@@ -91,11 +110,15 @@ class DesignStatusResponse(BaseModel):
     progress: int = 0
     stage: str | None = None
     error_message: str | None = None
+    calls: dict = Field(default_factory=dict)
+    limits: dict = Field(default_factory=dict)
+    module_repairs: dict = Field(default_factory=dict)
 
 
 # ─── Customization ──────────────────────────────────────
 
 class CustomizationRequest(BaseModel):
+    scale: Literal["1:38", "1:24", "1:16", "1:12"] | None = None
     customization_text: str = Field(
         ...,
         min_length=3,

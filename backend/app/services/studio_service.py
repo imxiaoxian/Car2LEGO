@@ -62,8 +62,6 @@ class StudioFile:
                 zf.writestr("model.lxfml", self.lxfml)
             if self.thumbnail:
                 zf.writestr("thumbnail.png", self.thumbnail)
-            # Generate simple instruction placeholder
-            zf.writestr("model.ins", self._generate_ins())
             # Metadata
             zf.writestr(".info", json.dumps(self.info, indent=2))
         return buf.getvalue()
@@ -104,7 +102,7 @@ class StudioService:
         """
         # Build proper model.ldr with file wrapper
         filename = name.replace(" ", "_").lower() + ".io"
-        wrapped_ldr = f"""0 FILE {filename}
+        wrapped_ldr = ldr_content if any(line.startswith("0 FILE ") for line in ldr_content.splitlines()) else f"""0 FILE {filename}
 0 {name}
 0 Name: {name}
 0 Author: {author}
@@ -135,6 +133,8 @@ class StudioService:
         geometry for self-contained models. This is what Studio actually
         uses for rendering and instructions.
         """
+        if any(line.startswith("0 FILE ") for line in ldr_content.splitlines()):
+            return ldr_content
         lines = [
             f"0 FILE {name.replace(' ', '_').lower()}.io",
             f"0 {name}",

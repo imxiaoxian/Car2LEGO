@@ -1,104 +1,54 @@
-"""LangChain ChatModel factory.
-
-Replaces the custom `BaseLLMProvider` abstraction with idiomatic LangChain
-ChatModel instances. Each call site picks a provider via env var:
-
-- `AI_TEXT_PROVIDER`  → `create_text_llm()`  (used by design + customization graphs)
-- `AI_VISION_PROVIDER` → `create_vision_llm()` (used by vision graph)
-
-DeepSeek and Doubao are OpenAI-API-compatible, so they reuse `ChatOpenAI`
-with a custom `base_url`. Anthropic is the legacy fallback via `ChatAnthropic`.
-
-The previously-dead `deepseek_reasoning_effort` setting (config.py:44) is
-now plumbed through via `model_kwargs`, fixing Phase 0 bug #4.
-"""
+"""Shared OpenAI-compatible model for every language and vision workload."""
 
 from langchain_core.language_models import BaseChatModel
-from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.runnables import RunnableLambda
 
 from app.config import settings
 
 
-def create_text_llm() -> BaseChatModel:
-    """Build the text-generation ChatModel (DeepSeek default).
+class GatewayChatOpenAI(ChatOpenAI):
+    """Validate structured JSON locally without gateway tool-call extensions.
 
-    Raises ValueError if the selected provider has no API key configured.
+    This gateway accepts text and images but returns an upstream 500 when tools
+    are supplied. No hidden retry or different model is used by this adapter.
+    Invalid JSON and schema violations remain explicit failures.
     """
-    provider = settings.ai_text_provider.lower()
+    def with_structured_output(self, schema, *, method=None, include_raw=False, **kwargs):
+        if include_raw or not hasattr(schema, "model_json_schema"):
+            raise ValueError("Gateway structured output requires a Pydantic schema")
+        parser = PydanticOutputParser(pydantic_object=schema)
+        instructions = "Return only one JSON object. Follow this schema exactly. " + parser.get_format_instructions()
+        def prepare(value):
+            messages = value.to_messages() if hasattr(value, "to_messages") else self._convert_input(value).to_messages()
+            return [SystemMessage(content=instructions), *messages]
+        return RunnableLambda(prepare) | self | parser
 
-    if provider == "deepseek":
-        if not settings.deepseek_api_key:
-            raise ValueError("DEEPSEEK_API_KEY not configured")
-        base_url = settings.deepseek_base_url.rstrip("/")
-        if not base_url.endswith("/v1"):
-            base_url = base_url + "/v1"
-        kwargs = {
-            "api_key": settings.deepseek_api_key,
-            "base_url": base_url,
-            "model": settings.deepseek_model,
-            "max_tokens": settings.text_max_tokens,
-        }
-        if settings.deepseek_reasoning_effort:
-            kwargs["reasoning_effort"] = settings.deepseek_reasoning_effort
-        return ChatOpenAI(**kwargs)
 
-    if provider == "openai":
-        if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY not configured")
-        return ChatOpenAI(
-            api_key=settings.openai_api_key,
-            base_url=settings.openai_base_url,
-            model=settings.openai_text_model,
-            max_tokens=settings.text_max_tokens,
-        )
+def openai_base_url() -> str:
+    """Accept either the gateway origin or its /v1 API root."""
+    url = settings.openai_base_url.rstrip("/")
+    return url if url.endswith("/v1") else f"{url}/v1"
 
-    if provider == "anthropic":
-        if not settings.anthropic_api_key:
-            raise ValueError("ANTHROPIC_API_KEY not configured")
-        return ChatAnthropic(
-            api_key=settings.anthropic_api_key,
-            model=settings.anthropic_model,
-            max_tokens=settings.text_max_tokens,
-        )
 
-    raise ValueError(f"Unknown AI_TEXT_PROVIDER: {provider!r}")
+def _create_llm(max_tokens: int) -> BaseChatModel:
+    if not settings.openai_api_key:
+        raise ValueError("OPENAI_API_KEY not configured")
+    return GatewayChatOpenAI(
+        api_key=settings.openai_api_key,
+        base_url=openai_base_url(),
+        model=settings.openai_model,
+        max_tokens=max_tokens,
+        timeout=180,
+        max_retries=0,
+    )
+
+
+def create_text_llm(max_tokens: int | None = None) -> BaseChatModel:
+    return _create_llm(min(max_tokens, settings.text_max_tokens) if max_tokens else settings.text_max_tokens)
 
 
 def create_vision_llm() -> BaseChatModel:
-    """Build the vision-analysis ChatModel (Doubao default).
-
-    Raises ValueError if the selected provider has no API key configured.
-    """
-    provider = settings.ai_vision_provider.lower()
-
-    if provider == "doubao":
-        if not settings.doubao_api_key:
-            raise ValueError("DOUBAO_API_KEY not configured")
-        return ChatOpenAI(
-            api_key=settings.doubao_api_key,
-            base_url=settings.doubao_base_url,
-            model=settings.doubao_vision_model,
-            max_tokens=settings.vision_max_tokens,
-        )
-
-    if provider == "openai":
-        if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY not configured")
-        return ChatOpenAI(
-            api_key=settings.openai_api_key,
-            base_url=settings.openai_base_url,
-            model=settings.openai_vision_model,
-            max_tokens=settings.vision_max_tokens,
-        )
-
-    if provider == "anthropic":
-        if not settings.anthropic_api_key:
-            raise ValueError("ANTHROPIC_API_KEY not configured")
-        return ChatAnthropic(
-            api_key=settings.anthropic_api_key,
-            model=settings.anthropic_vision_model,
-            max_tokens=settings.vision_max_tokens,
-        )
-
-    raise ValueError(f"Unknown AI_VISION_PROVIDER: {provider!r}")
+    return _create_llm(settings.vision_max_tokens)

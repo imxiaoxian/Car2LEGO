@@ -4,319 +4,269 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Car2LEGO** — generates BrickLink Studio `.io` files for any car model. Input: car photo or text (make+model+year). Output: Studio `.io` file with parts list + reference pricing. User opens in BrickLink Studio 2.0 for 3D viewing, photorealistic rendering, building instructions, and parts export.
+**Car2LEGO** — generates BrickLink Studio `.io` / LDraw files for a car model. Input: car photo or text (make+model+year). Output: assembled model + parts list + reference pricing, viewable in an in-repo Three.js viewer or opened in BrickLink Studio 2.0.
 
-**Architecture**: Studio is the rendering engine. We generate `.io` files — Studio does everything visual.
+**Architecture**: the backend builds a real, connection-validated LEGO scene; Studio (or the Three.js viewer) does the rendering.
 
 ## Quick Start
 
 ```bash
 cd D:/lego/backend
-pip install fastapi uvicorn sqlalchemy aiosqlite anthropic httpx celery redis alembic openai --quiet
+pip install -r requirements.txt --quiet
 
-# Start (SQLite dev — no PostgreSQL/Redis needed)
-DATABASE_URL="sqlite+aiosqlite:///test.db" REDIS_URL="" GENERATION_MODE=sync \
-  DEEPSEEK_API_KEY="sk-xxx" DOUBAO_API_KEY="ark-xxx" REBRICKABLE_API_KEY="xxx" \
+# Start (SQLite dev needs no PostgreSQL/Redis; Postgres via docker-compose)
+DATABASE_URL="sqlite+aiosqlite:///test.db" REDIS_URL="" \
+  OPENAI_API_KEY="..." DESIGN_WORKFLOW=assembly_v3 \
   uvicorn app.main:app --port 8000
 
-# Seed the LEGO car database (140 sets, requires REBRICKABLE_API_KEY for real parts)
-DATABASE_URL="sqlite+aiosqlite:///test.db" REBRICKABLE_API_KEY="xxx" python ../data/seed_sets.py
+# Seed reference data (both require a DB; run from repo root)
+DATABASE_URL="sqlite+aiosqlite:///test.db" python data/seed_sets.py          # 140 LEGO car sets
+DATABASE_URL="sqlite+aiosqlite:///test.db" python data/seed_car_specs.py     # 50 car spec rows
 
-# Run tests
+# Run tests (285 collected by default; slow/real-API tests deselected)
 cd D:/lego/backend
-pip install pytest pytest-asyncio pytest-cov httpx aiosqlite --quiet
-python -m pytest tests/unit/ -v
+python -m pytest tests/ -v
 
-# API docs: http://localhost:8000/docs
+# API docs: http://localhost:8000/docs   |   Frontend: cd D:/lego/frontend && npm run dev
 ```
 
 ## Architecture
 
 ```
-Input: Text (make+model+year) OR Car photo (Vision) OR 3D model (.obj/.stl)
+Input: Text (make+model+year) OR Car photo OR 3D model
     ↓
 FastAPI backend (Python, SQLite/PostgreSQL)
     ├── Matching Engine: L1 (140 LEGO sets) → L2 (MOC) → L3 (templates) → L4 (AI)
-    ├── Web Research: Google/official sites → structured car specs
-    ├── AI Providers (multi-vendor):
-    │   ├── DeepSeek (text → design generation, L4)
-    │   ├── Doubao (vision → image analysis)
-    │   └── Anthropic (legacy fallback)
-    ├── Community Mod System: Steam Workshop-style mod sharing
+    ├── Web Research: manufacturer/Wikipedia/auto sites → car specs
+    ├── Design generation: DESIGN_WORKFLOW → assembly_v3 (default) | v2 | legacy
+    ├── Single OpenAI-compatible gateway for all text + vision (see AI below)
+    ├── Vision Analyzer: car photo → taxonomy features
     ├── Rebrickable API: real parts import for L1 matches
     └── Pricing Service: BrickLink reference prices
     ↓
-Studio .io file (ZIP: model.ldr + model2.ldr + .info + thumbnail.png)
-    ↓
-Open in BrickLink Studio 2.0
-    ├── 3D view + orbit/zoom
-    ├── Photorealistic render (Eyesight GPU / POV-Ray CPU)
-    ├── Auto-generate building instructions
-    ├── Parts list → BrickLink XML export
-    └── PartDesigner: custom decals/paint
+AssemblyScene (validated parts + connections + joints + build steps)
+    ├── Studio .io / MPD / LDR / PDF export  → open in BrickLink Studio 2.0
+    └── scene.json / geometry endpoint       → Three.js viewer (AssemblyViewer.tsx)
 ```
 
-## AI Provider Architecture
+## Design Generation (PRIMARY: assembly_v3)
 
-Multi-vendor LLM abstraction in `app/integrations/`:
+`assembly_v3` is an evidence-based, recipe-driven generator. It solves a discrete stud
+grid with OR-Tools CP-SAT, builds a physical assembly, and validates real connections
+against Studio's own connectivity/collider files before export.
 
 ```
-app/integrations/
-├── provider.py                     # LLMResponse, BaseLLMProvider, mask_api_key()
-├── providers/
-│   ├── __init__.py                 # Factory: create_text_provider(), create_vision_provider()
-│   ├── anthropic.py                # AnthropicProvider (Claude SDK)
-│   ├── openai.py                   # OpenAIProvider (DeepSeek + OpenAI, OpenAI SDK)
-│   └── doubao.py                   # DoubaoProvider (Volcano Engine Responses API)
-├── llm.py                          # LegoDesignClient (provider-agnostic)
-└── ...
+app/services/assembly_v3/            # the generator package
+├── pipeline.py       # AssemblyPipeline.generate(): resumable orchestration, checkpoints, repair loop
+├── recipes.py        # solve_grid() (CP-SAT) + build_f40() router → f40.py or f40_detail.py
+├── f40.py            # stud-lattice F40 shell, recipe "f40-shell-3"
+├── f40_detail.py     # 1:24 native slope/mudguard surface, recipe "f40-surface-4"
+├── specifications.py # SCALES, CAPABILITIES, F40_SPEC, target_dimensions()
+├── validation.py     # digital gates: collisions(), move_joint(), motion_report(), validate_scene()
+├── connections.py    # infers connections from Studio .conn world ports
+├── catalog.py        # reads .conn port data, port()/part_validity()
+├── scene.py          # AssemblyScene / PartInstance / Module / Joint / BuildStep (Pydantic)
+├── repair.py         # score() + repair_module()
+├── jobs.py           # JobStore: lease/checkpoint/recover, call budgets
+├── exports.py        # Studio .io, MPD, flat LDR, inventory, PDF
+├── render.py         # CPU raster scene renders
+└── official_guides.py# official instruction guides from storage
+
+# scene.planning["recipe"] records the recipe used ("f40-shell-3", "f40-surface-4",
+# "experimental-coupe-scaffold" for non-F40 vehicles built from estimated dimensions)
 ```
 
-**Provider routing** (configurable via env vars):
+- **Scales** (`specifications.py` → `SCALES`): `1:38`, `1:24`, `1:16`, `1:12`. 1:10 / 1:8 are NOT
+  supported by this generator. `CAPABILITIES` maps each scale to its mechanisms
+  (rolling_wheels → doors, steering, independent_suspension).
+- **Scale requirements** (`requirements.py`, `scale_requirements_v1`): the single source
+  for appearance, mechanism instance counts, reference views, required/recommended
+  measurements, tolerances and step limits. New jobs/scenes snapshot the policy;
+  resume uses that snapshot. Old reports are not upgraded. See `docs/scale-requirements.md`.
+- **Routing** — `DESIGN_WORKFLOW` (default `assembly_v3`) is read in:
+  - `app/config.py:74` (default)
+  - `app/services/studio_design_generator.py:145/150/199` — assembly_v3 → `AssemblyPipeline.generate()`, else `legacy` → `design_graph_legacy`, else → v2 `design_graph`
+  - `app/api/v1/designs.py:226/658/1004/1145` — job dispatch + customize paths
+  - `app/main.py:57` — startup recovery loop re-drives `assembly_v3` jobs
 
-| Config | Default | Purpose |
-|--------|---------|---------|
-| `AI_TEXT_PROVIDER` | `deepseek` | Text→design generation (L4) |
-| `AI_VISION_PROVIDER` | `doubao` | Image→car features analysis |
-| `DEEPSEEK_MODEL` | `deepseek-chat` | Model name for DeepSeek |
-| `DOUBAO_VISION_MODEL` | `doubao-seed-2-1-pro-260628` | Model name for Doubao |
+## Services & Modules
 
-**How call sites use providers** — All 4 call sites now go through `LegoDesignClient.call_tools()` or `VisionAnalyzer._provider.create_message()`. Tool schemas remain in Anthropic format; `OpenAIProvider` and `DoubaoProvider` convert internally.
+| Area | File | Purpose |
+|------|------|---------|
+| Matching | `services/matching_engine.py` | L1→L4 cascade; `FLAGSHIP_SPECS` for 9 Technic supersets |
+| Assembly gen | `services/assembly_v3/` | Primary generator (see above) |
+| Geometry | `services/assembly_geometry.py` | Reads Studio collider `*.col` boxes → world AABBs |
+| Preview render | `services/assembly_preview.py` | `geometry_bounds()`, `render_preview()` (CPU), `part_triangles()` |
+| IO validator | `services/io_validator.py` | Validates `.io`; resolves Studio ldraw paths (`STUDIO_LDRAW_PARTS`) |
+| Studio service | `services/studio_service.py` | `.io` ZIP read/write/merge |
+| Templates | `services/studio_templates.py` | 6 chassis templates + `SCALE_SPECS` |
+| Studio automation | `services/studio_automation.py` | pywinauto → drive Studio desktop app |
+| Section planner | `services/section_planner.py` (+ `section_evaluator`, `section_inspector`) | v2 section workflow |
+| Vision analyzer | `services/vision_analyzer.py` | Car photo → features |
+| Vehicle taxonomy | `services/vehicle_taxonomy.py` | Classification system |
+| Reference images | `services/reference_images.py` | gpt-image reference shots + progress |
+| Brand features | `services/brand_features.py` | Brand design cues |
+| Car research | `services/car_research.py` | Web search → car specs (brand domains) |
+| Car specs | `services/car_specs_service.py` | `car_specs` knowledge base lookups |
+| Customization | `services/customization_service.py` | Apply mods to designs |
+| Community mods | `services/community_mods.py` | Mod repository + MOD_SPEC |
+| Mod catalog | `services/mod_parts_catalog.py` | Real-world mods × LEGO mappings |
+| Parts knowledge | `services/lego_parts_knowledge.py` | Curated part catalog |
+| Pricing | `services/pricing_service.py` | BrickLink reference prices |
+| Export | `services/export_service.py` | BrickLink XML/CSV |
+| Color | `services/color_service.py` | RGB → nearest LEGO color |
 
-**Key security feature**: `mask_api_key()` in `provider.py` — all API keys are masked in error messages and log output. Real keys stored only in `_api_key` private attribute.
+**AI layer** — all text and vision go through one OpenAI-compatible gateway:
+`app/agents/models.py` → `create_text_llm()` / `create_vision_llm()`, backed by
+`GatewayChatOpenAI` (validates JSON locally; the gateway rejects tool calls, so structured
+output is done by prompt + `PydanticOutputParser`). Config: `OPENAI_API_KEY`, `OPENAI_BASE_URL`,
+`OPENAI_MODEL`, `OPENAI_IMAGE_MODEL`, `TEXT_MAX_TOKENS`, `VISION_MAX_TOKENS`. The legacy
+`app/integrations/providers/` package no longer exists — `app/integrations/` holds only
+`base.py`, `nhtsa.py`, `rebrickable.py`.
 
-## Core Services
+**Agent graphs** (`app/agents/`): `design_graph.py` (v2 section workflow), `design_graph_legacy.py`,
+`section_graph.py`, `vision_graph.py`, `customization_graph.py`, `state.py`, `models.py`, `tools.py`.
 
-| Service | File | Purpose |
-|---------|------|---------|
-| Matching Engine | `matching_engine.py` | L1→L4 cascade: 140 sets → MOC → templates → AI. FLAGSHIP_SPECS for 9 Technic supersets (6 Ultimate + 3 F1) |
-| Vision Analyzer | `vision_analyzer.py` | Car photo → 52 sub-styles, 80+ features via Doubao |
-| Vehicle Taxonomy | `vehicle_taxonomy.py` | Complete classification system |
-| Studio Designer | `studio_design_generator.py` | AI → LDraw → .io pipeline (DeepSeek primary, 1:38 only) |
-| Studio Service | `studio_service.py` | .io ZIP read/write/merge (Studio 2.26.6 format) |
-| Studio Templates | `studio_templates.py` | 6 car chassis templates (sports/SUV/sedan/pickup/hatch/F1) + SCALE_SPECS |
-| Studio Automation | `studio_automation.py` | pywinauto → control Studio desktop app |
-| Mod Catalog | `mod_parts_catalog.py` | 24 real-world mods × LEGO part mappings |
-| Parts Knowledge | `lego_parts_knowledge.py` | 80-part curated catalog for AI |
-| Community Mods | `community_mods.py` | Steam Workshop-style mod repository |
-| Car Research | `car_research.py` | Web search → car specs (70+ brand domains) |
-| Customization | `customization_service.py` | Apply mods to existing designs |
-| Pricing | `pricing_service.py` | BrickLink reference prices per part |
+## Studio Integration
+
+`settings.studio_ldraw_path` (env `STUDIO_LDRAW_PATH`, default `D:/lego/Studio 2.0/ldraw`) points
+at the user's local Studio install. The generator reads, under that path:
+- `connectivity/<part>.conn` — connectivity ports (`assembly_v3/catalog.py`)
+- `collider/<part>.col` — oriented collision boxes (`services/assembly_geometry.py`)
+- `parts/`, `parts/s/`, `p/`, `UnOfficial/parts/` — LDraw geometry (`services/io_validator.py`)
 
 ## API Endpoints
 
+All under `/api/v1` (see `app/api/v1/router.py`). Derived from router decorators:
+
 ```
-POST /api/v1/designs              — Create design (text input, scale param: "1:38" default)
-GET  /api/v1/designs/scales       — List supported scales + capabilities
-POST /api/v1/designs/from-image   — Create design (image upload, Vision analysis)
-GET  /api/v1/designs/{id}         — Design detail + parts + match info
-GET  /api/v1/designs/{id}/status  — Poll async generation status
-GET  /api/v1/designs/{id}/pricing — Reference pricing for parts
-GET  /api/v1/designs/{id}/ldr     — Raw LDraw content
-POST /api/v1/designs/{id}/customize — Customize existing design
-POST /api/v1/designs/{id}/studio-open — Launch design in Studio
-
-GET  /api/v1/templates            — 6 car body templates
-GET  /api/v1/mods                 — 24 mod parts catalog
-POST /api/v1/research             — Web research for unknown cars
-GET  /api/v1/research/taxonomy-suggestions — New taxonomy entries
-
-GET  /api/v1/community            — Browse community mods
-POST /api/v1/community/submit     — Submit a community mod
-
-GET  /api/v1/export/xml/{id}      — BrickLink Wanted List XML
-GET  /api/v1/export/csv/{id}      — Parts CSV
-GET  /api/v1/export/ldr/{id}      — LDraw .ldr file
-GET  /api/v1/export/io/{id}       — Studio .io file
-
-GET  /api/v1/sets/known-cars      — 140 known LEGO car sets
-GET  /api/v1/cars/lookup          — Validate car via NHTSA API
+designs:  GET  /designs/scales
+          POST /designs                         (text input)
+          GET  /designs                         (list)
+          GET  /designs/{id}  |  /{id}/status
+          GET  /designs/{id}/reference-images/{view}
+          GET  /designs/{id}/scene | /quality | /geometry
+          GET  /designs/{id}/renders/{view}
+          POST /designs/{id}/control/{action}
+          GET  /designs/{id}/assembly-preview
+          GET  /designs/{id}/ldr  |  /{id}/parts
+          GET  /designs/{id}/open-in-studio
+          POST /designs/from-image              (image upload)
+          GET  /designs/{id}/pricing
+          POST /designs/{id}/studio-open  |  /{id}/customize
+cars:     GET  /cars  |  /cars/{car_id} ;  POST /cars/lookup
+sets:     GET  /sets/vehicles | /sets | /sets/known-cars | /sets/{set_num}
+parts:    GET  /parts
+export:   GET  /export/mpd/{id} | /xml/{id} | /csv/{id} | /ldr/{id} | /io/{id} | /pdf/{id}
+mods:     GET  /mods  |  /mods/categories
+templates:GET  /templates
+community:GET  /community | /categories | /spec | /{mod_id} | /{mod_id}/ldr ; POST /community/submit
+research: POST /research  (returns search queries + suggested sources; no live fetch)
+          GET  /research/taxonomy-suggestions ; POST /research/taxonomy-suggestions/clear
 ```
 
 ## Environment Variables
 
+Names only (defaults from `app/config.py`). Never commit real key values.
+
 ```
-# AI Providers (required)
-DEEPSEEK_API_KEY=sk-...          # DeepSeek — text design generation (L4)
-DOUBAO_API_KEY=ark-...           # Doubao — vision/image analysis
-
-# AI Provider Config (optional, defaults shown)
-AI_TEXT_PROVIDER=deepseek        # "deepseek" | "anthropic" | "openai"
-AI_VISION_PROVIDER=doubao        # "doubao" | "openai" | "anthropic"
-DEEPSEEK_MODEL=deepseek-chat     # Use deepseek-v4-pro for v4 (auto-strips tool_choice)
-DOUBAO_VISION_MODEL=doubao-seed-2-1-pro-260628
-
-# Legacy Anthropic (fallback only)
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Database
-DATABASE_URL=sqlite+aiosqlite:///test.db  # Dev default
-REDIS_URL=                        # Empty = sync fallback (no Celery needed for dev)
-GENERATION_MODE=sync              # "sync" | "async" | "auto"
-
-# External APIs
-REBRICKABLE_API_KEY=              # Required for L1 parts import
-STUDIO_PATH=D:\lego\Studio 2.0\Studio.exe
+DATABASE_URL=…            DATABASE_URL_SYNC=…      REDIS_URL=…
+STORAGE_PATH=./storage    STUDIO_LDRAW_PATH=D:/lego/Studio 2.0/ldraw
+OPENAI_API_KEY=  OPENAI_BASE_URL=  OPENAI_MODEL=gpt-6.1-sol  OPENAI_IMAGE_MODEL=
+IMAGE_QUALITY=  IMAGE_SIZE=  IMAGE_TIMEOUT=
+TEXT_MAX_TOKENS=32768     VISION_MAX_TOKENS=8192
+DESIGN_WORKFLOW=assembly_v3
+ASSEMBLY_TEXT_CALL_LIMIT=64  ASSEMBLY_IMAGE_CALL_LIMIT=12  ASSEMBLY_MODULE_REPAIR_LIMIT=3
+ASSEMBLY_REPLAN_LIMIT=2       ASSEMBLY_LEASE_SECONDS=900
+REBRICKABLE_API_KEY=  BRICKLINK_API_KEY=  BRICKLINK_API_SECRET=
+GENERATION_MODE=sync|async|auto    (read via os.getenv in designs.py; sync = inline, no Celery)
+DEBUG=  CORS_ORIGINS=
+# Legacy/retained (unused by the gateway path): ANTHROPIC_*, DEEPSEEK_*, DOUBAO_*
 ```
+
+## Data & Database
+
+- **Models** (`app/models/`, 8 files): `car`, `car_spec`, `design` (Design + DesignPart), `lego_set`,
+  `moc`, `part` (Part + PartColor), `template` (DesignTemplate), `user`.
+- **Tables** (10): `cars`, `car_specs`, `designs`, `design_parts`, `lego_sets`, `mocs`, `parts`,
+  `part_colors`, `design_templates`, `users`. Generic SQLAlchemy types (`JSON`, `Uuid`) → works on
+  SQLite and PostgreSQL.
+- **Alembic** (`backend/alembic/versions/`): `001_initial.py` (9 tables), `002_car_specs.py` (car_specs).
+  `main.py` runs `alembic upgrade head` on startup, falling back to `create_all`.
+- **Seeds** (`data/`): `seed_sets.py` → 140 rows (Speed Champions, Technic, Creator Expert/Icons, …);
+  `seed_car_specs.py` → 50 rows across major makes (Ferrari, Porsche, McLaren, Lamborghini, …).
 
 ## Scale System
 
-Four supported scales. AI generation supports 1:38 only; other scales require matching an official LEGO set.
-
-| Scale | AI Gen | Parts Source | Reference Sets |
-|-------|--------|-------------|----------------|
-| **1:38** | ✅ Yes | AI (20-40 parts, 200-350 total) | 76919(245) 76920(344) 77242(275) |
-| **1:12** | ❌ No | Rebrickable import only | 10295(1458) 10337(1506) 10304(1456) |
-| **1:10** | ❌ No | Rebrickable import only | 42154(1466) 42156(1775) 42171(1642) |
-| **1:8** | ❌ No | Rebrickable import only | 42056(2704) 42083(3599) 42115(3696) 42143(3778) 42172(3893) 42232(4104) |
-
-Scale profiles in `studio_templates.py` → `SCALE_SPECS`. AI prompt receives dimensions via `format_scale_for_prompt()`.
-
-## Design Pipeline (Two Paths)
-
-**Path A — Official Set Match (L1)**:
-```
-L1 match → Rebrickable API imports real parts → _build_io_from_parts() creates .io
-```
-Parts are real LEGO elements with correct colors/quantities. .io arranges them in a grid layout for browsing in Studio.
-
-**Path B — AI Generation (L4, 1:38 only)**:
-```
-No match → classify_car_to_template() → AI customizes template → .io file
-```
-AI system prompt is Speed Champions 8-wide. Template registry has 6 body styles (sports/SUV/sedan/pickup/hatch/F1) with brand mappings.
-
-**Path C — Unsupported**:
-```
-No match + scale ≠ 1:38 → returns error: "AI generation only supports 1:38"
-```
-
-Key implementation: `_build_io_from_parts()` in `designs.py` + `_import_set_parts()` for Rebrickable. Must `await db.flush()` after setting `file_io_path` to persist before `db.refresh()`.
-
-## Flagship Specs
-
-`matching_engine.py` → `FLAGSHIP_SPECS` dict maps 9 set numbers to mechanical specs:
-- 6 Ultimate Car Concept (42056/42083/42115/42143/42172/42232): engine, transmission, door type, suspension, distinctive features, hp, body proportions
-- 3 premium Technic (42156/42206/42207): Le Mans + F1 specs
-
-L1 matches auto-enrich `MatchResult.metadata["flagship"]` → stored in `Design.metadata_` → passed to AI generator as `flagship_metadata` param.
-
-## Web Research Pipeline
-
-When a car is not in the database:
-1. Build prioritized search queries (official site → Wikipedia → auto sites)
-2. 70+ manufacturer domains mapped (byd.com, porsche.com, etc.)
-3. Claude extracts specs from search results
-4. Structured data feeds the design generator
-
-## Community Mod System (MOD_SPEC v1.0)
-
-```json
-{
-  "mod_id": "gt_wing_v2",
-  "name": "GT Wing V2",
-  "version": "1.0.0",
-  "author": "username",
-  "category": "aerodynamics",
-  "difficulty": "medium",
-  "estimated_parts": 12,
-  "compatible_body_styles": ["sports_car", "coupe"],
-  "ldraw_file": "model.ldr",
-  "preview_image": "preview.png"
-}
-```
-
-## Database Compatibility
-
-Models use generic SQLAlchemy types (`JSON`, `Uuid`) — works with both PostgreSQL and SQLite.
-**Use Alembic for schema changes**: `alembic revision --autogenerate -m "description"` then `alembic upgrade head`.
-On first startup, `main.py` runs `alembic upgrade head` automatically (falls back to `create_all` if no migrations exist).
-Seed data: 140 LEGO car sets across Speed Champions (88), Technic (32), Icons/Creator Expert (20).
+`SCALE_SPECS` in `services/studio_templates.py` and `SCALES`/`CAPABILITIES` in
+`services/assembly_v3/specifications.py`. assembly_v3 supports `1:38`, `1:24`, `1:16`, `1:12`
+(experimental — digital/Studio/physical acceptance required; F40 recipes exist per scale).
+The v2/legacy image-guided path supports `1:38` only.
 
 ## Testing
 
 ```bash
-# Install test deps (one-time)
-pip install pytest pytest-asyncio pytest-cov httpx aiosqlite --quiet
-
-# Unit tests (59 tests across 5 modules)
-python -m pytest tests/unit/ -v
-
-# With coverage
-python -m pytest tests/unit/ -v --cov=app --cov-report=term-missing
-
-# Integration tests
+cd D:/lego/backend
+python -m pytest tests/ -v                       # 285 collected (slow tests deselected)
+python -m pytest tests/unit/ -v --cov=app        # fail_under = 60 (pytest.ini)
 python -m pytest tests/integration/ -v
 ```
 
-**Test structure**:
+`pytest.ini`: `testpaths = tests`, `asyncio_mode = auto`, `addopts = -v --tb=short --color=yes -m "not slow"`,
+markers `slow` / `integration` / `unit`. Test tree (31 files):
+
 ```
-backend/tests/
-├── conftest.py                              # Shared fixtures (async DB session, mock factories)
-├── unit/services/
-│   ├── test_matching_engine.py              # L1→L4 cascade (9 tests)
-│   ├── test_pricing_service.py              # Part price estimation (13 tests)
-│   ├── test_color_service.py                # RGB→LEGO color mapping (11 tests)
-│   ├── test_ldraw_service.py                # LDraw format generation (11 tests)
-│   └── test_vehicle_taxonomy.py             # Classification system (15 tests)
-└── integration/
-    └── test_api.py                          # End-to-end API tests
+tests/
+├── conftest.py
+├── unit/agents/     8 files (design_graph, section_graph, vision_graph, tools, …)
+├── unit/services/  17 files (assembly_v3, assembly_geometry, matching_engine, pricing, …)
+├── unit/{models,integrations}/  __init__.py only
+└── integration/     6 files (test_api, test_api_e2e, test_assembly_v3_api, …)
 ```
 
-CI: `.github/workflows/ci.yml` — backend tests (Python 3.11/3.12) + frontend lint/build on push/PR.
+## CI / Docker / Celery
+
+- **CI** (`.github/workflows/ci.yml`): `backend-tests` (Python 3.11/3.12 — ruff `E,F,W` lint,
+  `pytest tests/unit/`, then `test_api_e2e.py test_api.py`, coverage → Codecov) and
+  `frontend-tests` (Node 20 — `next lint`, `tsc --noEmit`, `next build`).
+- **Docker**: `backend/Dockerfile` (python:3.12-slim, uvicorn), `frontend/Dockerfile` (node:20-alpine).
+  `docker-compose.yml` services: `db` (postgres:16), `redis` (redis:7), `backend`, `celery-worker`
+  (`celery -A tasks.celery_app`), `frontend`.
+- **Celery** lives at `backend/tasks/` (package `tasks`, not `app.tasks`): `celery_app.py`,
+  `generation.py`, `customization.py`, plus F40 dev/analysis scripts. With `GENERATION_MODE=sync`
+  (or no `REDIS_URL`) generation runs inline — Celery is not required for dev.
+- **Lint/format**: no `pyproject.toml`, ruff config file, or `.pre-commit-config.yaml` in the repo.
+  Ruff is installed ad-hoc in CI; frontend uses `.eslintrc.json` + `tailwind.config.ts`.
+
+## Security
+
+API keys are masked in errors/logs by `mask_api_key()` in **`app/agents/security.py`**
+(migrated out of the removed `app/integrations/provider.py`).
+
+## Frontend
+
+Next.js `^14.2.15` (App Router). Pages: `app/page.tsx`, `app/designs/[id]/page.tsx`, `app/sets/page.tsx`
+(+ `layout.tsx`). Components: `components/viewer/AssemblyViewer.tsx` (Three.js scene viewer, loaded via
+`next/dynamic` with `ssr:false`), `components/ProductImage.tsx`, `components/SiteHeader.tsx`.
+API base URL in `lib/api.ts`: `process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"`.
 
 ## Key Files Quick Reference
 
 ```
 backend/
-├── alembic/                        # DB migrations (auto-generated, run on startup)
-│   └── versions/001_initial.py     # Initial migration (8 tables)
-├── tests/
-│   ├── conftest.py                 # Shared fixtures (async DB, factories)
-│   ├── unit/services/              # 59 unit tests across 5 files
-│   └── integration/test_api.py     # API integration tests
 ├── app/
-│   ├── main.py                     # App entry, CORS, auto-migrate (alembic + create_all fallback)
-│   ├── config.py                   # Settings: DB, Redis, AI providers, API keys
-│   ├── api/v1/
-│   │   ├── designs.py              # Core API + _import_set_parts, _build_io_from_parts, _run_sync_generation
-│   │   ├── research.py             # Web research + taxonomy suggestions
-│   │   ├── community.py            # Mod repository CRUD
-│   │   ├── mods.py                 # Built-in mod catalog
-│   │   ├── templates.py            # Body style templates
-│   │   ├── cars.py, sets.py, parts.py  # Supporting endpoints
-│   │   └── export.py               # File export (XML/CSV/LDraw/.io)
-│   ├── services/
-│   │   ├── studio_design_generator.py  # AI → Studio .io pipeline (async, PRIMARY)
-│   │   ├── design_generator.py         # DEPRECATED — use StudioDesignGenerator
-│   │   ├── vision_analyzer.py          # Image→features via Doubao (async)
-│   │   ├── vehicle_taxonomy.py         # 52 sub-styles, 80+ features, 47 colors
-│   │   ├── studio_service.py           # .io read/write/merge
-│   │   ├── studio_templates.py         # 5 car chassis LDraw templates
-│   │   ├── studio_automation.py        # Windows UI automation for Studio
-│   │   ├── customization_service.py    # Apply mods to designs
-│   │   ├── community_mods.py           # Mod repository + MOD_SPEC
-│   │   ├── mod_parts_catalog.py        # 24 real-world mods
-│   │   ├── lego_parts_knowledge.py     # 80-part curated catalog
-│   │   ├── car_research.py             # Web search → car specs
-│   │   ├── pricing_service.py          # Reference pricing (estimated)
-│   │   ├── matching_engine.py          # L1→L4 cascade
-│   │   ├── color_service.py            # RGB→LEGO nearest color
-│   │   ├── ldraw_service.py            # LDraw format helpers
-│   │   └── export_service.py           # BrickLink XML/CSV generation
-│   ├── integrations/
-│   │   ├── provider.py                 # BaseLLMProvider, LLMResponse, mask_api_key()
-│   │   ├── providers/
-│   │   │   ├── __init__.py             # Factory: create_text/vision_provider()
-│   │   │   ├── anthropic.py            # AnthropicProvider (Claude SDK)
-│   │   │   ├── openai.py               # OpenAIProvider (DeepSeek + OpenAI)
-│   │   │   └── doubao.py               # DoubaoProvider (Volcano Responses API)
-│   │   ├── llm.py                      # LegoDesignClient (provider-agnostic)
-│   │   ├── nhtsa.py                    # NHTSA car validation
-│   │   └── rebrickable.py              # Rebrickable API (L1 parts import)
-│   └── tasks/
-│       ├── generation.py               # Celery: AI → .io
-│       └── customization.py            # Celery: mod application
-├── pytest.ini                          # Pytest config (asyncio auto, coverage)
-└── requirements.txt                    # Python dependencies
+│   ├── main.py               # App entry, CORS/GZip, alembic upgrade, assembly_v3 recovery loop
+│   ├── config.py             # Settings (DB, storage, gateway model, DESIGN_WORKFLOW, budgets)
+│   ├── api/v1/router.py      # Aggregates 9 routers under /api/v1
+│   ├── api/v1/designs.py     # Core API + generate/dispatch/customize + _import_set_parts/_build_io_from_parts
+│   ├── agents/               # LangGraph graphs (design v2, legacy, section, vision, customization) + models.py + security.py
+│   ├── services/assembly_v3/ # PRIMARY generator package (pipeline, recipes, f40, validation, …)
+│   ├── services/             # matching_engine, studio_*, vision_analyzer, geometry/preview, … (see table)
+│   └── models/               # 8 model files / 10 tables
+├── alembic/versions/         # 001_initial.py, 002_car_specs.py
+├── tasks/                    # Celery app + task modules
+├── tests/                    # 31 files, 285 collected
+└── pytest.ini                # asyncio auto, -m "not slow", coverage fail_under 60
+data/                         # seed_sets.py (140), seed_car_specs.py (50)
+frontend/                     # Next.js 14 App Router + Three.js AssemblyViewer
 ```

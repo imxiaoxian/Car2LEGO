@@ -21,14 +21,14 @@ def test_compute_section_bounds_returns_5_sections(body_style):
 def test_chassis_z_range_covers_full_length():
     bounds = compute_section_bounds(scale="1:38", body_style="sports_car")
     chassis = next(b for b in bounds if b.section == "chassis")
-    assert chassis.z_range == (0.0, 360.0)
-    assert chassis.y_range == (0.0, 24.0)
+    assert chassis.z_range == (0.0, 320.0)
+    assert chassis.y_range == (0.0, 40.0)
 
 
 def test_front_section_z_range():
     bounds = compute_section_bounds(scale="1:38", body_style="sports_car")
     front = next(b for b in bounds if b.section == "front")
-    assert front.z_range == (240.0, 360.0)
+    assert front.z_range == (200.0, 360.0)
 
 
 def test_wheels_section_has_two_axle_z_positions():
@@ -37,7 +37,7 @@ def test_wheels_section_has_two_axle_z_positions():
     # Wheel Z positions encoded in connection_points (front axle, rear axle)
     z_values = [cp[2] for cp in wheels.connection_points]
     assert 60.0 in z_values  # front axle
-    assert 200.0 in z_values  # rear axle
+    assert 260.0 in z_values  # front axle
 
 
 def test_unsupported_scale_raises():

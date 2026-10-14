@@ -29,7 +29,7 @@ def inspect_current_state(
     # Build LDR via existing helper
     generator = StudioDesignGenerator()
     # _build_ldraw expects a dict with "parts" and "design_notes"
-    data = {"parts": merged, "design_notes": ""}
+    data = {"parts": merged, "design_notes": "", "positive_y_is_height": True}
     ldr_text = generator._build_ldraw(data, make, model, year)
 
     # Reverse-parse to validate the LDR is well-formed
@@ -38,7 +38,7 @@ def inspect_current_state(
     # parts_snapshot — right-half only (parser already filters via filter_right_half
     # if called; here we use raw parse which keeps all parts including mirrors).
     # For LLM prompt clarity, return right-half (X >= 0) only.
-    right_half = [p for p in _parsed_to_dicts(reparsed) if p["x"] >= 0]
+    right_half = [{**p, "y": -p["y"]} for p in _parsed_to_dicts(reparsed) if p["x"] >= 0]
 
     # Distribution stats
     y_hist = Counter()
@@ -66,12 +66,20 @@ def inspect_current_state(
     else:
         boundary = {}
 
-    # Connection integrity — placeholder, real check is section-specific
-    integrity = {"with_previous": True, "gaps": []}
+    # Part origins cannot prove clutch/connectivity without connection geometry.
+    integrity = {"with_previous": None, "gaps": [], "method": "not_physically_verified"}
+    section_stats = {
+        "y_histogram": dict(Counter(int(p["y"] // 24) * 24 for p in pending_parts)),
+        "z_histogram": dict(Counter(int(p["z"] // 60) * 60 for p in pending_parts)),
+        "color_dist": dict(Counter(p["color_id"] for p in pending_parts)),
+        "type_dist": dict(Counter(p["part_num"] for p in pending_parts)),
+        "total_parts": len(pending_parts),
+    }
 
     return SectionInspection(
         section=section,
         parts_snapshot=right_half,
+        current_section_parts=list(pending_parts),
         boundary_occupancy=boundary,
         connection_integrity=integrity,
         distribution_stats={
@@ -80,6 +88,7 @@ def inspect_current_state(
             "color_dist": dict(color_dist),
             "type_dist": dict(type_dist),
             "total_parts": len(right_half),
+            "current_section": section_stats,
         },
     )
 

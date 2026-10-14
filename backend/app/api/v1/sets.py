@@ -11,6 +11,12 @@ from app.schemas.car import LegoSetResponse
 router = APIRouter()
 
 
+@router.get("/vehicles")
+async def browse_vehicles():
+    from app.services.vehicle_catalog import vehicle_catalog
+    return {"vehicles": vehicle_catalog(), "workflow_version": "assembly_v3"}
+
+
 @router.get("", response_model=list[LegoSetResponse])
 async def list_sets(
     make: str | None = Query(default=None, description="Filter by car make"),

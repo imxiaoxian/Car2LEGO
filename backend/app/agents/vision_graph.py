@@ -172,7 +172,7 @@ async def analyze_agent_node(state: VisionState) -> dict:
         return {}
 
     llm = create_vision_llm()
-    structured_llm = llm.with_structured_output(CarFeaturesOutput)
+    structured_llm = llm.with_structured_output(CarFeaturesOutput, method="function_calling")
 
     base64_image = state["base64_image"]
     media_type = state["media_type"]

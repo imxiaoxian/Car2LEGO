@@ -25,7 +25,7 @@ from tests.conftest import MockChatModel
 
 
 # Use a separate in-memory DB for integration tests
-INTEGRATION_DB_URL = "sqlite+aiosqlite:///test_integration_e2e.db"
+INTEGRATION_DB_URL = "sqlite+aiosqlite:///:memory:"
 
 
 @pytest.fixture
@@ -73,10 +73,11 @@ def tmp_storage(tmp_path, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def force_sync_generation(monkeypatch):
+def force_sync_generation(monkeypatch, mock_reference_images):
     """Force GENERATION_MODE=sync so no Celery/Redis is needed."""
     monkeypatch.setenv("GENERATION_MODE", "sync")
     monkeypatch.setenv("REDIS_URL", "")
+    monkeypatch.setattr(settings, "design_workflow", "legacy")
 
 
 class TestCreateDesignL4Mocked:
@@ -209,7 +210,10 @@ class TestFromImageMocked:
 
         # Create a minimal JPEG image
         import io as std_io
-        img_bytes = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9"
+        from PIL import Image
+        photo = std_io.BytesIO()
+        Image.new("RGB", (64, 48), "red").save(photo, format="JPEG")
+        img_bytes = photo.getvalue()
 
         with patch("app.agents.vision_graph.create_vision_llm", return_value=vision_llm), \
              patch("app.agents.design_graph_legacy.create_text_llm", return_value=text_llm):

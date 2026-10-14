@@ -14,7 +14,7 @@
 
 <p>
   <strong>AI-Powered LEGO Model Generation Platform</strong><br>
-  LangGraph Agent · Multi-Vendor LLM · 4-Level Matching · Studio .io Output · Community Mods
+  LangGraph Agent · OpenAI Multimodal Models · Image References · Studio .io Output
 </p>
 
 </div>
@@ -23,7 +23,59 @@
 
 ## 📖 Overview
 
-**Car2LEGO** converts any car model into **BrickLink Studio `.io` files** — complete with parts lists, building instructions, and pricing. Just input a car make, model, and year (or upload a photo), and the platform generates LEGO blueprints you can open directly in BrickLink Studio 2.0 for 3D viewing, photorealistic rendering, and parts export.
+**Car2LEGO** is an experimental vehicle-to-LEGO assembly workspace. Enter a car make, model and year, or upload a photo, to generate inspectable **BrickLink Studio `.io` drafts**, parts lists and step documents. Physical buildability and precision appearance require separate acceptance.
+
+### Scale-aware assembly generation
+
+The default `assembly_v3` workflow uses `gpt-6.1-sol` for recognition and visual
+planning, and `gpt-image-2.5-sunburst` for vehicle references. Native parts, connector
+graphs, collision geometry and OR-Tools layout solving produce the assembly scene.
+Every supported scale has its own appearance, mechanism, reference and measurement
+requirements. Requirements are snapshotted for pause/resume and exposed in the UI.
+
+| Scale | Target | Required mechanisms | Default reference sheets |
+| --- | --- | --- | --- |
+| 1:38 | Recognizable compact exterior | Four rolling wheels | 6 |
+| 1:24 | Full body, simplified cockpit and engine bay | Wheels, front hood, engine cover | 14 |
+| 1:16 | Detailed cockpit, engine and door panels | Above plus both doors and steering | 18 |
+| 1:12 | Layered body, detailed engine, interior and underbody | Above plus four independent suspension units | 20 |
+
+These are acceptance targets. Outputs remain experimental drafts until independent
+appearance, digital, Studio and physical checks pass. Opening covers, steering and
+suspension do not yet have accepted recipes. See [scale requirements](docs/scale-requirements.md)
+and [implementation and acceptance status](docs/assembly_v3-status.md).
+
+Set `STUDIO_LDRAW_PATH` to a local Studio `ldraw` directory containing `parts`, `p`
+and `collider` directories. The local default is `Studio 2.0/ldraw` under this repo.
+Generation fails clearly if required geometry is missing.
+
+Configure `backend/.env` for local development or root `.env` for Docker:
+
+```dotenv
+OPENAI_API_KEY=your_gateway_key
+OPENAI_BASE_URL=https://api.lundong.ai
+OPENAI_MODEL=gpt-6.1-sol
+OPENAI_IMAGE_MODEL=gpt-image-2.5-sunburst
+IMAGE_QUALITY=high
+IMAGE_SIZE=1536x1024
+IMAGE_TIMEOUT=300
+DESIGN_WORKFLOW=assembly_v3
+```
+
+The gateway origin is normalized to `/v1`. It must support multimodal chat and
+image generation/editing for these model IDs. Structured text uses local schema
+validation. Image calls have no budget cap; additional detail sheets can be requested
+as needed. Text calls default to a limit of 64. Cached references are reused when
+restarting the same design with unchanged inputs.
+
+With Redis, generation runs in Celery. Without Redis, the default `auto` mode
+returns a pending design and runs generation in a local background task; keep
+the backend running until completion. `GENERATION_MODE=sync` waits for completion.
+The detail page polls progress and displays references as they become available.
+Assembly generation supports `1:38`, `1:24`, `1:16` and `1:12`. `1:8` and `1:10`
+remain closed. Official inventories supply reference stock information and do not
+count as an assembled vehicle. Other vehicles remain experimental; F40 is the first
+specialized recipe under development.
 
 > 🧱 **What makes this special**: Not just another AI wrapper — a 4-level matching cascade from official LEGO sets to AI-generated custom designs, with a Steam Workshop-style community mod system.
 
@@ -46,20 +98,20 @@
 │  └────────────────┘  └──────────────┘  └──────────────────┘     │
 │  ┌────────────────┐  ┌──────────────┐  ┌──────────────────┐     │
 │  │  Vision Analyzer│  │  Car Research │  │  Export Service   │     │
-│  │  (Doubao)       │  │  (Web Search) │  │  (XML/CSV/LDraw)  │     │
+│  │  (OpenAI)       │  │  (Specs)      │  │  (XML/CSV/LDraw)  │     │
 │  └────────────────┘  └──────────────┘  └──────────────────┘     │
 └──────────────────────────────────────────────────────────────────┘
         │              │              │              │
         ▼              ▼              ▼              ▼
 ┌──────────┐  ┌──────────┐  ┌──────────────┐  ┌───────────────┐
 │PostgreSQL│  │  Redis   │  │  Celery Worker│  │  AI Providers │
-│          │  │ (Broker) │  │  (Async Gen)  │  │  (Multi-Vendor)│
+│          │  │ (Broker) │  │  (Async Gen)  │  │  (OpenAI)      │
 └──────────┘  └──────────┘  └──────────────┘  └───────────────┘
                                                      │
                                     ┌────────────────┼────────────────┐
                                     ▼                ▼                ▼
-                                DeepSeek          Doubao          Anthropic
-                                (Text/Design)     (Vision)        (Fallback)
+                                gpt-6.1-sol       gpt-6.1-sol      gpt-image-2.5-sunburst
+                                (Text/Design)     (Vision)        (References)
 ```
 
 ---
@@ -82,26 +134,24 @@ Three specialized agent graphs:
 - **Vision Graph**: `car photo → feature extraction → design parameters`
 - **Customization Graph**: `existing design + mod → customized .io`
 
-### 🤖 Multi-Vendor AI Provider System
-
-Abstract LLM provider layer with runtime switching:
+### 🤖 OpenAI Models
 
 | Provider | Role | Model |
 |----------|------|-------|
-| **DeepSeek** | Text → LEGO design generation (L4) | deepseek-chat / v4-pro |
-| **Doubao** (Volcano Engine) | Vision → Car image analysis | doubao-seed-2-1-pro |
-| **Anthropic** | Legacy fallback | Claude Sonnet 4 |
+| **OpenAI-compatible gateway** | Recognition, planning, design, review, customization | gpt-6.1-sol |
+| **OpenAI-compatible Images API** | Complete vehicle and component references | gpt-image-2.5-sunburst |
 
 > 🔒 **Security-first**: All API keys are masked in logs via `mask_api_key()` — real keys stored only in private `_api_key` attributes.
 
 ### 📐 Scale System
 
-| Scale | AI Generation | Parts Source | Example Sets |
-|-------|:---:|-------------|--------------|
-| **1:38** | ✅ | AI (20-40 parts, 200-350 total) | Speed Champions 76919, 76920 |
-| **1:12** | ❌ | Rebrickable import | Creator Expert 10295, 10337 |
-| **1:10** | ❌ | Rebrickable import | Technic 42154, 42156 |
-| **1:8** | ❌ | Rebrickable import | Ultimate 42115, 42143, 42172 |
+| Scale | Generation | Precision acceptance |
+| --- | --- | --- |
+| **1:38** | Experimental native assembly | Independent checks required |
+| **1:24** | Experimental native assembly | Independent checks required |
+| **1:16** | Experimental native assembly | Independent checks required |
+| **1:12** | Experimental native assembly | Independent checks required |
+| **1:10 / 1:8** | Reserved, creation closed | No accepted recipe |
 
 ### 🏪 Community Mod System
 - **MOD_SPEC v1.0** format with versioning
@@ -109,10 +159,10 @@ Abstract LLM provider layer with runtime switching:
 - 80-part curated LEGO parts knowledge catalog
 - Steam Workshop-style submission/browse functionality
 
-### 🔍 Web Research Pipeline
-- 70+ manufacturer domains mapped (byd.com → porsche.com)
-- Prioritized search queries (official site → Wikipedia → auto sites)
-- Structured car specs extraction for design generation
+### 🔍 Vehicle References
+- Photo recognition preserves the identified year, paint and visible details
+- Scale-specific generated exterior and detail sheets replace manufacturer photo searches
+- Specification lookup remains available independently of image generation
 
 ---
 
@@ -126,7 +176,7 @@ Abstract LLM provider layer with runtime switching:
 | **Async Tasks** | Celery + Redis | AI generation in background workers |
 | **Database** | PostgreSQL 16 + SQLAlchemy | Async with SQLite fallback for dev |
 | **Cache/Broker** | Redis 7 | Celery broker + result backend |
-| **LLM** | DeepSeek + Doubao + Anthropic | Multi-vendor with unified provider interface |
+| **LLM** | gpt-6.1-sol + gpt-image-2.5-sunburst | OpenAI-compatible gateway |
 | **LEGO Format** | LDraw (.ldr) + Studio (.io) | ZIP-based format with parts + metadata |
 | **Testing** | pytest-asyncio | 59 unit tests + integration tests |
 
@@ -154,8 +204,7 @@ Abstract LLM provider layer with runtime switching:
 - Python 3.11+
 - Node.js 18+
 - Docker & Docker Compose
-- DeepSeek API Key
-- Doubao API Key (for vision features)
+- Gateway API key with access to gpt-6.1-sol and gpt-image-2.5-sunburst
 
 ### Installation
 
@@ -167,8 +216,8 @@ cd Car2LEGO
 # 2. Configure
 cp .env.example .env
 # Edit .env with your API keys:
-#   DEEPSEEK_API_KEY=sk-your-key
-#   DOUBAO_API_KEY=ark-your-key
+#   OPENAI_API_KEY=your_gateway_key
+#   OPENAI_BASE_URL=https://api.lundong.ai
 
 # 3. Start all services
 docker compose up -d
@@ -187,11 +236,11 @@ open http://localhost:3000
 
 ```bash
 cd backend
-pip install fastapi uvicorn sqlalchemy aiosqlite anthropic httpx celery redis alembic --quiet
+pip install -r requirements.txt
 
 # Start with SQLite (no PostgreSQL/Redis needed)
-DATABASE_URL="sqlite+aiosqlite:///test.db" REDIS_URL="" GENERATION_MODE=sync \
-  DEEPSEEK_API_KEY="sk-your-key" DOUBAO_API_KEY="ark-your-key" \
+DATABASE_URL="sqlite+aiosqlite:///dev.db" REDIS_URL="" GENERATION_MODE=auto \
+  OPENAI_API_KEY="your_gateway_key" OPENAI_BASE_URL="https://api.lundong.ai" \
   uvicorn app.main:app --port 8000
 
 # API docs → http://localhost:8000/docs

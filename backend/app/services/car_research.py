@@ -165,12 +165,14 @@ class CarResearchService:
             "purpose": "detailed_specs",
         })
 
-        # Priority 4: Image search (for visual analysis)
-        queries.append({
-            "query": f"{car} front side rear view official photo",
-            "priority": 4,
-            "purpose": "reference_images",
-        })
+        for purpose, terms in (
+            ("wheel_geometry", "technical specifications front rear tyre sizes wheel rim track dimensions"),
+            ("door_geometry", "workshop body repair manual door aperture dimensions hinge opening angle"),
+            ("windshield_geometry", "windscreen glass dimensions width slant height rake angle datum technical drawing"),
+            ("interior_geometry", "workshop manual front seat dimensions engine compartment dimensions"),
+        ):
+            queries.append({"query": f"{car} {terms}", "priority": 1 if official_domain else 3,
+                            "purpose": purpose})
 
         return queries
 

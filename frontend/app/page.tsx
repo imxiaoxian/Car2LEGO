@@ -1,249 +1,106 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { createDesign, getKnownCars, LegoSetInfo } from "@/lib/api";
+import { Suspense, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Camera, ChevronRight, ImagePlus, LoaderCircle, X } from "lucide-react";
+import { createDesign, createDesignFromImage, getScales, ScaleCapability } from "@/lib/api";
+import { showcaseCars } from "@/lib/showcase";
+import ProductImage from "@/components/ProductImage";
+import BrandSelector from "@/components/BrandSelector";
+import ScaleRequirements from "@/components/ScaleRequirements";
+import { findVehicleBrand } from "@/lib/vehicle-brands";
 
 export default function HomePage() {
+  return <Suspense fallback={<div className="empty-state"><LoaderCircle className="spin" /></div>}><CreatePage /></Suspense>;
+}
+
+function CreatePage() {
   const router = useRouter();
+  const search = useSearchParams();
   const [make, setMake] = useState("");
+  const [customMake, setCustomMake] = useState(false);
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
+  const [scale, setScale] = useState("1:38");
+  const [scales, setScales] = useState<ScaleCapability[]>([]);
+  const [mode, setMode] = useState<"text" | "photo">("text");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [selected, setSelected] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [knownCars, setKnownCars] = useState<LegoSetInfo[]>([]);
-  const [showKnown, setShowKnown] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const car = showcaseCars[selected];
 
-  const loadKnownCars = useCallback(async () => {
-    if (knownCars.length > 0) {
-      setShowKnown(!showKnown);
-      return;
-    }
+  useEffect(() => {
+    const requestedMake = search.get("make") || "";
+    const knownMake = findVehicleBrand(requestedMake);
+    setMake(knownMake?.name || requestedMake); setCustomMake(Boolean(requestedMake && !knownMake));
+    setModel(search.get("model") || ""); setYear(search.get("year") || "");
+    const requested = search.get("scale");
+    if (requested && ["1:38", "1:24", "1:16", "1:12"].includes(requested)) setScale(requested);
+    const index = showcaseCars.findIndex(item => item.make.toLowerCase() === search.get("make")?.toLowerCase() && item.model.toLowerCase() === search.get("model")?.toLowerCase());
+    if (index >= 0) setSelected(index);
+  }, [search]);
+  useEffect(() => { void getScales().then(data => setScales(data.scales)).catch(() => setScales(["1:38", "1:24", "1:16", "1:12"].map(ratio => ({ ratio, mechanisms: [], status: "experimental", recipe_available: false, precision_supported: false })))); }, []);
+  useEffect(() => {
+    if (!photo) { setPreview(""); return; }
+    const url = URL.createObjectURL(photo);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photo]);
+
+  function chooseCar(index: number) {
+    setSelected(index);
+    const item = showcaseCars[index];
+    setMake(item.make); setCustomMake(!findVehicleBrand(item.make)); setModel(item.model); setYear(String(item.year)); setError("");
+  }
+
+  function selectPhoto(file?: File) {
+    if (!file || loading) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setError("请选择 JPG、PNG 或 WebP 图片。"); return; }
+    if (file.size > 20 * 1024 * 1024) { setError("图片大小不能超过 20 MB。"); return; }
+    setPhoto(file); setError("");
+  }
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (mode === "photo" && !photo) { setError("请选择车辆照片。"); return; }
+    if (mode === "text" && (!make.trim() || !model.trim() || !year)) { setError("请选择品牌，并填写车型和年份。"); return; }
+    if (year && (!Number.isInteger(Number(year)) || Number(year) < 1900 || Number(year) > 2030)) { setError("年份应在 1900 至 2030 之间。"); return; }
+    setLoading(true); setError("");
     try {
-      const cars = await getKnownCars();
-      setKnownCars(cars);
-      setShowKnown(true);
-    } catch {
-      // silently fail
-    }
-  }, [knownCars, showKnown]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!make.trim() || !model.trim() || !year.trim()) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const design = await createDesign(
-        make.trim(),
-        model.trim(),
-        parseInt(year)
-      );
+      const design = mode === "photo" && photo
+        ? await createDesignFromImage(photo, { make: make.trim(), model: model.trim(), year: year ? Number(year) : undefined, scale })
+        : await createDesign(make.trim(), model.trim(), Number(year), undefined, scale);
       router.push(`/designs/${design.id}`);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
-      setLoading(false);
-    }
-  };
+    } catch (err) { setError(err instanceof Error ? err.message : "创建失败，请重试。"); setLoading(false); }
+  }
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      {/* Hero */}
-      <div className="text-center mb-12">
-        <h1 className="text-5xl font-extrabold tracking-tight mb-4">
-          Turn Any Car into{" "}
-          <span className="brick-gradient bg-clip-text text-transparent">
-            LEGO
-          </span>
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Enter any car model from around the world — get LEGO building
-          instructions, parts lists, and a BrickLink shopping list.
-        </p>
-      </div>
-
-      {/* Search Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-lg p-8 mb-8"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Make (Brand)
-            </label>
-            <input
-              type="text"
-              value={make}
-              onChange={(e) => setMake(e.target.value)}
-              placeholder="e.g., Porsche, Toyota, Ferrari"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-brick-red focus:border-transparent outline-none transition"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Model
-            </label>
-            <input
-              type="text"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              placeholder="e.g., 911, Supra, F40"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-brick-red focus:border-transparent outline-none transition"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Year
-            </label>
-            <input
-              type="number"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              placeholder="e.g., 2020"
-              min={1900}
-              max={2030}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-brick-red focus:border-transparent outline-none transition"
-            />
-          </div>
+  return <>
+    <div className="product-nav"><div className="content-width"><span>车辆设计工作室</span><Link href="/sets">探索车型 <ChevronRight size={14} /></Link></div></div>
+    <section className="create-experience">
+      <div className="experience-title"><h1>Car2LEGO</h1><p>你的下一辆，逐块成形。</p></div>
+      <div className="product-stage" key={car.set}><ProductImage src={car.image} alt={`${car.make} ${car.model} LEGO 官方套装展示`} className="showcase-image" priority /></div>
+      <div className="model-picker" aria-label="展示车型"><div className="model-caption"><span>{car.make} {car.model}</span><span>LEGO {car.set} · 展示车型</span></div><div className="swatches">{showcaseCars.map((item, index) => <button key={item.set} onClick={() => chooseCar(index)} title={`${item.make} ${item.model}`} aria-label={`选择 ${item.make} ${item.model}`} aria-pressed={selected === index} className={`swatch ${selected === index ? "selected" : ""}`} style={{ "--swatch": item.color } as React.CSSProperties} />)}</div></div>
+      <form id="create" onSubmit={submit} className="creation-form content-width" aria-label="创建设计">
+        <div className="form-heading"><h2>创建你的车型</h2><div className="segmented" role="group" aria-label="输入方式"><button type="button" aria-pressed={mode === "text"} onClick={() => { setMode("text"); setError(""); }}>车型信息</button><button type="button" aria-pressed={mode === "photo"} onClick={() => { setMode("photo"); setError(""); }}><Camera size={15} />车辆照片</button></div></div>
+        {mode === "photo" && <div className="upload-row" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); selectPhoto(e.dataTransfer.files[0]); }}>
+          <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={e => selectPhoto(e.target.files?.[0])} hidden aria-label="上传车辆照片" />
+          {photo ? <><ProductImage src={preview} alt="已选择的车辆照片" className="upload-preview" /><span className="upload-filename">{photo.name}</span><button type="button" className="icon-button" title="移除照片" aria-label="移除照片" onClick={() => { setPhoto(null); if (inputRef.current) inputRef.current.value = ""; }}><X size={18} /></button></> : <button type="button" className="upload-command" onClick={() => inputRef.current?.click()}><ImagePlus size={22} strokeWidth={1.4} /><span>选择车辆照片</span></button>}
+        </div>}
+        <div className="form-fields">
+          <BrandSelector value={make} custom={customMake} onChange={(value, custom) => { setMake(value); setCustomMake(custom); }} optional={mode === "photo"} disabled={loading} />
+          <label className="field"><span>车型{mode === "photo" ? "（可选）" : ""}</span><input autoComplete="off" value={model} onChange={e => setModel(e.target.value)} placeholder="F40" required={mode === "text"} disabled={loading} /></label>
+          <label className="field"><span>年份{mode === "photo" ? "（可选）" : ""}</span><input type="number" inputMode="numeric" min={1900} max={2030} value={year} onChange={e => setYear(e.target.value)} placeholder="1990" required={mode === "text"} disabled={loading} /></label>
+          <button type="submit" className="button primary create-button" disabled={loading}>{loading ? <><LoaderCircle size={18} className="spin" />{mode === "photo" ? "识别中" : "创建中"}</> : <>创建设计 <ArrowRight size={17} /></>}</button>
         </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm">
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-brick-red hover:bg-red-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <Spinner />
-              Matching your car...
-            </span>
-          ) : (
-            "🔍 Find LEGO Design"
-          )}
-        </button>
+        <div className="form-bottom"><label className="scale-field"><span>模型比例</span><select aria-label="模型比例" value={scale} disabled={loading} onChange={e => setScale(e.target.value)}>{scales.map(item => <option key={item.ratio} value={item.ratio}>{item.ratio} · {item.requirements?.label || "实验装配"}</option>)}</select></label><span>BrickLink Studio .io</span></div>
+        <ScaleRequirements policy={scales.find(item => item.ratio === scale)?.requirements} compact />
+        {error && <p role="alert" className="error-message">{error}</p>}
       </form>
-
-      {/* Quick examples */}
-      <div className="text-center mb-8">
-        <button
-          onClick={loadKnownCars}
-          className="text-sm text-gray-500 hover:text-gray-700 underline underline-offset-4"
-        >
-          {showKnown ? "Hide known models" : "Browse known LEGO car models →"}
-        </button>
-      </div>
-
-      {showKnown && knownCars.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {knownCars
-            .filter((s) => s.car_make && s.car_model)
-            .slice(0, 40)
-            .map((s) => (
-              <button
-                key={s.set_num}
-                onClick={async () => {
-                  setMake(s.car_make || "");
-                  setModel(s.car_model || "");
-                  setYear(s.year?.toString() || "");
-                  try {
-                    setLoading(true);
-                    const design = await createDesign(
-                      s.car_make!,
-                      s.car_model!,
-                      s.year || 2020
-                    );
-                    router.push(`/designs/${design.id}`);
-                  } catch {
-                    setLoading(false);
-                  }
-                }}
-                className="bg-white border border-gray-200 rounded-xl p-3 text-left hover:border-brick-red hover:shadow-md transition text-sm"
-              >
-                <div className="font-semibold text-gray-900 truncate">
-                  {s.car_make} {s.car_model}
-                </div>
-                <div className="text-gray-500 text-xs mt-1">{s.name}</div>
-                <div className="text-gray-400 text-xs">
-                  {s.brick_count} pieces • Set {s.set_num}
-                </div>
-              </button>
-            ))}
-        </div>
-      )}
-
-      {/* How it works */}
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StepCard
-          emoji="🚗"
-          title="1. Enter Your Car"
-          description="Type in any car make, model, and year from around the world."
-        />
-        <StepCard
-          emoji="🧱"
-          title="2. Get LEGO Design"
-          description="We match against official LEGO sets, community MOCs, or generate a custom design."
-        />
-        <StepCard
-          emoji="🛒"
-          title="3. Buy & Build"
-          description="Download the parts list, buy on BrickLink, and start building!"
-        />
-      </div>
-    </div>
-  );
-}
-
-function StepCard({
-  emoji,
-  title,
-  description,
-}: {
-  emoji: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="text-center p-6">
-      <div className="text-4xl mb-3">{emoji}</div>
-      <h3 className="font-bold text-lg mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{description}</p>
-    </div>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="animate-spin h-5 w-5"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-  );
+    </section>
+    <section className="collection-band" id="collection"><div className="content-width"><div className="section-heading"><h2>经典车型，各有魅力。</h2><Link href="/sets" className="text-link">查看车型目录 <ChevronRight size={16} /></Link></div><div className="collection-grid">{showcaseCars.map((item, index) => <button key={item.set} className="collection-item" onClick={() => { chooseCar(index); document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "center" }); }}><ProductImage src={item.image} alt={`LEGO ${item.make} ${item.model}`} className="collection-image" /><div><h3>{item.make} {item.model}</h3><p>{item.subtitle}</p><span className="text-link">选择车型 <ChevronRight size={14} /></span></div></button>)}</div></div></section>
+  </>;
 }

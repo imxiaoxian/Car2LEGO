@@ -1,13 +1,15 @@
 """Celery task for LLM-based design customization."""
 
 import asyncio
+import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import async_session
-from app.models.design import Design, DesignPart
+from app.models.design import Design
+from app.services.design_parts import replace_design_parts
 from app.services.customization_service import CustomizationService
 from tasks.celery_app import celery_app
 
@@ -20,7 +22,7 @@ def customize_design(
     car_info: str,
     customization_request: str,
 ):
-    """Customize an existing LEGO car design using Claude LLM.
+    """Customize an existing LEGO car design using the shared OpenAI model.
 
     Args:
         new_design_id: UUID for the new customized design record
@@ -85,7 +87,7 @@ async def _load_base_design(design_id: str) -> dict | None:
     async with async_session() as db:
         stmt = (
             select(Design)
-            .where(Design.id == design_id)
+            .where(Design.id == uuid.UUID(design_id))
             .options(selectinload(Design.parts))
         )
         result = await db.execute(stmt)
@@ -133,7 +135,7 @@ async def _update_customized_design(design_id: str, result: dict):
         try:
             stmt = (
                 select(Design)
-                .where(Design.id == design_id)
+                .where(Design.id == uuid.UUID(design_id))
                 .options(selectinload(Design.parts))
             )
             res = await db.execute(stmt)
@@ -149,17 +151,8 @@ async def _update_customized_design(design_id: str, result: dict):
                 design.difficulty = result.get("difficulty", "Medium")
                 design.file_ldr_path = result.get("file_ldr_path")
                 design.file_io_path = result.get("file_io_path")
-                design.metadata_ = result.get("metadata", {})
-
-                for part_data in result.get("parts_data", []):
-                    design_part = DesignPart(
-                        design_id=design.id,
-                        part_num=part_data["part_num"],
-                        ldraw_color_id=part_data["ldraw_color_id"],
-                        quantity=part_data["quantity"],
-                        bricklink_id=part_data.get("bricklink_id"),
-                    )
-                    db.add(design_part)
+                design.metadata_ = {**(design.metadata_ or {}), **result.get("metadata", {})}
+                await replace_design_parts(db, design.id, result.get("parts_data", []))
             else:
                 design.status = "failed"
                 design.error_message = result.get("error_message")

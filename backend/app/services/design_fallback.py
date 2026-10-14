@@ -25,6 +25,10 @@ async def fallback_single_shot(state: dict) -> dict:
         "retry_count": 0,
         "status": "",
         "error_message": "",
+        "reference_images": state.get("reference_images", []),
+        "reference_brief": state.get("reference_brief", {}),
+        "vehicle_features": state.get("vehicle_features", {}),
+        "storage_path": state.get("storage_path", ""),
     }
 
     graph = build_legacy_graph()

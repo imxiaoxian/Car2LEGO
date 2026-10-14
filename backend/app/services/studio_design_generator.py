@@ -120,6 +120,8 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         custom_request: str = "",
         flagship_metadata: dict | None = None,
         scale: str | None = None,
+        vehicle_features: dict | None = None,
+        source_image_path: str = "",
     ) -> dict:
         """Generate a Studio .io file for a car model via the LangGraph design graph.
 
@@ -140,6 +142,11 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         # section_inspector.py also imports StudioDesignGenerator. Top-level
         # imports in this module would create a cycle that Python cannot
         # resolve. This is the established pattern for this entry point.
+        if settings.design_workflow == "assembly_v3":
+            from app.services.assembly_v3.pipeline import AssemblyPipeline
+            return await AssemblyPipeline(self.storage).generate(design_id, make, model, year, scale or "1:38",
+                mod_ids=mod_ids, custom_request=custom_request, vehicle_features=vehicle_features,
+                source_image_path=source_image_path)
         if settings.design_workflow == "legacy":
             from app.agents.design_graph_legacy import build_design_graph as build_design_graph_legacy
 
@@ -159,6 +166,11 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
             "mod_ids": mod_ids or [],
             "custom_request": custom_request,
             "flagship_metadata": flagship_metadata,
+            "vehicle_features": vehicle_features or {},
+            "source_image_path": source_image_path,
+            "storage_path": str(self.storage),
+            "reference_images": [],
+            "reference_brief": {},
             "messages": [],
             "design_output": None,
             "retry_count": 0,
@@ -174,8 +186,23 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
             "section_retry_count": 0,
             "progress": "",
             "fallback_used": False,
+            "completed_sections": [],
+            "section_failure": "",
         }
-        result = await graph.ainvoke(initial_state)
+        from app.agents.security import mask_api_key
+        from app.services.reference_images import ReferenceImageService, write_progress
+
+        try:
+            if scale != "1:38":
+                raise ValueError("Image-guided AI generation currently supports 1:38 only")
+            write_progress(initial_state, "starting", 0)
+            if settings.design_workflow == "legacy":
+                initial_state.update(await ReferenceImageService().generate(initial_state))
+            result = await graph.ainvoke(initial_state, config={"recursion_limit": 256})
+        except Exception as exc:
+            result = {"status": "failed", "error_message": mask_api_key(str(exc))[:1000]}
+        write_progress(initial_state, result.get("status", "failed"),
+                       100 if result.get("status") == "completed" else 0)
 
         # Map graph state → return-dict shape expected by callers.
         status = result.get("status", "completed")
@@ -197,12 +224,12 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
 
         Groups parts by build step with `0 STEP` separators.
         Auto-mirrors every part with X > 0.1 to -X with flipped rotation
-        (negate columns 0, 3, 6 of the rotation matrix). The LLM only
+        (negate row entries 0, 1, 2 of the rotation matrix). The LLM only
         outputs the right half; this function creates the left side.
         """
         lines = [
             f"0 {year} {make} {model}",
-            "0 Author: Car2LEGO AI (Claude + Studio 2.26.6)",
+            "0 Author: Car2LEGO AI (OpenAI + Studio 2.26.6)",
             f"0 Name: {make}_{model}_{year}",
             "0 !LICENSE Redistributable under CC BY 4.0",
             "0",
@@ -216,15 +243,15 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         for p in parts:
             x = float(p.get("x", 0))
             expanded.append(p)
-            if abs(x) > 0.1:
+            if p.get("mirror", True) and abs(x) > 0.1:
                 mirrored = dict(p)
                 mirrored["x"] = -x
-                # Flip rotation matrix X-column (indices 0, 3, 6)
+                # Reflect in the world X plane: H * R negates the first row.
                 rot = p.get("rotation", "1 0 0 0 1 0 0 0 1").strip().split()
                 if len(rot) == 9:
                     rot[0] = f"{-float(rot[0]):.6g}"
-                    rot[3] = f"{-float(rot[3]):.6g}"
-                    rot[6] = f"{-float(rot[6]):.6g}"
+                    rot[1] = f"{-float(rot[1]):.6g}"
+                    rot[2] = f"{-float(rot[2]):.6g}"
                     mirrored["rotation"] = " ".join(rot)
                 expanded.append(mirrored)
 
@@ -244,11 +271,12 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
 
                 for q in range(p.get("quantity", 1)):
                     x = float(p["x"])
-                    if p.get("quantity", 1) > 1 and q == 1 and abs(x) > 1:
-                        x = -x
+                    y = float(p["y"])
+                    if data.get("positive_y_is_height"):
+                        y = -y  # LDraw has positive Y down; planning uses height up.
                     lines.append(
                         f"1 {p['color_id']} "
-                        f"{x:.1f} {float(p['y']):.1f} {float(p['z']):.1f} "
+                        f"{x:.1f} {y:.1f} {float(p['z']):.1f} "
                         f"{rot_parts[0]} {rot_parts[1]} {rot_parts[2]} "
                         f"{rot_parts[3]} {rot_parts[4]} {rot_parts[5]} "
                         f"{rot_parts[6]} {rot_parts[7]} {rot_parts[8]} "
@@ -269,7 +297,7 @@ positions (rear wing height, exhaust location, etc.) for accurate replication.
         for p in data.get("parts", []):
             key = (p["part_num"], p["color_id"])
             qty = p.get("quantity", 1)
-            if abs(float(p.get("x", 0))) > 0.1:
+            if p.get("mirror", True) and abs(float(p.get("x", 0))) > 0.1:
                 qty *= 2  # auto-mirrored copy doubles the count
             key_counter[key] += qty
             part_map[key] = p.get("bricklink_id", p["part_num"].replace(".dat", ""))

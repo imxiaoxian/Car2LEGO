@@ -192,7 +192,7 @@ async def finalize_customization_node(state: CustomizationState) -> dict:
     pass the ReAct tool-call messages (they confuse the structured output parser).
     """
     llm = create_text_llm()
-    structured_llm = llm.with_structured_output(CustomizedDesign)
+    structured_llm = llm.with_structured_output(CustomizedDesign, method="function_calling")
 
     messages = [
         SystemMessage(content=SYSTEM_PROMPT),

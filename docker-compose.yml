@@ -44,6 +44,14 @@ services:
       STORAGE_PATH: /app/storage
       REBRICKABLE_API_KEY: ${REBRICKABLE_API_KEY:-}
       BRICKLINK_API_KEY: ${BRICKLINK_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.lundong.ai}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6.1-sol}
+      OPENAI_IMAGE_MODEL: ${OPENAI_IMAGE_MODEL:-gpt-image-2.5-sunburst}
+      IMAGE_QUALITY: ${IMAGE_QUALITY:-high}
+      IMAGE_SIZE: ${IMAGE_SIZE:-1536x1024}
+      IMAGE_TIMEOUT: ${IMAGE_TIMEOUT:-300}
+      DESIGN_WORKFLOW: ${DESIGN_WORKFLOW:-assembly_v3}
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +71,14 @@ services:
       DATABASE_URL: postgresql+asyncpg://car2lego:car2lego@db:5432/car2lego
       REDIS_URL: redis://redis:6379/0
       STORAGE_PATH: /app/storage
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.lundong.ai}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6.1-sol}
+      OPENAI_IMAGE_MODEL: ${OPENAI_IMAGE_MODEL:-gpt-image-2.5-sunburst}
+      IMAGE_QUALITY: ${IMAGE_QUALITY:-high}
+      IMAGE_SIZE: ${IMAGE_SIZE:-1536x1024}
+      IMAGE_TIMEOUT: ${IMAGE_TIMEOUT:-300}
+      DESIGN_WORKFLOW: ${DESIGN_WORKFLOW:-assembly_v3}
     depends_on:
       db:
         condition: service_healthy

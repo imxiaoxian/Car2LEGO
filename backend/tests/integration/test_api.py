@@ -21,6 +21,19 @@ from tests.conftest import create_test_set, create_test_car
 INTEGRATION_DB_URL = "sqlite+aiosqlite:///test_integration.db"
 
 
+@pytest.fixture(autouse=True)
+def offline_generation(monkeypatch, tmp_path, mock_reference_images, mock_image_guided_llm):
+    from app.config import settings
+    from app.integrations.nhtsa import nhtsa_client
+    async def vehicle_details(make, model, year):
+        return dict(make=make, model=model, year=year, body_style="sports_car")
+    monkeypatch.setattr(nhtsa_client, "get_vehicle_details", vehicle_details)
+    monkeypatch.setenv("GENERATION_MODE", "sync")
+    monkeypatch.setenv("REDIS_URL", "")
+    monkeypatch.setattr(settings, "storage_path", str(tmp_path))
+    monkeypatch.setattr(settings, "design_workflow", "v2")
+
+
 @pytest.fixture(scope="module")
 async def integration_client():
     """Create an async test client wired to the FastAPI app.

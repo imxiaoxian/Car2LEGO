@@ -27,10 +27,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Studio 2.0 LDraw library paths
-STUDIO_LDRAW_PARTS = Path(r"D:\lego\Studio 2.0\ldraw\parts")
-STUDIO_LDRAW_SUBPARTS = Path(r"D:\lego\Studio 2.0\ldraw\parts\s")
-STUDIO_LDRAW_PRIMITIVES = Path(r"D:\lego\Studio 2.0\ldraw\p")
-STUDIO_LDRAW_UNOFFICIAL = Path(r"D:\lego\Studio 2.0\ldraw\UnOfficial\parts")
+from app.config import settings
+
+STUDIO_LDRAW_PARTS = Path(settings.studio_ldraw_path) / "parts"
+STUDIO_LDRAW_SUBPARTS = STUDIO_LDRAW_PARTS / "s"
+STUDIO_LDRAW_PRIMITIVES = STUDIO_LDRAW_PARTS.parent / "p"
+STUDIO_LDRAW_UNOFFICIAL = STUDIO_LDRAW_PARTS.parent / "UnOfficial" / "parts"
 
 # Standard LDraw color codes (subset — see full list at ldraw.org)
 LDRAW_VALID_COLORS = {
@@ -81,6 +83,8 @@ LDRAW_VALID_COLORS = {
 
 # Car geometry validation — part sets for Speed Champions 1:38 cars
 WHEEL_PART_NUMBERS = {
+    "4624.dat", "4624c00.dat", "56904.dat", "6014.dat", "6014c01.dat",
+    "3641.dat", "6015.dat",
     "30382.dat", "30383.dat",  # Speed Champions wheel assemblies
     "56145.dat", "56146.dat",  # tires
     "41896.dat",  # hub
@@ -94,7 +98,7 @@ SLOPE_PART_NUMBERS = {
     "60481.dat", "11477.dat", "6153.dat", "6167.dat",
 }
 
-TRANSPARENT_COLORS = {47, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82}
+TRANSPARENT_COLORS = set(range(32, 48)) | {52, 54, 57, 231, 234, 276, 285}
 
 
 @dataclass
@@ -353,7 +357,7 @@ def _validate_car_geometry(parts: list[dict], report: ValidationReport, filename
 
     windshield_parts = [
         p for p in parts
-        if p["color"] in TRANSPARENT_COLORS and p["y"] >= 64
+        if p["color"] in TRANSPARENT_COLORS and abs(p["y"]) >= 64
     ]
     if len(windshield_parts) == 0:
         report.add(

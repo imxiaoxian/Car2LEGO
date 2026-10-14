@@ -22,7 +22,6 @@ Nodes:
 """
 
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -30,9 +29,9 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
 
 from app.agents.models import create_text_llm
+from app.services.reference_images import reference_content, design_directory
 from app.agents.security import mask_api_key
 from app.agents.state import DesignState
-from app.config import settings
 from app.database import async_session
 from app.services.brand_features import get_brand_features, get_brand_profile
 from app.services.car_specs_service import CarSpecsService
@@ -369,11 +368,11 @@ Match these features in your extra_parts and recolor_rules."""
 async def customize_design_node(state: DesignState) -> dict:
     """LLM outputs DesignCustomization — colors + extra parts only."""
     llm = create_text_llm()
-    structured_llm = llm.with_structured_output(DesignCustomization)
+    structured_llm = llm.with_structured_output(DesignCustomization, method="function_calling")
 
     messages = [
         SystemMessage(content=SYSTEM_PROMPT),
-        HumanMessage(content=state["prompt"]),
+        HumanMessage(content=reference_content(state, state["prompt"])),
         HumanMessage(
             content=(
                 "Output your customization. Remember:\n"
@@ -439,7 +438,7 @@ async def create_io_node(state: DesignState) -> dict:
     year = state["year"]
     design_id = state["design_id"]
 
-    storage = Path(settings.storage_path)
+    storage = design_directory(state).parent
     design_dir = storage / str(design_id)
     design_dir.mkdir(parents=True, exist_ok=True)
 
@@ -479,7 +478,7 @@ async def build_parts_data_node(state: DesignState) -> dict:
     generator = StudioDesignGenerator()
     data = state["design_output"]
     parts_data = generator._build_parts_data(data)
-    total_parts = data.get("total_parts", len(data.get("parts", [])))
+    total_parts = sum(p["quantity"] for p in parts_data)
 
     return {
         "parts_data": parts_data,
@@ -491,6 +490,8 @@ async def build_parts_data_node(state: DesignState) -> dict:
             "studio_version": "2.26.6",
             "template": classify_car_to_template(state["make"]),
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            "reference_images": state.get("reference_images", []),
+            "reference_brief": state.get("reference_brief", {}),
         },
         "status": "completed",
     }

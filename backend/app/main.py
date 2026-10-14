@@ -1,10 +1,12 @@
 """FastAPI application entry point."""
 
 import os
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.config import settings
 from app.api.v1.router import api_router
@@ -45,7 +47,29 @@ async def _run_alembic_upgrade() -> None:
 async def lifespan(app: FastAPI):
     # Startup — run migrations
     await _run_alembic_upgrade()
-    yield
+    async def recovery_loop():
+        from app.services.assembly_v3.jobs import JobStore
+        from app.api.v1.designs import _run_background_generation
+        import uuid
+        workers = {}
+        try:
+            while True:
+                if settings.design_workflow == "assembly_v3":
+                    for id in JobStore().recoverable():
+                        if id not in workers or workers[id].done():
+                            workers[id] = asyncio.create_task(_run_background_generation(uuid.UUID(id)))
+                    workers = {id: task for id, task in workers.items() if not task.done()}
+                await asyncio.sleep(10)
+        finally:
+            for task in workers.values():
+                task.cancel()
+            await asyncio.gather(*workers.values(), return_exceptions=True)
+    recovery = asyncio.create_task(recovery_loop())
+    try:
+        yield
+    finally:
+        recovery.cancel()
+        await asyncio.gather(recovery, return_exceptions=True)
     # Shutdown
     await engine.dispose()
 
@@ -56,6 +80,7 @@ app = FastAPI(
     docs_url="/docs",
     lifespan=lifespan,
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS
 app.add_middleware(
