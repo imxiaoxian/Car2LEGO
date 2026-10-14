@@ -1,0 +1,698 @@
+{
+  "model": "model.ldr",
+  "rows": [
+    {
+      "part": "3020.dat",
+      "description": "Plate  2 x  4",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 27
+    },
+    {
+      "part": "3020.dat",
+      "description": "Plate  2 x  4",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 11
+    },
+    {
+      "part": "3020.dat",
+      "description": "Plate  2 x  4",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 46
+    },
+    {
+      "part": "3020.dat",
+      "description": "Plate  2 x  4",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 7
+    },
+    {
+      "part": "3020.dat",
+      "description": "Plate  2 x  4",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 28
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 24
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 13
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 25,
+      "color_name": "Orange",
+      "color_rgb": "#FE8A18",
+      "color_known": true,
+      "quantity": 1
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 21
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 7
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 15
+    },
+    {
+      "part": "3021.dat",
+      "description": "Plate  2 x  3",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 1
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 21
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 18
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 25
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 11
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 21
+    },
+    {
+      "part": "3022.dat",
+      "description": "Plate  2 x  2",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 2
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 111
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 2,
+      "color_name": "Green",
+      "color_rgb": "#257A3E",
+      "color_known": true,
+      "quantity": 3
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 61
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 25,
+      "color_name": "Orange",
+      "color_rgb": "#FE8A18",
+      "color_known": true,
+      "quantity": 3
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 205
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 60
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 164
+    },
+    {
+      "part": "3023.dat",
+      "description": "Plate  1 x  2",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 17
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 170
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 2,
+      "color_name": "Green",
+      "color_rgb": "#257A3E",
+      "color_known": true,
+      "quantity": 12
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 77
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 19,
+      "color_name": "Tan",
+      "color_rgb": "#E4CD9E",
+      "color_known": true,
+      "quantity": 11
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 25,
+      "color_name": "Orange",
+      "color_rgb": "#FE8A18",
+      "color_known": true,
+      "quantity": 6
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 258
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 105
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 226
+    },
+    {
+      "part": "3024.dat",
+      "description": "Plate  1 x  1",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 73
+    },
+    {
+      "part": "3034.dat",
+      "description": "Plate  2 x  8",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 3
+    },
+    {
+      "part": "3034.dat",
+      "description": "Plate  2 x  8",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 18
+    },
+    {
+      "part": "3034.dat",
+      "description": "Plate  2 x  8",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 6
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 35
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 2
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 49
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 2
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 12
+    },
+    {
+      "part": "3460.dat",
+      "description": "Plate  1 x  8",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 1
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 55
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 25
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 19,
+      "color_name": "Tan",
+      "color_rgb": "#E4CD9E",
+      "color_known": true,
+      "quantity": 1
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 25,
+      "color_name": "Orange",
+      "color_rgb": "#FE8A18",
+      "color_known": true,
+      "quantity": 4
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 80
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 29
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 69
+    },
+    {
+      "part": "3623.dat",
+      "description": "Plate  1 x  3",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 8
+    },
+    {
+      "part": "3666.dat",
+      "description": "Plate  1 x  6",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 32
+    },
+    {
+      "part": "3666.dat",
+      "description": "Plate  1 x  6",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 7
+    },
+    {
+      "part": "3666.dat",
+      "description": "Plate  1 x  6",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 37
+    },
+    {
+      "part": "3666.dat",
+      "description": "Plate  1 x  6",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 12
+    },
+    {
+      "part": "3666.dat",
+      "description": "Plate  1 x  6",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 25
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 59
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 26
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 25,
+      "color_name": "Orange",
+      "color_rgb": "#FE8A18",
+      "color_known": true,
+      "quantity": 2
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 102
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 24
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 52
+    },
+    {
+      "part": "3710.dat",
+      "description": "Plate  1 x  4",
+      "in_library": true,
+      "color_code": 272,
+      "color_name": "Dark_Blue",
+      "color_rgb": "#0D325B",
+      "color_known": true,
+      "quantity": 1
+    },
+    {
+      "part": "3795.dat",
+      "description": "Plate  2 x  6",
+      "in_library": true,
+      "color_code": 0,
+      "color_name": "Black",
+      "color_rgb": "#05131D",
+      "color_known": true,
+      "quantity": 10
+    },
+    {
+      "part": "3795.dat",
+      "description": "Plate  2 x  6",
+      "in_library": true,
+      "color_code": 4,
+      "color_name": "Red",
+      "color_rgb": "#C91A09",
+      "color_known": true,
+      "quantity": 6
+    },
+    {
+      "part": "3795.dat",
+      "description": "Plate  2 x  6",
+      "in_library": true,
+      "color_code": 70,
+      "color_name": "Reddish_Brown",
+      "color_rgb": "#582A12",
+      "color_known": true,
+      "quantity": 18
+    },
+    {
+      "part": "3795.dat",
+      "description": "Plate  2 x  6",
+      "in_library": true,
+      "color_code": 71,
+      "color_name": "Light_Bluish_Gray",
+      "color_rgb": "#A0A5A9",
+      "color_known": true,
+      "quantity": 2
+    },
+    {
+      "part": "3795.dat",
+      "description": "Plate  2 x  6",
+      "in_library": true,
+      "color_code": 72,
+      "color_name": "Dark_Bluish_Gray",
+      "color_rgb": "#6C6E68",
+      "color_known": true,
+      "quantity": 8
+    }
+  ],
+  "total_parts": 2683,
+  "unknown_color_codes": [],
+  "parts_not_in_library": []
+}

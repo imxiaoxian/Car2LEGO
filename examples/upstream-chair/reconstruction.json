@@ -1,0 +1,61 @@
+{
+  "stage": "reconstruction",
+  "status": "completed",
+  "started_at": "2026-10-14T07:28:54.263476+00:00",
+  "inputs": {
+    "image": "chair.png",
+    "sha256": "2503c12a74419d91a4c6c9f1affc48fee6e2b8b9091956ca6211e91ada57b5bf",
+    "resolution": 64,
+    "chunk_size": 4096,
+    "device": "cpu",
+    "remove_background": true,
+    "foreground_ratio": 0.85
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "vertices": 2407,
+  "faces": 4814,
+  "watertight": true,
+  "bounds": [
+    [
+      -0.31648528575897217,
+      -0.2883561849594116,
+      -0.5099248290061951
+    ],
+    [
+      0.2894710302352905,
+      0.2892942428588867,
+      0.5836026668548584
+    ]
+  ],
+  "backend": "TripoSR + scikit-image marching cubes",
+  "outputs": {
+    "input.png": "5dfab95874b25684ee3b44b2cd9881fe02025f49f6f7f5ae2526f60e70e33110",
+    "mesh.glb": "b17b26e1031bbfc8027c3b5d0b107261e2871bf991583cd576600747d4949e0e",
+    "mesh.obj": "634556cd874fb9bc21a4e6c7243637835aa25d24b2f48a7d9a461b8cf7142a18"
+  },
+  "seconds": 19.252
+}

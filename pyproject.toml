@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "car2lego-3d"
+version = "0.1.0"
+description = "Local text-to-image, image-to-3D, and mesh-to-LEGO research pipeline"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "torch==2.5.1", "torchvision==0.20.1",
+  "numpy==1.26.4", "scipy==1.14.1", "scikit-image==0.24.0",
+  "trimesh==4.5.3", "rtree==1.3.0", "Pillow==10.4.0",
+  "huggingface-hub==0.25.2", "transformers==4.42.4", "diffusers==0.30.3",
+  "accelerate==0.34.2", "safetensors==0.4.5", "omegaconf==2.3.0",
+  "einops==0.8.0", "jaxtyping==0.2.36", "rembg==2.0.59",
+  "onnxruntime==1.19.2", "imageio==2.36.0", "imageio-ffmpeg==0.5.1",
+  "matplotlib==3.9.2"
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.3"]
+
+[project.scripts]
+car2lego3d = "car2lego3d.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

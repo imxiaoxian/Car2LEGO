@@ -1,0 +1,5 @@
+* text=auto eol=lf
+# Experiment hashes refer to exact exported bytes, including their original newlines.
+examples/** -text
+*.png binary
+*.glb binary

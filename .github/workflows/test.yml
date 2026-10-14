@@ -1,0 +1,18 @@
+name: Geometry and export tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv .venv
+      - run: uv pip install --python .venv/bin/python torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cpu
+      - run: uv pip install --python .venv/bin/python -r requirements.lock.txt
+      - run: uv pip install --python .venv/bin/python -e . --no-deps
+      - run: .venv/bin/python -m car2lego3d setup
+      - run: .venv/bin/python -m pytest -q
+      - run: .venv/bin/python scripts/verify_examples.py

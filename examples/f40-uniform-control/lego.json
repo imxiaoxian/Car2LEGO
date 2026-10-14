@@ -1,0 +1,131 @@
+{
+  "stage": "lego",
+  "status": "completed",
+  "started_at": "2026-10-14T07:36:51.849566+00:00",
+  "inputs": {
+    "mesh": "mesh.glb",
+    "sha256": "b663000cd349dbd6223b622db376fbde4e65896c20d2dc90fc9a38a0a15ecbf8",
+    "length_studs": 32,
+    "up_axis": "z",
+    "yaw": 0,
+    "color": 4
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "part_count": 813,
+  "occupied_voxels": 8345,
+  "overlapping_voxels": 0,
+  "missing_voxels": 0,
+  "extra_voxels": 0,
+  "coverage_exact": true,
+  "stud_connected_components": 1,
+  "component_sizes": [
+    813
+  ],
+  "stud_connections": 3066,
+  "unsupported_above_ground": [
+    6,
+    7,
+    11,
+    12,
+    13,
+    14,
+    15,
+    22,
+    23,
+    25,
+    29,
+    32,
+    35,
+    37,
+    42,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    55,
+    56,
+    57,
+    59,
+    60,
+    61,
+    62,
+    65,
+    68,
+    69,
+    70,
+    73,
+    74,
+    75,
+    76,
+    77,
+    94,
+    96,
+    100,
+    110,
+    113,
+    115,
+    116,
+    119,
+    120,
+    121,
+    124,
+    173,
+    175,
+    177,
+    213,
+    220,
+    269,
+    270,
+    272,
+    364
+  ],
+  "buildability": "unverified",
+  "studio_verified": false,
+  "physical_verified": false,
+  "limitations": [
+    "Stud graph assumes full rectangular plate footprints and vertical clutch connections.",
+    "No clutch force, center-of-mass, insertion, native collider, wheel or mechanism verification.",
+    "GLB previews approximate parts with cuboids; use LDraw in Studio for real part geometry."
+  ],
+  "dimensions_mm": [
+    256,
+    144,
+    80.0
+  ],
+  "outputs": {
+    "model.ldr": "420051817331b8cc13c8117319f4fa2537740d168d0ffe969227a7bd8ab84123",
+    "lego.glb": "99bb7b8d2690ba4dce28b60df85835278682bec89934dff43db59dc03d2a3de9",
+    "inventory.csv": "894a4fb68e70553dafd30022fccc807f5518dd9a04084ceb2cd0e450168ba387"
+  },
+  "seconds": 2.154
+}

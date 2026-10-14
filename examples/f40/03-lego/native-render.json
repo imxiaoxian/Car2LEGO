@@ -1,0 +1,14 @@
+{
+  "renderer": "ldraw-mcp / Blender 4.5.14",
+  "model": "model.ldr",
+  "model_sha256": "895f42123388ca3792fc43b2464a41a0d06e461030034a069757568bc48e0702",
+  "resolution_per_view": 640,
+  "samples": 24,
+  "azimuths": [
+    45,
+    135
+  ],
+  "missing_parts": [],
+  "studio_verified": false,
+  "physical_verified": false
+}

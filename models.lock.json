@@ -1,0 +1,18 @@
+{
+  "triposr_code": {
+    "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+    "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+  },
+  "triposr_weights": {
+    "repo": "stabilityai/TripoSR",
+    "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+  },
+  "sd_turbo": {
+    "repo": "stabilityai/sd-turbo",
+    "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+  },
+  "dino_config": {
+    "repo": "facebook/dino-vitb16",
+    "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+  }
+}

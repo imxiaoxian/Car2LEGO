@@ -1,0 +1,46 @@
+{
+  "stage": "image",
+  "status": "completed",
+  "started_at": "2026-10-14T07:40:22.748321+00:00",
+  "inputs": {
+    "prompt": "a red Ferrari F40 sports car, realistic proportions, black tires, transparent windows",
+    "composed_prompt": "Product photo of a red Ferrari F40 sports car, realistic proportions, black tires, transparent windows. One complete car, three quarter view, all four wheels attached, centered, isolated on a plain white background, soft even studio lighting, entire vehicle visible with margin, no text, no collage.",
+    "seed": 42,
+    "steps": 4,
+    "device": "cuda:0"
+  },
+  "models": {
+    "triposr_code": {
+      "url": "https://github.com/VAST-AI-Research/TripoSR.git",
+      "commit": "107cefdc244c39106fa830359024f6a2f1c78871"
+    },
+    "triposr_weights": {
+      "repo": "stabilityai/TripoSR",
+      "revision": "5b521936b01fbe1890f6f9baed0254ab6351c04a"
+    },
+    "sd_turbo": {
+      "repo": "stabilityai/sd-turbo",
+      "revision": "b261bac6fd2cf515557d5d0707481eafa0485ec2"
+    },
+    "dino_config": {
+      "repo": "facebook/dino-vitb16",
+      "revision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2"
+    }
+  },
+  "versions": {
+    "torch": "2.5.1+cu124",
+    "trimesh": "4.5.3",
+    "scikit-image": "0.24.0",
+    "diffusers": "0.30.3",
+    "transformers": "4.42.4"
+  },
+  "output": "reference.png",
+  "sha256": "0d35b802a6c17007a60f4ea716e538a1abdd53d8b072ee8d5423462152927ac8",
+  "size": [
+    512,
+    512
+  ],
+  "license": "SD-Turbo model license applies; see THIRD_PARTY_NOTICES.md",
+  "peak_gpu_allocated_mb": 3096.11,
+  "seconds": 8.763
+}
