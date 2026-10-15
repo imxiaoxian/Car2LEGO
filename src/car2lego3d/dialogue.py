@@ -3,6 +3,7 @@ import base64
 from io import BytesIO
 import json
 import os
+import time
 
 from dotenv import dotenv_values
 from PIL import Image
@@ -35,7 +36,8 @@ def image_content(paths):
     return content
 
 
-def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_completed=False, *, model=None):
+def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_completed=False, *,
+             model=None, stream=False, total_timeout=1800):
     from openai import OpenAI
     config = settings()
     if model is not None:
@@ -51,6 +53,8 @@ def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_com
                        dict(type="input_image", image_url=c["image_url"]["url"]) for c in content]
         inputs.append(dict(role=message["role"], content=content))
     request = dict(model=config["model"], input=inputs, max_output_tokens=max_tokens)
+    if stream:
+        request["stream"] = True
     directory.mkdir(parents=True, exist_ok=True)
     request_path = directory / f"{name}-request.json"
     response_path = directory / f"{name}-response.json"
@@ -63,15 +67,60 @@ def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_com
             response = Response.model_validate(json.loads(response_path.read_text(encoding="utf-8")))
             if response.status == "completed":
                 return parse_json(response.output_text)
+    # A failed replacement request must never pair its inputs with an older completed reply.
+    response_path.unlink(missing_ok=True)
     write_json(directory / f"{name}-request.json", request)
     write_json(endpoint_path, endpoint)
+    if timeout <= 0 or total_timeout <= 0:
+        raise ValueError("Model timeouts must be positive")
     with OpenAI(**{k: v for k, v in config.items() if k != "model"}, timeout=timeout, max_retries=0) as client:
-        response = client.responses.create(**request)
+        response = streamed_response(client, request, directory, name, total_timeout) if stream else client.responses.create(**request)
     raw = response.model_dump(mode="json")
     write_json(directory / f"{name}-response.json", raw)
     if response.status != "completed":
         raise ValueError(f"Model response did not complete: {response.status}.")
     return parse_json(response.output_text)
+
+
+def streamed_response(client, request, directory, name, total_timeout):
+    from openai.types.responses import Response
+    started = time.monotonic()
+    progress_path = directory / f"{name}-progress.json"
+    progress = dict(status="connecting", model=request["model"], events=0, output_characters=0, seconds=0)
+    write_json(progress_path, progress)
+    response = None
+    try:
+        with (directory / f"{name}-events.jsonl").open("w", encoding="utf-8") as log:
+            # Some compatible gateways omit response.created; require the authoritative terminal response.
+            with client.responses.create(**request) as events:
+                for event in events:
+                    elapsed = time.monotonic() - started
+                    progress.update(status="streaming", last_event=event.type, seconds=round(elapsed, 3),
+                                    events=progress["events"] + 1)
+                    if event.type == "response.output_text.delta":
+                        progress["output_characters"] += len(event.delta)
+                    if getattr(event, "response", None):
+                        progress["response_id"] = event.response.id
+                        if event.type in {"response.completed", "response.failed", "response.incomplete"}:
+                            response = Response.model_validate(event.response.model_dump(mode="json"))
+                    log.write(json.dumps(event.model_dump(mode="json"), ensure_ascii=False) + "\n")
+                    log.flush()
+                    write_json(progress_path, progress)
+                    if elapsed > total_timeout:
+                        raise TimeoutError(f"Model stream exceeded its {total_timeout}s total deadline")
+                    if event.type == "error":
+                        raise RuntimeError(f"Model stream error: {event.code}: {event.message}")
+                    if response is not None:
+                        break
+        if response is None:
+            raise RuntimeError("Model stream ended without a terminal response; partial output cannot be used")
+        progress.update(status=response.status, seconds=round(time.monotonic() - started, 3))
+        write_json(progress_path, progress)
+        return response
+    except Exception as error:
+        progress.update(status="failed", error=type(error).__name__, seconds=round(time.monotonic() - started, 3))
+        write_json(progress_path, progress)
+        raise
 
 
 def parse_json(content):

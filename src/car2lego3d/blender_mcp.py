@@ -15,7 +15,8 @@ from .multiview import load_views
 from .vehicle import load_spec, spec_record
 
 
-MODEL_TIMEOUT = 600
+MODEL_TIMEOUT = 180
+MCP_TIMEOUT = 600
 
 
 PROMPT = """You are a senior automotive Blender modeller. Build an accurate detailed smooth car from ALL
@@ -80,9 +81,14 @@ def call(tool, arguments, directory, name, port=9877):
     python = os.environ.get("CAR2LEGO_MCP_PYTHON") or local.get("CAR2LEGO_MCP_PYTHON") or str(python)
     request, response = directory / f"{name}-mcp-request.json", directory / f"{name}-mcp-response.json"
     write_json(request, dict(tool=tool, arguments=arguments))
+    timeout = float(os.environ.get("CAR2LEGO_MCP_TIMEOUT")
+                   or local.get("CAR2LEGO_MCP_TIMEOUT") or MCP_TIMEOUT)
+    if timeout <= 0:
+        raise ValueError("CAR2LEGO_MCP_TIMEOUT must be positive")
     result = subprocess.run([python, "-B", str(ROOT / "scripts/blender_mcp_worker.py"),
-        "--input", str(request), "--output", str(response), "--source", str(upstream()), "--port", str(port)],
-        capture_output=True, cwd=ROOT, timeout=280,
+        "--input", str(request), "--output", str(response), "--source", str(upstream()), "--port", str(port),
+        "--timeout", str(timeout)],
+        capture_output=True, cwd=ROOT, timeout=timeout + 30,
         env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUTF8": "1"})
     (directory / f"{name}-mcp.log").write_bytes(result.stdout + result.stderr)
     if result.returncode:
@@ -175,7 +181,7 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                 *image_content(images)]
         messages = [{"role": "system", "content": PROMPT}, {"role": "user", "content": user}]
         response = ask_json(messages, directory, "model", max_tokens=24000, timeout=MODEL_TIMEOUT,
-                            reuse_completed=True, model=model)
+                            reuse_completed=True, model=model, stream=True)
         with BlenderSession(directory) as blender:
             for attempt in range(3):
                 code = validate_code(response["code"])
@@ -189,7 +195,7 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                     messages += [{"role": "assistant", "content": json.dumps(response)},
                         {"role": "user", "content": "Execution failed. Return a corrected FULL script: " + str(error)[-7000:]}]
                     response = ask_json(messages, directory, f"repair-{attempt+1}", max_tokens=24000,
-                                        timeout=MODEL_TIMEOUT, model=model)
+                                        timeout=MODEL_TIMEOUT, model=model, stream=True)
             blender.execute(render_code(directory), "export-render")
             if review:
                 before = directory / "before-review"
@@ -204,7 +210,7 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                         *image_content(images), *image_content({"CURRENT_" + v: directory / f"render-{v}.png"
                             for v in ("left", "front", "back", "three-quarter")}),
                         {"type": "text", "text": "Current script: " + response["code"]}]}],
-                    directory, "visual-review", max_tokens=18000, timeout=MODEL_TIMEOUT, model=model)
+                    directory, "visual-review", max_tokens=18000, timeout=MODEL_TIMEOUT, model=model, stream=True)
                 if feedback.get("code", "").strip():
                     try:
                         blender.execute(validate_code(feedback["code"]), "visual-refine")

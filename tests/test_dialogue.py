@@ -1,3 +1,4 @@
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,6 +17,26 @@ def response(status="completed"):
         status=status, output=[dict(id="msg_test", type="message", role="assistant", status="completed",
             content=[dict(type="output_text", text='{"length": 5103}', annotations=[])])],
         parallel_tool_calls=False, tool_choice="auto", tools=[]))
+
+
+class Event:
+    def __init__(self, event_type, response_obj=None, delta=None):
+        self.type, self.response, self.delta = event_type, response_obj, delta
+
+    def model_dump(self, mode="json"):
+        result = {"type": self.type}
+        if self.delta is not None:
+            result["delta"] = self.delta
+        if self.response is not None:
+            result["response"] = self.response.model_dump(mode="json")
+        return result
+
+
+def stream_client(events):
+    client = MagicMock()
+    client.__enter__.return_value = client
+    client.responses.create.return_value.__enter__.return_value = iter(events)
+    return client
 
 
 @pytest.mark.parametrize("change", [None, "endpoint", "model", "prompt", "incomplete"])
@@ -68,3 +89,78 @@ def test_modelling_setting_is_independent_from_vehicle_dialogue(monkeypatch, tmp
         monkeypatch.setenv("CAR2LEGO_BLENDER_MODEL", "modelling-override")
         assert dialogue.settings("CAR2LEGO_BLENDER_MODEL", "gpt-6-astra")["model"] == "modelling-override"
         assert dialogue.settings()["model"] == "vehicle-model"
+
+
+def test_streamed_reply_records_progress_until_terminal_event(tmp_path):
+    completed = response()
+    def events():
+        yield Event("response.output_text.delta", delta='{"length": ')
+        yield Event("response.completed", completed)
+        raise AssertionError("A terminal event must finish without waiting for the connection to close")
+    client = stream_client(events())
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), patch("openai.OpenAI", return_value=client):
+        assert dialogue.ask_json(MESSAGES, tmp_path, "stream", model="gpt-6-astra", stream=True) == {"length": 5103}
+    request = client.responses.create.call_args.kwargs
+    assert request["stream"] is True
+    progress = json.loads((tmp_path / "stream-progress.json").read_text(encoding="utf-8"))
+    assert progress["status"] == "completed"
+    assert progress["last_event"] == "response.completed"
+    assert progress["events"] == 2
+    assert len((tmp_path / "stream-events.jsonl").read_text(encoding="utf-8").splitlines()) == 2
+
+
+def test_interrupted_stream_retains_partial_events_but_never_parses_them(tmp_path):
+    def events():
+        yield Event("response.output_text.delta", delta='{"length": 5103}')
+        raise ConnectionError("Constructed connection reset")
+    client = stream_client(events())
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client):
+        with pytest.raises(ConnectionError), patch.object(dialogue, "parse_json") as parse:
+            dialogue.ask_json(MESSAGES, tmp_path, "interrupted", stream=True)
+        parse.assert_not_called()
+    progress = json.loads((tmp_path / "interrupted-progress.json").read_text(encoding="utf-8"))
+    assert progress["status"] == "failed"
+    assert progress["events"] == 1
+    assert not (tmp_path / "interrupted-response.json").exists()
+
+
+def test_interrupted_replacement_cannot_reuse_an_older_completed_reply(tmp_path):
+    client = stream_client([Event("response.completed", response())])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client):
+        dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True, reuse_completed=True)
+        client.responses.create.return_value.__enter__.side_effect = ConnectionError("Constructed timeout")
+        for _ in range(2):
+            with pytest.raises(ConnectionError):
+                dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True,
+                                  reuse_completed=True, model="gpt-6-astra")
+        assert client.responses.create.call_count == 3
+    assert not (tmp_path / "model-response.json").exists()
+
+
+@pytest.mark.parametrize("status", ["failed", "incomplete"])
+def test_unsuccessful_terminal_stream_is_retained_without_parsing(tmp_path, status):
+    client = stream_client([Event(f"response.{status}", response(status))])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client), patch.object(dialogue, "parse_json") as parse:
+        with pytest.raises(ValueError, match="did not complete"):
+            dialogue.ask_json(MESSAGES, tmp_path, "terminal", stream=True)
+        parse.assert_not_called()
+    assert json.loads((tmp_path / "terminal-response.json").read_text(encoding="utf-8"))["status"] == status
+
+
+def test_stream_without_terminal_event_fails_even_with_complete_json(tmp_path):
+    client = stream_client([Event("response.output_text.delta", delta='{"length": 5103}')])
+    with pytest.raises(RuntimeError, match="without a terminal response"):
+        dialogue.streamed_response(client, {"model": "test-model"}, tmp_path, "missing", 1800)
+
+
+def test_active_stream_deadline_is_checked_and_failure_is_recorded(tmp_path):
+    client = stream_client([Event("response.output_text.delta", delta="partial")])
+    with patch.object(dialogue.time, "monotonic", side_effect=[0, 2, 2]):
+        with pytest.raises(TimeoutError, match="total deadline"):
+            dialogue.streamed_response(client, {"model": "test-model"}, tmp_path, "deadline", 1)
+    progress = json.loads((tmp_path / "deadline-progress.json").read_text(encoding="utf-8"))
+    assert progress["status"] == "failed"
+    assert progress["error"] == "TimeoutError"

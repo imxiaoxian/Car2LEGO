@@ -1,11 +1,13 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 import json
+import runpy
+import socket
 
 import pytest
 
 from car2lego3d import blender_mcp
-from car2lego3d.common import write_json
+from car2lego3d.common import ROOT, write_json
 
 
 def test_mcp_uses_isolated_interpreter_from_local_configuration(tmp_path, monkeypatch):
@@ -19,6 +21,33 @@ def test_mcp_uses_isolated_interpreter_from_local_configuration(tmp_path, monkey
             patch.object(blender_mcp, "upstream", return_value=tmp_path), \
             patch.object(blender_mcp.subprocess, "run", side_effect=run):
         blender_mcp.call("test", {}, tmp_path, "test")
+
+
+def test_mcp_timeout_is_forwarded_to_worker_and_process_guard(tmp_path, monkeypatch):
+    monkeypatch.setenv("CAR2LEGO_MCP_TIMEOUT", "601")
+    def run(command, **kwargs):
+        assert command[-2:] == ["--timeout", "601.0"]
+        assert kwargs["timeout"] == 631.0
+        write_json(tmp_path / "test-mcp-response.json", {
+            "result": {"content": [{"type": "text", "text": "OK"}]}
+        })
+        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+    with patch.object(blender_mcp, "configuration", return_value=(tmp_path, "shared-python")), \
+            patch.object(blender_mcp, "upstream", return_value=tmp_path), \
+            patch.object(blender_mcp.subprocess, "run", side_effect=run):
+        blender_mcp.call("test", {}, tmp_path, "test")
+
+
+def test_upstream_socket_budget_is_isolated_from_standard_library():
+    launcher = runpy.run_path(str(ROOT / "scripts/blender_mcp_server.py"))
+    server = SimpleNamespace(socket=socket)
+    launcher["configure_socket_timeout"](server, 601)
+    with server.socket.socket(socket.AF_INET, socket.SOCK_STREAM) as connection:
+        connection.settimeout(180)
+        assert connection.gettimeout() == 601
+    with socket.socket() as other_connection:
+        other_connection.settimeout(180)
+        assert other_connection.gettimeout() == 180
 
 
 def test_blender_preferences_stay_in_run_directory(tmp_path, monkeypatch):
@@ -69,6 +98,6 @@ def test_modelling_repairs_and_visual_review_use_same_model(tmp_path):
         blender_mcp.reconstruct(tmp_path / "views.json", output, tmp_path / "spec.json")
     assert [c.args[2] for c in ask.call_args_list] == ["model", "repair-1", "visual-review"]
     assert all(c.kwargs["model"] == "gpt-6-astra" for c in ask.call_args_list)
-    assert all(c.kwargs["timeout"] == 600 for c in ask.call_args_list)
+    assert all(c.kwargs["timeout"] == 180 and c.kwargs["stream"] for c in ask.call_args_list)
     record = json.loads((output / "reconstruction.json").read_text(encoding="utf-8"))
     assert record["model"] == record["inputs"]["model"] == "gpt-6-astra"
