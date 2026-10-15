@@ -1,12 +1,40 @@
 {
-  "name": "car2lego-3d-frontend",
+  "name": "car2lego-frontend",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "scripts": { "build": "tsc --noEmit && vite build", "dev": "vite --host 127.0.0.1" },
-  "dependencies": { "react": "18.3.1", "react-dom": "18.3.1", "lucide-react": "1.55.0" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:desktop": "playwright test"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@react-three/drei": "^9.114.3",
+    "@react-three/fiber": "^8.17.10",
+    "framer-motion": "^11.5.4",
+    "lucide-react": "^1.55.0",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.0",
+    "swr": "^2.2.5",
+    "three": "^0.169.0",
+    "zod": "^3.23.8"
+  },
   "devDependencies": {
-    "@types/node": "^24.0.0", "@types/react": "18.3.9", "@types/react-dom": "18.3.0",
-    "@vitejs/plugin-react": "6.1.2", "typescript": "5.9.3", "vite": "8.3.4"
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22.7.0",
+    "@types/react": "^18.3.9",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.169.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.2"
   }
 }

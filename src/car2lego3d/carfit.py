@@ -219,6 +219,9 @@ class Car:
 
 
 def design(fit, rear_wing=True):
+    if fit.get("body_family") in ("suv", "crossover"):
+        from .sculpted_suv import design_sculpted_suv
+        return design_sculpted_suv(fit)
     if fit.get("family_builder") == "open_wheel":
         from .recipes import design_open_wheel
         return design_open_wheel(fit)

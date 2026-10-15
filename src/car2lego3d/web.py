@@ -205,13 +205,16 @@ class JobStore:
 
 
 class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, jobs, **kwargs):
+    def __init__(self, *args, jobs, desktop=None, **kwargs):
         self.jobs = jobs
+        self.desktop = desktop
         super().__init__(*args, **kwargs)
 
     def local_host(self):
-        return self.headers.get("Host") in {f"localhost:{self.server.server_port}",
-                                          f"127.0.0.1:{self.server.server_port}"}
+        ports = {str(self.server.server_port)}
+        if self.desktop:
+            ports.add(os.environ.get("CAR2LEGO_FRONTEND_PORT", "8766"))
+        return self.headers.get("Host") in {f"{host}:{port}" for host in ("localhost", "127.0.0.1") for port in ports}
 
     def research(self):
         return getattr(self.jobs, "research", None)
@@ -226,6 +229,8 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def send_file(self, path):
+        if not path.is_file():
+            raise FileNotFoundError(path)
         self.send_response(200)
         self.send_header("Content-Type", self.guess_type(str(path)))
         self.send_header("Content-Length", str(path.stat().st_size))
@@ -240,6 +245,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_response({"error": "仅支持本机访问。"}, 403)
         path = urlsplit(self.path).path
         try:
+            if path.startswith("/api/v1/") and self.desktop:
+                from .desktop import dispatch_get
+                return dispatch_get(self, path)
             if path == "/api/config":
                 return self.json_response({"scales": [requirements_for_scale(s) for s in SCALES],
                                            "colors": [{"code": code, "name": name[0]} for code, name in COLORS.items()]})
@@ -260,12 +268,26 @@ class Handler(SimpleHTTPRequestHandler):
             return super().do_GET()
         except FileNotFoundError:
             self.json_response({"error": "任务或文件不存在。"}, 404)
+        except (ValueError, RuntimeError) as error:
+            self.json_response({"error": str(error)}, 400)
 
     def do_POST(self):
         origin = self.headers.get("Origin")
-        if not self.local_host() or origin not in {f"http://127.0.0.1:{self.server.server_port}",
-                                                   f"http://localhost:{self.server.server_port}"}:
+        ports = {str(self.server.server_port)}
+        if self.desktop:
+            ports.add(os.environ.get("CAR2LEGO_FRONTEND_PORT", "8766"))
+        if not self.local_host() or origin not in {f"http://{host}:{port}" for host in ("localhost", "127.0.0.1") for port in ports}:
             return self.json_response({"error": "仅接受同源本机请求。"}, 403)
+        if urlsplit(self.path).path.startswith("/api/v1/") and self.desktop:
+            from .desktop import dispatch_post
+            try:
+                return dispatch_post(self, urlsplit(self.path).path)
+            except FileNotFoundError:
+                return self.json_response({"error": "任务或文件不存在。"}, 404)
+            except (ValueError, UnicodeDecodeError) as error:
+                return self.json_response({"error": str(error)}, 400)
+            except RuntimeError as error:
+                return self.json_response({"error": str(error)}, 409)
         if self.path not in {"/api/jobs", "/api/research", "/api/plan"}:
             return self.json_response({"error": "接口不存在。"}, 404)
         try:
@@ -310,4 +332,22 @@ def serve(port=8765):
         finally:
             if jobs.worker:
                 jobs.worker.join()
+            research.close()
+
+
+def serve_desktop(port=8767):
+    from .desktop import DesktopStore
+    research = ResearchStore(ROOT / "runs/vehicle-research")
+    jobs = JobStore(ROOT / "runs/web", research)
+    desktop = DesktopStore(jobs)
+    handler = partial(Handler, directory=str(ROOT / "frontend/public"), jobs=jobs, desktop=desktop)
+    with ThreadingHTTPServer(("127.0.0.1", port), handler) as server:
+        print(f"Car2LEGO_3D API: http://127.0.0.1:{port}", flush=True)
+        try:
+            server.serve_forever()
+        finally:
+            if desktop.active:
+                desktop.control(desktop.active, "cancel")
+            if desktop.worker:
+                desktop.worker.join()
             research.close()

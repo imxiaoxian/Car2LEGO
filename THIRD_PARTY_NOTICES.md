@@ -37,8 +37,11 @@ and catalog assets are identified below.
   own licenses. See the installed distributions for full notices.
 - **Car2LEGO**: https://github.com/imxiaoxian/Car2LEGO (MIT, copyright 2025
   imxiaoxian). Architecture reference: real part IDs, LDraw outputs, and separate
-  digital versus physical validation. The brand selector, search helper, catalog,
-  translations, logo assets, catalog documentation and sync script are reused.
+  digital versus physical validation. The Next.js desktop pages, styles, viewer,
+  components, brand selector, search helper, catalog, translations, logo assets,
+  showcase images, catalog documentation and sync script are reused. Source services
+  for recognition, reference images, native geometry and step documents run in
+  isolated subprocesses. Studio color identifiers are used as factual mappings.
   Original MIT copyright and license are retained in `frontend/LICENSE.Car2LEGO`.
   No private data or credentials are copied.
 - **car-logos-dataset**: https://github.com/filippofilip95/car-logos-dataset,
@@ -49,7 +52,7 @@ and catalog assets are identified below.
   manufacturer websites and Seeklogo. Each asset's original source and SHA-256
   are stored in `frontend/lib/data/vehicle-brands.json`; see
   `docs/vehicle-brand-catalog.md` for scope and license limitations.
-- **React**, **Vite**, **TypeScript** (MIT), **lucide-react** (ISC): local page
+- **React**, **Next.js**, **Vite**, **TypeScript** (MIT), **lucide-react** (ISC): local page
   dependencies retain their respective licenses in installed packages.
 
 LEGO and BrickLink are trademarks of their owners. This research project is not

@@ -41,7 +41,11 @@ def test_for_me_uses_four_door_cabin_with_rigid_native_parts(width):
     assert fit["cabin_width_studs"] == (6 if width == 8 else 8)
     car = design(fit)
     assert sum(p.module == "door skin" for p in car.parts) == 4
-    assert sum(p.module == "continuous SUV tail lights" for p in car.parts) == width//2
+    lights = [p for p in car.parts if p.module == "continuous SUV tail lights"]
+    assert len(lights) == (width-2)//2
+    # Leave one stud of body at either end of the continuous light strip.
+    z = sorted(p.position[2] for p in lights)
+    assert np.diff(z).tolist() == [40] * (len(lights)-1)
     assert not {"G82 vertical kidney grilles", "engine cover", "rear wing"} & {p.module for p in car.parts}
     for p in car.parts:
         matrix = np.array(p.rotation).reshape(3, 3)
@@ -49,9 +53,10 @@ def test_for_me_uses_four_door_cabin_with_rigid_native_parts(width):
         assert np.linalg.det(matrix) == pytest.approx(1)
     for skin in [p for p in car.parts if p.module == "door skin"]:
         for x in (-30, 30):
-            socket = np.array(skin.position) + np.array(skin.rotation).reshape(3, 3) @ (x, 8, 0)
+            sockets = [np.array(skin.position) + np.array(skin.rotation).reshape(3, 3) @ (x, 8, z)
+                       for z in (-10, 10)]
             assert any(np.allclose(socket, np.array(m.position) + np.array(m.rotation).reshape(3, 3) @ (0, 10, -10))
-                       for m in car.parts if m.module == "door mounts")
+                       for socket in sockets for m in car.parts if m.module == "door mounts")
 
 
 def test_identity_proxy_retains_user_color_and_scope():

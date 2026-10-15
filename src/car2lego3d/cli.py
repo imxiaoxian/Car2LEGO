@@ -18,6 +18,8 @@ def main():
     commands.add_parser("doctor", help="Show environment and CUDA availability")
     web = commands.add_parser("web", help="Serve the local generation page and brand selector")
     web.add_argument("--port", type=int, default=8765)
+    api = commands.add_parser("desktop-api", help="API for the replicated Car2LEGO desktop frontend")
+    api.add_argument("--port", type=int, default=8767)
     research = commands.add_parser("research", help="Search live physical specs with the vehicle-spec-search skill")
     research.add_argument("--brand", required=True)
     research.add_argument("--model", required=True)
@@ -104,6 +106,9 @@ def main():
     elif args.command == "web":
         from .web import serve
         serve(args.port)
+    elif args.command == "desktop-api":
+        from .web import serve_desktop
+        serve_desktop(args.port)
     elif args.command == "setup":
         if args.backend == "hunyuan-mv":
             from .multiview import setup_source
