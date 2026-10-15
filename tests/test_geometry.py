@@ -8,6 +8,22 @@ from car2lego3d.lego import Plate, convert, export, pack, validate, voxelize
 from car2lego3d.reconstruction import marching_cubes, preprocess, upstream_model
 
 
+def test_multimaterial_glb_preview_can_resolve_face_colors(tmp_path):
+    from car2lego3d.lego import load_mesh, color_visual
+    scene = trimesh.Scene()
+    for index, color in enumerate(([1, .2, .05, 1], [.02, .02, .02, 1])):
+        mesh = trimesh.creation.box()
+        mesh.apply_translation([index * 2, 0, 0])
+        mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(baseColorFactor=color))
+        scene.add_geometry(mesh)
+    source = tmp_path / "materials.glb"
+    scene.export(source)
+    mesh = load_mesh(source)
+    colors = color_visual(mesh).face_colors
+    assert colors.shape == (len(mesh.faces), 4)
+    assert len(np.unique(colors, axis=0)) == 2
+
+
 def test_anisotropic_voxel_scale():
     mesh = trimesh.creation.box(extents=[24, 8, 9.6])
     cells, info = voxelize(mesh, length_studs=4, color=4)

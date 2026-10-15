@@ -25,7 +25,7 @@ function stageLabel(stage: string) {
   if (phase === "reconstruction") return "多视角 3D 重建";
   if (phase === "reference_images") return `生成${viewNames[section] || "车辆"}参考图`;
   if (phase === "section" || phase === "building") return `构建${viewNames[section] || "车辆部位"}`;
-  return ({ starting: "准备设计", vehicle_research:"搜索车型尺寸与结构资料",reference_brief:"规划参考角度",reference_consistency:"检查整车与细节一致性",planning: "规划结构", assembly:"模块装配", validation:"数字检查",repair:`局部修复 ${section || ""}`,rendering:"真实零件渲染",instructions:"生成步骤说明",exporting:"导出 Studio",acceptance:"整车验收",draft:"装配草稿",paused:"任务已暂停",cancelled:"任务已取消",completed: "设计已完成", pending: "等待生成", processing: "生成模型", failed: "生成失败" } as Record<string, string>)[phase] || "生成模型";
+  return ({ starting: "准备设计", vehicle_research:"模型对话获取车辆参数",reference_brief:"规划参考角度",reference_consistency:"检查整车与细节一致性",planning: "规划结构", assembly:"模块装配", validation:"数字检查",repair:`局部修复 ${section || ""}`,rendering:"真实零件渲染",instructions:"生成步骤说明",exporting:"导出 Studio",acceptance:"整车验收",draft:"装配草稿",paused:"任务已暂停",cancelled:"任务已取消",completed: "设计已完成", pending: "等待生成", processing: "生成模型", failed: "生成失败" } as Record<string, string>)[phase] || "生成模型";
 }
 
 function failureCallLabel(kind?: string) {

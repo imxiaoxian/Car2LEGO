@@ -144,7 +144,9 @@ def test_compatibility_http_and_origin_guard(store, monkeypatch):
         thread.join()
 
 
-def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(tmp_path, ready_research, monkeypatch):
+@pytest.mark.parametrize("backend", ["hunyuan-mv", "gpt-blender"])
+def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(tmp_path, ready_research, monkeypatch, backend):
+    monkeypatch.setenv("CAR2LEGO_RECONSTRUCTION_BACKEND", backend)
     from PIL import Image
     research, _ = ready_research()
     desktop = DesktopStore(JobStore(tmp_path / "jobs", research))
@@ -171,7 +173,7 @@ def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(t
                 views[view] = dict(file=f"{view}.png", sha256=digest(output / f"{view}.png"), model="gpt-image-test")
             write_json(output / "views.json", dict(schema_version=1, synthetic=True, views=views, brief=dict(body_style="sports_car")))
         elif "reconstruct" in args:
-            assert args[args.index("--backend")+1] == "hunyuan-mv"
+            assert args[args.index("--backend")+1] == backend
             assert args[args.index("--reconstruction-steps")+1] == "50"
             assert "--views" in args and "--image" not in args
             (output / "calibrated.glb").write_bytes(b"mock reconstruction")

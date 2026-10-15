@@ -25,7 +25,7 @@ def ready_research(tmp_path):
         research_id = "a" * 32
         write_json(directory / research_id / "research/spec.json", spec)
         write_json(directory / research_id / "result.json", {"status": "ready", "request": identity,
-                   "spec": spec, "audit": {"skill_sha256": digest(SKILL)}})
+                   "spec": spec, "audit": {"cache_signature": store.cache_signature()}})
         return store, research_id
 
     yield create

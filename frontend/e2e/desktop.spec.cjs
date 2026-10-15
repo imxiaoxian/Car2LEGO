@@ -73,6 +73,26 @@ test('real draft geometry, canvas pixels, controls, and exports', async ({ page,
   const detail = await response.json();
   expect(detail.status).toBe('draft');
   expect(detail.quality_report.precision_verified).toBe(false);
+  if (detail.physical_specifications?.research?.mode === 'model_dialogue') {
+    const specifications = page.getByRole('region', { name: '车辆尺寸与结构参数' });
+    await expect(specifications).toContainText('模型估计，未经厂商或实测核验');
+    await expect(specifications).toContainText('模型对话');
+    await expect(specifications).toContainText('估算换算');
+    expect(detail.physical_specifications.overall_grounded).toBe(false);
+    expect(detail.physical_specifications.sources).toEqual([]);
+    expect(detail.physical_specifications.research.queries).toEqual([]);
+    const collected = await request.post('/api/v1/research/physical-specifications', {
+      headers: { origin: new URL(page.url()).origin },
+      data: { make: detail.physical_specifications.vehicle.make,
+        model: detail.physical_specifications.vehicle.model, year: null, scale: detail.requested_scale },
+    });
+    expect(collected.ok()).toBeTruthy();
+    const parameters = await collected.json();
+    expect(parameters.research.mode).toBe('model_dialogue');
+    expect(parameters.measurements.length.method).toBe('estimated');
+    expect(parameters.measurements.length.confidence).toBeLessThan(1);
+    expect(parameters.sources).toEqual([]);
+  }
   for (const [kind, url] of Object.entries(detail.file_urls)) {
     const exported = await request.get(url);
     expect(exported.ok(), kind).toBeTruthy();

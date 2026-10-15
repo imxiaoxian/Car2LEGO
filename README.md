@@ -4,7 +4,7 @@
 从 [Car2LEGO](https://github.com/imxiaoxian/Car2LEGO) 的图片参考、真实零件和独立验收设计出发，将显式 3D 网格作为新的中间表示。
 
 ```text
-车型 + 原厂规格 + 外观参考 → 复用 Car2LEGO GPT 生图服务
+车型 → 大模型对话获取物理参数 → 复用 Car2LEGO GPT 生图服务
                            ↓
          同一车型前 / 后 / 左 / 右四张独立视图
                            ↓
@@ -41,7 +41,7 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 
 脚本创建 `.venv`，安装 PyTorch 2.5.1 CUDA 12.4 和依赖，下载并固定 Hunyuan3D 的形状重建源码。
 首次运行会下载模型权重到 `models/Hunyuan3D-2mv` 和背景移除权重到 rembg 缓存，需联网及数 GB 磁盘空间。
-没有全局修改 Python / Conda 环境。GPT 生图复用原项目的 API 配置；联网规格搜索需要已安装并登录的 Codex CLI。
+没有全局修改 Python / Conda 环境。GPT 生图和规格对话复用原项目的 API 配置；默认规格获取不需要 Codex CLI 或联网搜索工具。
 将 `.env.example` 中的 `CAR2LEGO_SOURCE_ROOT` 配置为原项目目录，必要时设置 `CAR2LEGO_SOURCE_PYTHON`。
 桥接进程直接调用原来的 `ReferenceImageService.generate()`，输出写入本项目，失败不会自动换用 SD。
 Hunyuan3D-2mv 的代码、权重与许可、复现命令见 [多视角复现](docs/multiview-reconstruction.md)。
@@ -66,17 +66,18 @@ powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1
 目录包含现存、历史及商用品牌，不保证穷尽全球所有品牌；数据来源和更新方式见
 [品牌目录](docs/vehicle-brand-catalog.md)。生图阶段以只读方式调用 `D:\lego` 的参考图服务，产物保存在本项目。
 
-页面提交品牌、车型、可选年款、比例或车辆照片；后台依次检索尺寸、生成四视图、重建和装配。
+页面提交品牌、车型、可选年款、比例或车辆照片；后台依次通过模型对话获取尺寸、生成四视图、重建和装配。
 完成后可下载 Studio `.io`、LDraw、MPD、步骤 PDF、CSV、BrickLink XML 和检查报告。
 任务参数、日志和产物保存在 `runs/web/<任务ID>/`，详情路径为 `/designs/<任务ID>`；
 旧的 `/?job=<任务ID>` 链接会跳转至详情页。暂停在阶段边界生效，恢复会复用已完成且哈希匹配的输出。
 重新拟合会保存旧版本并重建装配；改装会创建独立副本。同一服务每次只运行一个生成任务。
 服务只监听本机地址，写入接口校验同源请求。
 
-提交设计后调用项目内 [vehicle-spec-search skill](.agents/skills/vehicle-spec-search/SKILL.md)
-实时搜索网页并读取来源，获取尺寸和轮胎等物理参数；页面加载不会自动发起模型调用。
-详情页保留重新搜索功能。规格按品牌/车型/版本绑定；未公开的门窗参数保留为空，跨代型号要求补充版本。
-生成及自定义车长均采用该次检索结果，无固定 F40 规格回退。每项数值带来源、短原文证据及单位。
+提交设计后直接与配置的 `OPENAI_MODEL`（默认 `gpt-6.1-sol`）对话，获取车身、轮胎、门窗等物理参数。
+年款为选填，缺省时记录所假定的代表版本；模型无法确定的参数保留为空。
+数值全部标记为模型估算，并记录逐项依据和置信度，不声称原厂核验或实际测量。
+详情页可重新获取。规格缓存绑定品牌、车型、版本、模型、接口、提示词和 schema；旧的搜索缓存不会自动复用。
+生成及自定义车长均采用该次规格快照，无固定车型回退。页面加载不会自动发起模型调用。
 不同尺度继续采用各自的要求；缺少独立配方或超出当前零件范围时禁止生成。
 车辆配方不保证车型外观或精确尺寸还原；品牌目录不等同于规格/配方支持目录。
 桌面流程复用原项目的真实零件几何、渲染和步骤文档服务，并单独记录碰撞与连接检查。
@@ -99,7 +100,8 @@ M4 的算法改进、同网格对照和剩余问题见 [轿跑实验](docs/coupe
 更改前端端口时，API 进程须设置 `CAR2LEGO_FRONTEND_PORT`；更改 API 端口时，构建前设置 `CAR2LEGO_API_ORIGIN`。
 旧 Vite 页面源码仅作历史保留；当前 `npm run build` 构建 Next.js 桌面页面。
 浏览器验收截图、测试和页面实际生成记录见 [验证记录](docs/brand-selector-validation.md)。
-联网 skill 的运行条件和证据边界见 [规格搜索](docs/vehicle-spec-search.md)。
+规格对话、配置和数据边界见 [车辆参数获取](docs/vehicle-spec-search.md)。
+`gpt-blender` 实验后端通过 GPT 四视图分析、Blender MCP 和会话插件生成网格；配置及实测记录见 [Blender 实验](docs/gpt-blender-experiment.md)。
 
 CLI 获取任意车型规格：
 

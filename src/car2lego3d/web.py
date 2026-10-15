@@ -256,7 +256,7 @@ class Handler(SimpleHTTPRequestHandler):
             match = re.fullmatch(r"/api/research/([a-f0-9]{32})", path)
             if match:
                 if not self.research():
-                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                    return self.json_response({"error": "规格获取暂不可用。"}, 503)
                 return self.json_response(self.research().get(match[1]))
             match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(?:/files/([a-z_]+))?", path)
             if match:
@@ -297,21 +297,21 @@ class Handler(SimpleHTTPRequestHandler):
             payload = json.loads(self.rfile.read(length))
             if self.path == "/api/research":
                 if not self.research():
-                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                    return self.json_response({"error": "规格获取暂不可用。"}, 503)
                 identity, _, _ = vehicle_identity(payload)
                 refresh = payload.get("refresh", False)
                 if not isinstance(refresh, bool):
-                    raise ValueError("重新搜索选项无效。")
+                    raise ValueError("重新获取选项无效。")
                 return self.json_response(self.jobs.research.start(identity, refresh), 202)
             if self.path == "/api/plan":
                 if not self.research():
-                    return self.json_response({"error": "规格搜索暂不可用。"}, 503)
+                    return self.json_response({"error": "规格获取暂不可用。"}, 503)
                 return self.json_response(prepare_request(payload, self.research())[2])
             self.json_response(self.jobs.start(payload), 202)
         except (ValueError, UnicodeDecodeError) as error:
             self.json_response({"error": str(error)}, 400)
         except FileNotFoundError:
-            self.json_response({"error": "请先搜索当前车型的物理规格。"}, 400)
+            self.json_response({"error": "请先获取当前车型的物理规格。"}, 400)
         except RuntimeError as error:
             self.json_response({"error": str(error)}, 409)
 

@@ -13,14 +13,14 @@ def main():
     parser = argparse.ArgumentParser(description="Car2LEGO_3D: text -> image -> mesh -> LEGO -> Studio .io")
     commands = parser.add_subparsers(dest="command", required=True)
     setup = commands.add_parser("setup", help="Download and pin an upstream reconstruction source")
-    setup.add_argument("--backend", choices=["hunyuan-mv", "triposr"], default="hunyuan-mv")
+    setup.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default="hunyuan-mv")
     commands.add_parser("recipes", help="Show vehicle families and their official LEGO references")
     commands.add_parser("doctor", help="Show environment and CUDA availability")
     web = commands.add_parser("web", help="Serve the local generation page and brand selector")
     web.add_argument("--port", type=int, default=8765)
     api = commands.add_parser("desktop-api", help="API for the replicated Car2LEGO desktop frontend")
     api.add_argument("--port", type=int, default=8767)
-    research = commands.add_parser("research", help="Search live physical specs with the vehicle-spec-search skill")
+    research = commands.add_parser("research", help="Get full-size physical specifications through model dialogue")
     research.add_argument("--brand", required=True)
     research.add_argument("--model", required=True)
     research.add_argument("--variant", default="")
@@ -41,7 +41,7 @@ def main():
     for name in ("image", "reconstruct", "lego", "run"):
         child = commands.add_parser(name)
         child.add_argument("--output", type=Path, required=True)
-        child.add_argument("--vehicle-specs", type=Path, help="Sourced physical vehicle dimensions JSON")
+        child.add_argument("--vehicle-specs", type=Path, help="Physical vehicle dimensions JSON, including model estimates")
         if name in ("image", "run"):
             child.add_argument("--prompt", required=name == "image")
             child.add_argument("--image-provider", choices=["gpt", "sd-turbo"], default="gpt")
@@ -56,7 +56,7 @@ def main():
                                    help="Reuse a completed multiview mesh only after verifying inputs and output hashes")
             child.add_argument("--image", type=Path, help="Legacy TripoSR input; requires --backend triposr")
             child.add_argument("--views", type=Path, help="Four labelled GPT views.json")
-            child.add_argument("--backend", choices=["hunyuan-mv", "triposr"], default="hunyuan-mv")
+            child.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default="hunyuan-mv")
             child.add_argument("--reconstruction-steps", type=int, default=50)
             child.add_argument("--resolution", type=int, choices=[64, 128, 192, 256], default=128)
             child.add_argument("--chunk-size", type=int, default=4096)
@@ -110,7 +110,9 @@ def main():
         from .web import serve_desktop
         serve_desktop(args.port)
     elif args.command == "setup":
-        if args.backend == "hunyuan-mv":
+        if args.backend == "gpt-blender":
+            from .blender_mcp import upstream as setup_source
+        elif args.backend == "hunyuan-mv":
             from .multiview import setup_source
         else:
             from .reconstruction import setup_source
@@ -135,11 +137,12 @@ def main():
     elif args.command == "run":
         if sum(bool(item) for item in (args.prompt, args.image, args.views)) != 1:
             parser.error("run requires exactly one of --prompt, --views or --image")
-        if args.backend == "hunyuan-mv" and (args.image or (args.prompt and args.image_provider != "gpt")):
-            parser.error("hunyuan-mv requires four --views or GPT multiview --prompt")
+        multiview = args.backend in {"hunyuan-mv", "gpt-blender"}
+        if multiview and (args.image or (args.prompt and args.image_provider != "gpt")):
+            parser.error("Multiview backends require four --views or GPT multiview --prompt")
         if args.backend == "triposr" and (args.views or (args.prompt and args.image_provider == "gpt")):
             parser.error("TripoSR is a legacy single-image experiment; GPT runs require hunyuan-mv")
-        if args.backend == "hunyuan-mv" and vehicle_spec is None:
+        if multiview and vehicle_spec is None:
             parser.error("Vehicle multiview run requires --vehicle-specs for classification and physical constraints")
         if args.output.exists() and any(args.output.iterdir()):
             parser.error("run --output must be empty to preserve prior artifacts")
@@ -182,13 +185,13 @@ def main():
                        "--seed", args.seed, "--steps", args.steps, "--device", args.device,
                        "--image-provider", args.image_provider,
                        *(["--reference-image", args.reference_image] if args.reference_image else []), *spec_args)
-                source = args.output / "01-image" / ("views.json" if args.backend == "hunyuan-mv" else "reference.png")
+                source = args.output / "01-image" / ("views.json" if multiview else "reference.png")
             else:
                 source = (args.views or args.image).resolve()
                 if args.views:
                     from .multiview import snapshot_views
                     source = snapshot_views(source, args.output / "01-image")
-            if args.backend == "hunyuan-mv":
+            if multiview:
                 from .multiview import load_views
                 from .recipes import classify, selection_record
                 manifest, _ = load_views(source)
@@ -205,7 +208,7 @@ def main():
                                      vehicle_spec, args.resolution, args.reconstruction_steps, args.seed)
                 record["reconstruction_reused_from"] = str(args.reconstruction_cache.resolve())
             else:
-                invoke("reconstruct", "--views" if args.backend == "hunyuan-mv" else "--image", source,
+                invoke("reconstruct", "--views" if multiview else "--image", source,
                        "--backend", args.backend, "--reconstruction-steps", args.reconstruction_steps,
                        "--seed", args.seed,
                        "--output", args.output / "02-mesh", "--resolution", args.resolution,
@@ -217,7 +220,7 @@ def main():
                    "--strategy", args.strategy, *(["--no-rear-wing"] if args.no_rear_wing else []), *color_args,
                    *(["--width-studs", args.width_studs] if args.width_studs is not None else []),
                    *(["--body-style", args.body_style] if args.body_style else []),
-                   *(["--reference-views", args.reference_views or source] if args.backend == "hunyuan-mv" or args.reference_views else []),
+                   *(["--reference-views", args.reference_views or source] if multiview or args.reference_views else []),
                    *(["--requirements-snapshot", requirements_snapshot] if requirements_snapshot else []), *spec_args)
             from .native import configured_preview
             native = configured_preview(args.output / "03-lego" / "model.ldr", args.output / "03-lego")
@@ -235,7 +238,12 @@ def main():
         print(generate(args.prompt, args.output, args.seed, args.steps, args.device, vehicle_spec,
                        args.image_provider, args.reference_image))
     elif args.command == "reconstruct":
-        if args.backend == "hunyuan-mv":
+        if args.backend == "gpt-blender":
+            if not args.views or args.image or args.no_remove_bg or vehicle_spec is None:
+                parser.error("gpt-blender requires four --views and --vehicle-specs")
+            from .blender_mcp import reconstruct
+            print(reconstruct(args.views, args.output, vehicle_spec))
+        elif args.backend == "hunyuan-mv":
             if not args.views or args.image or args.no_remove_bg:
                 parser.error("hunyuan-mv requires --views and foreground masks; single-image input is unsupported")
             from .multiview import reconstruct

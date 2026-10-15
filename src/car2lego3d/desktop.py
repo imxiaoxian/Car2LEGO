@@ -71,7 +71,8 @@ def physical(spec, request, applied=False, audit=None):
         mm = value * 25.4 if item["unit"] == "inch" else value
         measurements[name] = dict(value=value, unit=item["unit"], method="sourced" if grounded else "estimated",
             grounded=grounded, conflicted=False, source_url=source.get("url"), source_kind=item.get("status"),
-            source_status="fetched", vehicle_match="source_scoped", confidence=1 if grounded else 0,
+            source_status="fetched" if grounded else "model_estimated", vehicle_match="source_scoped" if grounded else "model_assumed",
+            confidence=item.get("confidence", 1 if grounded else 0),
             target_model_mm=mm / denominator if item["unit"] in {"mm", "inch"} else None,
             evidence=item.get("evidence", ""), definition=name)
     for axle in ("front", "rear"):
@@ -80,6 +81,7 @@ def physical(spec, request, applied=False, audit=None):
             items = [measurements.get(f"{axle}_{field}", {}) for field in ("tyre_width", "tyre_aspect", "rim_diameter")]
             measurements[f"{axle}_tyre_diameter"] = dict(value=diameter, unit="mm", method="derived",
                 grounded=all(i.get("grounded", False) for i in items), conflicted=False,
+                confidence=min(i.get("confidence", 0) for i in items),
                 target_model_mm=diameter / denominator, source_url=items[0].get("source_url"), evidence="Tyre specification conversion")
     required = requirements_for_scale(scale)["required_measurements"]
     missing = [n for n, item in spec.get("measurements", {}).items() if item.get("value") is None]
@@ -91,7 +93,10 @@ def physical(spec, request, applied=False, audit=None):
         sources=[dict(url=s.get("url", ""), title=s.get("title", ""), status="fetched",
             measurement_count=sum(m.get("source") == key for m in spec.get("measurements", {}).values()))
             for key, s in sources.items() if s.get("url")],
-        research=dict(skill="vehicle-spec-search", version="1", status="completed",
+        acquisition=spec.get("acquisition"), manufacturer_verified=spec.get("manufacturer_verified", False),
+        research=dict(skill="vehicle-dialogue" if (audit or {}).get("mode") == "model_dialogue" else "vehicle-spec-search",
+            mode=(audit or {}).get("mode"), model=(audit or {}).get("model"), turns=(audit or {}).get("turns", 0),
+            version="2", status="completed",
             documents_read=len((audit or {}).get("opened_pages", [])),
             queries=[dict(query=q["query"], purpose="vehicle specifications", status="searched", engine="Bing",
                 results=q.get("results", [])) for q in (audit or {}).get("calls", [])]))
@@ -248,6 +253,12 @@ class DesktopStore:
                 raise ValueError("当前比例尚无可用装配配方：" + " ".join(plan["generation"]["blockers"]))
             spec_args = ["--vehicle-specs", str(spec_path)]
             prefix = [sys.executable, "-u", "-m", "car2lego3d"]
+            from dotenv import dotenv_values
+            backend = request.get("reconstruction_backend") or os.environ.get("CAR2LEGO_RECONSTRUCTION_BACKEND") or dotenv_values(ROOT / ".env").get("CAR2LEGO_RECONSTRUCTION_BACKEND") or "hunyuan-mv"
+            if backend not in {"hunyuan-mv", "gpt-blender"}:
+                raise ValueError("Unsupported desktop reconstruction backend")
+            request["reconstruction_backend"] = backend
+            write_json(directory / "request.json", request)
             views, mesh, lego, studio = (artifacts / n for n in ("01-image", "02-mesh", "03-lego", "04-studio"))
             prompt = f"{request['brand']} {request['model']} {request.get('year') or ''}. {request.get('custom_request', '')}"
             if request.get("color") is not None:
@@ -256,7 +267,7 @@ class DesktopStore:
                 ("reference_images", 12, views / "views.json", [*prefix, "image", "--prompt", prompt,
                     "--output", views, *spec_args, *(["--reference-image", source] if source.exists() else [])]),
                 ("reconstruction", 45, mesh / "calibrated.glb", [*prefix, "reconstruct", "--views", views / "views.json",
-                    "--output", mesh, "--backend", "hunyuan-mv", "--resolution", "256", "--reconstruction-steps", "50", *spec_args]),
+                    "--output", mesh, "--backend", backend, "--resolution", "256", "--reconstruction-steps", "50", *spec_args]),
                 ("assembly", 75, lego / "model.ldr", [*prefix, "lego", "--mesh", mesh / "calibrated.glb",
                     "--output", lego, "--scale", request["scale"], "--reference-views", views / "views.json", *spec_args,
                     *(["--color", request["color"]] if request.get("color") is not None else [])]),

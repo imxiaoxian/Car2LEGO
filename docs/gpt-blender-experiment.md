@@ -1,0 +1,158 @@
+# GPT + Blender MCP experiment
+
+## Implementation
+
+This branch adds `gpt-blender` as an explicit reconstruction backend. The desktop
+experiment selects it through `CAR2LEGO_RECONSTRUCTION_BACKEND=gpt-blender`.
+The existing default remains `hunyuan-mv` when this variable is absent.
+
+Vehicle dimensions now come directly from Responses API dialogue, using the
+original project's API configuration. The request supplies no browsing tools.
+Year is optional. Every returned number is an estimate with a confidence and
+basis; it does not certify manufacturer specifications. See
+[vehicle dialogue](vehicle-spec-search.md).
+
+The modelling request supplies four labelled elevations, the overview image and
+the full-size specification snapshot to `gpt-6.1-sol`. Generated bpy code runs
+through the upstream MCP `execute_blender_code` tool and Blender addon. Execution
+errors can trigger two corrections. After exporting six views, a visual review
+can apply one scene patch. Failed patches restore the saved coherent scene.
+
+The upstream dependency is
+[ahujasid/mcp-for-blender](https://github.com/ahujasid/mcp-for-blender), MIT,
+v2.1.9, commit `7a0373ec9199183cb460068c4f96aed9c579fb4f`.
+The addon is loaded in the experiment's Blender process. Preferences, logs and
+outputs are isolated per run. No global addon installation is required.
+Generated code is restricted by AST checks, which are not a security sandbox;
+this is a local modelling experiment using a trusted configured endpoint.
+
+## Setup And Run
+
+Install normal pipeline dependencies and `.[gpt]`. Blender 4.5 is required.
+The MCP subprocess uses an isolated environment to avoid conflicts with the
+original project's Python dependencies:
+
+```powershell
+uv venv .mcp-venv --python 3.11
+uv pip install --python .mcp-venv/Scripts/python.exe "mcp>=1.26,<2" httpx
+```
+
+Set these paths in the ignored local `.env`, adapting to the local checkout:
+
+```dotenv
+CAR2LEGO_SOURCE_ROOT=D:/lego
+CAR2LEGO_SOURCE_PYTHON=D:/python/anaconda/python.exe
+CAR2LEGO_MCP_PYTHON=D:/Car2LEGO_3D-worktrees/gpt61-blender/.mcp-venv/Scripts/python.exe
+CAR2LEGO_BLENDER=D:/lego/backend/storage/tool_research/blender-4.5.14-windows-x64/blender.exe
+CAR2LEGO_RECONSTRUCTION_BACKEND=gpt-blender
+```
+
+API credentials are inherited from the original project's configuration and are
+not stored in the experiment's request records. Use the experiment's installed
+Python package; when sharing another checkout's interpreter, set `PYTHONPATH`
+to this checkout's `src` first.
+
+```powershell
+python -m car2lego3d research --brand Lotus --model "For Me" --output runs/spec
+python -m car2lego3d reconstruct --backend gpt-blender `
+  --views path/to/01-image/views.json --vehicle-specs runs/spec/spec.json `
+  --output runs/mesh
+python -m car2lego3d lego --mesh runs/mesh/calibrated.glb `
+  --vehicle-specs runs/spec/spec.json --reference-views path/to/01-image/views.json `
+  --scale 1:24 --strategy car --color 25 --output runs/lego
+python -m car2lego3d studio --ldraw runs/lego/model.ldr --output runs/studio
+```
+
+For image generation and all subsequent stages together, use `run --backend
+gpt-blender --prompt ... --vehicle-specs ... --scale 1:24 --strategy car` with
+an empty output directory. The existing GPT image service remains unchanged.
+
+## Actual Comparison On 2026-10-15
+
+The isolated worktree is `D:/Car2LEGO_3D-worktrees/gpt61-blender`, branch
+`codex/gpt61-blender`, based on `450e6db`. Original checkouts remain untouched.
+
+Inputs were reused transparently to compare reconstruction and conversion:
+
+- Genuine `gpt-image-2.5-sunburst` four-view images and overview from
+  `D:/Car2LEGO_3D/runs/lotus-for-me-gpt-20261015/01-image`. Image generation was
+  not repeated in this comparison.
+- A new real direct dialogue for Lotus For Me, with no year, returned all 27
+  numeric estimates in one turn and zero search calls. Assumed dimensions were
+  5103 x 2019 x 1636 mm, wheelbase 3019 mm. These are not verified vehicle data.
+- Candidate modelling and visual patch were actually executed through MCP.
+- Baseline reused the raw Hunyuan3D-2mv inference from
+  `D:/Car2LEGO_3D/runs/lotus-for-me-mv-20261015/02-mesh-v2/mesh.glb`
+  (resolution 256, 50 steps), recalibrated with the same new specification.
+  Hunyuan inference was not repeated.
+- Both LEGO conversions used the same specification, views, 1:24 scale, orange
+  colour 25, native geometry audit, presentation service and Studio export.
+
+| Result | GPT + Blender | Hunyuan3D-2mv |
+| --- | --- | --- |
+| Mesh triangles | 209928 | 305732 |
+| LEGO recipe | suv-v1 | suv-v1 |
+| Parts | 345 | 335 |
+| Native overall L/W/H, mm | 222.4 / 88.0 / 67.200024 | 222.4 / 88.0 / 67.200024 |
+| Detected native collisions | 0 | 0 |
+| Connectivity components | 2 | 2 |
+| Parts disconnected from main component | 2 | 2 |
+| Studio archive/source verification | passed | passed |
+| Delivery accepted | false | false |
+
+Measurements include protruding native parts and studs. Zero detected collisions
+does not prove a physical build. Studio GUI import and physical assembly were not
+verified. `requirements-report.json` remains `draft`; estimated vehicle inputs
+cannot pass manufacturer-grounded dimensional acceptance. Nominal front tyre
+width differs by +22.18%, windscreen width by -24.71%, and windscreen angle by
++13 degrees from the assumed targets.
+
+The Blender intermediate mesh has separate coloured bodywork, wheels, glass,
+lights and door outlines, but its front styling and broad glazing still deviate
+from the input images. The final LEGO renders remain very similar, with only
+minor surface-detail differences. The converter's fixed part families remain
+the main bottleneck. No final quality improvement sufficient to justify merging
+was demonstrated, so this experiment is not merged into `main`.
+
+The actual modelling response followed the older image brief's 21-inch tyres
+instead of the new dialogue's 22-inch estimate. The prompt now explicitly gives
+the specification snapshot precedence, but modelling has not been rerun with
+that amended sentence. Bounding boxes include mirrors/trim and do not validate
+body width. The common render importer compensates for the GLB Y-up conversion
+when displaying the baseline's stored Z-up coordinates.
+
+Local evidence is in `runs/lotus-dialogue-blender`,
+`runs/lotus-dialogue-hunyuan`, and `runs/blender-comparison.json`.
+Each candidate includes MCP requests/responses, Blender and GLB outputs,
+native LEGO reports, actual geometry renders, LDraw, BOM, steps PDF and `.io`.
+Large run artifacts are ignored by Git; the code and this record are versioned.
+Use `scripts/compare_backends.py --candidate ... --baseline ... --spec ...
+--views ... --output ...` for another prepared comparison, or `--render-only`
+to refresh common-rig images without rewriting meshes or regenerating LEGO.
+
+## Dialogue And Desktop Validation
+
+An uncached BMW M4 parameter request through the desktop frontend completed in
+35.27 seconds. Year was omitted. It returned 27 model estimates, plus two derived
+tyre diameters, in one turn with zero search calls. The model assumed the 2021
+G82 standard coupe and estimated length at 4794 mm. Even its high-confidence
+values remain `estimated`, without manufacturer or physical verification.
+Request and response evidence is saved under
+`runs/vehicle-research/758ca8eb9c93492d9c7dec6a851c577f/research/`.
+
+The Next.js proxy timeout now allows the two possible five-minute dialogue turns;
+its previous 30-second default interrupted the real request. A cached vehicle
+also remains readable while a different vehicle's dialogue is running. The
+same-origin write guard remains enabled for the experiment's frontend port.
+
+Validation after these changes: 175 backend tests passed; the production frontend
+build passed; six desktop Playwright cases passed at 1440 x 1000 and 1920 x 1080.
+The desktop checks cover actual geometry pixels, rotation, wireframe, assembly
+steps, downloads, brands, optional year and dialogue parameter labels. Screenshots
+are under `runs/desktop-playwright/`. These checks do not establish visual delivery
+acceptance, Studio GUI compatibility or physical buildability.
+
+The published experimental candidate is
+`http://127.0.0.1:8770/designs/5b62aa03259f4a0995d25c2358fd6f85`.
+Its Studio file is
+`runs/web/5b62aa03259f4a0995d25c2358fd6f85/artifacts/04-studio/model.io`.

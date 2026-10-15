@@ -47,7 +47,12 @@ def load_mesh(source):
 
 
 def color_visual(mesh):
-    return mesh.visual.to_color() if mesh.visual.kind == "texture" else mesh.visual
+    if mesh.visual.kind == "texture":
+        visual = mesh.visual.to_color()
+        # Trimesh's texture conversion leaves the mesh needed for face colors unset.
+        visual.mesh = mesh
+        return visual
+    return mesh.visual
 
 
 def orient(mesh, up_axis="z", yaw=0):

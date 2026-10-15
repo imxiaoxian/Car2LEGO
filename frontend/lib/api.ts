@@ -70,7 +70,9 @@ export interface PhysicalSpecifications {
   missing_recommended?: string[];
   conflicts: { name: string }[];
   sources: { url: string; status: string; title?: string; error?: string; note?: string; measurement_count?: number }[];
+  acquisition?: string;
   research?: { skill: string; version: string; status: string; scale: string; documents_read?: number;
+    mode?: string; model?: string; turns?: number;
     started_at?: string; finished_at?: string; missing_fields?: string[];
     queries: { query: string; purpose: string; status: string; engine?: string; results: { title: string; url: string }[] }[] };
 }

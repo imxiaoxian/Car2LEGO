@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, FormEvent } from "react";
 import { createRoot } from "react-dom/client";
-import { ArrowRight, Blocks, Box, Download, ExternalLink, Image, LoaderCircle, RefreshCw, Search } from "lucide-react";
+import { ArrowRight, Blocks, Box, Download, ExternalLink, Image, LoaderCircle, MessageSquare, RefreshCw, Search } from "lucide-react";
 import BrandSelector from "@/components/BrandSelector";
 import { vehicleBrands } from "@/lib/vehicle-brands";
 import "./styles.css";
@@ -12,8 +12,8 @@ interface Job {
   request: { brand_zh?: string; brand?: string; model: string; scale: string };
 }
 interface Identity { brand: string; model: string; variant: string }
-interface Measurement { value: number | null; unit: string; status: string; source: string | null; evidence: string; note: string }
-interface Spec { model: string; variant: string; measurements: Record<string, Measurement>; sources: Record<string, { title: string; url: string; kind: string }> }
+interface Measurement { value: number | null; unit: string; status: string; source: string | null; evidence: string; note: string; confidence?: number }
+interface Spec { model: string; variant: string; measurements: Record<string, Measurement>; sources: Record<string, { title: string; url?: string; kind: string }> }
 interface Research { id: string; status: string; request: Identity; spec?: Spec; questions?: string[]; notes?: string[]; error: string | null; cached?: boolean }
 interface Plan { grid: { length_studs: number; width_studs: number }; policy: Policy; missing_measurements: string[];
   generation: { draft_recipe_available: boolean; blockers: string[] } }
@@ -185,16 +185,16 @@ function App() {
             <label className="field"><span>年款 / 版本（可选）</span><input aria-label="年款 / 版本" value={variant}
               onChange={e => { setVariant(e.target.value); identityEdited(); }} placeholder="如 1987 · 国际版" maxLength={100} /></label>
             <div className="research-section">
-              <div className="research-heading"><strong>联网物理规格</strong>
+              <div className="research-heading"><strong>车辆物理规格</strong>
                 <button type="button" className="research-command" disabled={searching || !brand.trim() || !model.trim()}
                   onClick={() => { void searchSpecs(!!currentResearch); }}>
-                  {searching ? <LoaderCircle size={15} className="spin" /> : currentResearch ? <RefreshCw size={15} /> : <Search size={15} />}
-                  {searching ? "搜索中" : currentResearch ? "重新搜索" : "搜索规格"}</button></div>
-              <p className="research-state" role="status">{startingResearch ? "正在启动联网搜索" : searching ?
-                `正在搜索 ${research?.request.brand || brand} ${research?.request.model || model}` : spec ?
+                  {searching ? <LoaderCircle size={15} className="spin" /> : currentResearch ? <RefreshCw size={15} /> : <MessageSquare size={15} />}
+                  {searching ? "获取中" : currentResearch ? "重新获取" : "获取规格"}</button></div>
+              <p className="research-state" role="status">{startingResearch ? "正在启动规格对话" : searching ?
+                `正在获取 ${research?.request.brand || brand} ${research?.request.model || model}` : spec ?
                 `${spec.model} · ${spec.variant}${currentResearch?.cached ? " · 已缓存" : ""}` : currentResearch?.status === "needs_clarification" ?
                 "请明确车型代际或版本" : currentResearch?.status === "not_found" ? "未找到完整的基础尺寸" :
-                currentResearch?.status === "failed" || currentResearch?.status === "interrupted" ? "规格检索未完成" : "等待车型规格"}</p>
+                currentResearch?.status === "failed" || currentResearch?.status === "interrupted" ? "规格获取未完成" : "等待车型规格"}</p>
               {currentResearch?.questions?.map((question, index) => <p key={index} className="constraint blocked">{question}</p>)}
               {(researchError || currentResearch?.error) && <p className="error" role="alert">{researchError || currentResearch?.error}</p>}
               {spec && <>
@@ -203,11 +203,12 @@ function App() {
                 <details className="spec-details"><summary>物理参数与来源</summary>
                   <table><tbody>{Object.entries(spec.measurements).map(([field, item]) => <tr key={field}>
                     <th>{measurementNames[field] || field}</th><td>{item.value === null ? "未找到" : `${item.value} ${item.unit}`}
-                      {item.value !== null && item.source && <a href={spec.sources[item.source].url} target="_blank" rel="noreferrer"
-                        title={`${spec.sources[item.source].title}\n${item.evidence}\n${item.note}`} aria-label={`${measurementNames[field]}来源`}><ExternalLink size={12} /></a>}</td></tr>)}</tbody></table>
+                      {item.value !== null && item.source && (spec.sources[item.source].url ? <a href={spec.sources[item.source].url} target="_blank" rel="noreferrer"
+                        title={`${spec.sources[item.source].title}\n${item.evidence}\n${item.note}`} aria-label={`${measurementNames[field]}来源`}><ExternalLink size={12} /></a>
+                        : <small title={item.note}>模型估算 · {Math.round((item.confidence || 0) * 100)}%</small>)}</td></tr>)}</tbody></table>
                   <ol className="source-list">{Object.entries(spec.sources).map(([id, source]) => <li key={id}>
-                    <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a>
-                    <small>{source.kind === "reference" ? "资料来源" : source.kind === "tyre_manufacturer" ? "轮胎厂商" : "汽车厂商"}</small></li>)}</ol>
+                    {source.url ? <a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> : <span>{source.title}</span>}
+                    <small>{source.kind === "model_estimate" ? "模型估算，未经核验" : source.kind === "reference" ? "资料来源" : source.kind === "tyre_manufacturer" ? "轮胎厂商" : "汽车厂商"}</small></li>)}</ol>
                 </details>
               </>}
               {currentResearch?.notes?.map((note, index) => <p key={index} className="research-note">{note}</p>)}
@@ -221,7 +222,7 @@ function App() {
             </> : <div className="scale-requirements"><p>{scaleDescriptions[scale]}</p>
               {policy && <span>{policy.required_measurements.length} 项尺寸资料 · 每步最多 {policy.max_parts_per_step} 件</span>}
             </div>}
-            <p className={blocked ? "constraint blocked" : "constraint"}>{!spec ? "等待联网规格" : planError || (currentPlan ?
+            <p className={blocked ? "constraint blocked" : "constraint"}>{!spec ? "等待车型规格" : planError || (currentPlan ?
               currentPlan.generation.draft_recipe_available ? `尺寸辅助 · ${currentPlan.grid.length_studs} × ${currentPlan.grid.width_studs} studs · ${currentPlan.missing_measurements.length} 项所需参数未找到` :
               `当前配方不支持 ${currentPlan.policy.scale} / ${currentPlan.grid.length_studs} × ${currentPlan.grid.width_studs} studs` : "正在规划尺寸")}</p>
             <div className="color-field"><span>车身颜色</span><div role="group" aria-label="车身颜色" className="swatches">

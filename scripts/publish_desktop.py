@@ -19,6 +19,8 @@ def main():
     parser.add_argument("--mesh", type=Path, required=True)
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--spec", type=Path, required=True)
+    parser.add_argument("--research-audit", type=Path)
+    parser.add_argument("--frontend-port", type=int, default=8768)
     args = parser.parse_args()
     load_views(args.views / "views.json")
     spec = load_spec(args.spec)
@@ -37,6 +39,9 @@ def main():
     studio = export_studio(artifacts / "03-lego/model.ldr", artifacts / "04-studio", preview if preview.exists() else None)
     verify_archive(studio, artifacts / "03-lego/model.ldr")
     write_json(directory / "vehicle-specs.json", spec)
+    if args.research_audit:
+        audit = json.loads(args.research_audit.read_text(encoding="utf-8"))
+        write_json(directory / "research-audit.json", audit.get("audit", audit))
     write_json(directory / "request.json", request | dict(created_at=datetime.now(timezone.utc).isoformat(),
                origin="Imported CLI candidate; appearance and physical build not accepted"))
     write_json(directory / "desktop.json", dict(artifacts="artifacts", workflow="multiview_v1"))
@@ -44,7 +49,7 @@ def main():
         "reference_images":"01-image/views.json", "reconstruction":"02-mesh/calibrated.glb",
         "assembly":"03-lego/model.ldr", "exporting":"04-studio/model.io"}.items()})
     write_json(directory / "status.json", dict(status="draft", stage="draft", progress=100, error=None))
-    print(json.dumps(dict(id=id, url=f"http://127.0.0.1:8768/designs/{id}", studio=str(studio))))
+    print(json.dumps(dict(id=id, url=f"http://127.0.0.1:{args.frontend_port}/designs/{id}", studio=str(studio))))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,10 @@
 {
+  "blender_mcp_code": {
+    "url": "https://github.com/ahujasid/mcp-for-blender.git",
+    "commit": "7a0373ec9199183cb460068c4f96aed9c579fb4f",
+    "version": "2.1.9",
+    "license": "MIT"
+  },
   "hunyuan3d_code": {
     "url": "https://github.com/Tencent-Hunyuan/Hunyuan3D-2",
     "repo": "Tencent-Hunyuan/Hunyuan3D-2",

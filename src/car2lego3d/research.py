@@ -1,4 +1,4 @@
-"""Run the project research skill with live web search and persist its evidence."""
+"""Vehicle specification dialogue and caches, with the legacy web compiler retained."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
@@ -181,7 +181,7 @@ def compile_result(answer, identity, audit):
             "error": None, "delivery_accepted": False}
 
 
-def research_vehicle(identity, directory, timeout=300):
+def research_vehicle_web(identity, directory, timeout=300):
     directory = Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=True)
     executable = os.environ.get("CAR2LEGO_CODEX_BIN") or shutil.which("codex")
@@ -221,6 +221,11 @@ def research_vehicle(identity, directory, timeout=300):
     return result
 
 
+def research_vehicle(identity, directory, timeout=300):
+    from .vehicle_dialogue import research_vehicle as dialogue
+    return dialogue(identity, directory, timeout)
+
+
 class ResearchStore:
     def __init__(self, directory):
         self.directory = Path(directory)
@@ -235,7 +240,6 @@ class ResearchStore:
                 current = self._read(self.active)
                 if identity_key(current["request"]) == key:
                     return current
-                raise RuntimeError("已有车型规格正在检索，完成后可搜索新车型。")
             if not refresh and self.directory.exists():
                 for path in sorted(self.directory.glob("*/result.json"), key=lambda p: p.stat().st_mtime, reverse=True):
                     try:
@@ -243,8 +247,10 @@ class ResearchStore:
                     except (OSError, ValueError):
                         continue
                     if (identity_key(cached["request"]) == key and cached["status"] == "ready"
-                            and cached.get("audit", {}).get("skill_sha256") == digest(SKILL)):
+                            and cached.get("audit", {}).get("cache_signature") == self.cache_signature()):
                         return {"id": path.parent.name, **cached, "cached": True}
+            if self.active:
+                raise RuntimeError("已有车型规格对话正在进行，完成后可获取新车型。")
             research_id = uuid4().hex
             directory = self.directory / research_id
             write_json(directory / "result.json", {"status": "running", "request": identity, "error": None})
@@ -252,9 +258,14 @@ class ResearchStore:
             self.pool.submit(self._run, research_id, identity)
             return {"id": research_id, "status": "running", "request": identity, "error": None}
 
+    @staticmethod
+    def cache_signature():
+        from .vehicle_dialogue import cache_signature
+        return cache_signature()
+
     def _read(self, research_id):
         if not isinstance(research_id, str) or not re.fullmatch(r"[a-f0-9]{32}", research_id):
-            raise FileNotFoundError("规格检索不存在。")
+            raise FileNotFoundError("规格对话不存在。")
         result = json.loads((self.directory / research_id / "result.json").read_text(encoding="utf-8"))
         return {"id": research_id, **result}
 
@@ -262,7 +273,7 @@ class ResearchStore:
         with self.lock:
             result = self._read(research_id)
             if result["status"] == "running" and research_id != self.active:
-                result.update(status="interrupted", error="规格检索曾中断，请重新搜索。")
+                result.update(status="interrupted", error="规格对话曾中断，请重新获取。")
             return result
 
     def _run(self, research_id, identity):
@@ -281,9 +292,9 @@ class ResearchStore:
     def specification(self, research_id, identity):
         result = self.get(research_id)
         if result["status"] != "ready":
-            raise ValueError("请先完成该车型的联网规格检索。")
+            raise ValueError("请先完成该车型的规格对话。")
         if identity_key(result["request"]) != identity_key(identity):
-            raise ValueError("车型或版本已改变，请重新搜索物理规格。")
+            raise ValueError("车型或版本已改变，请重新获取物理规格。")
         return self.directory / research_id / "research/spec.json"
 
     def close(self):
