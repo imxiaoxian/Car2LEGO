@@ -9,7 +9,7 @@ interface Policy { scale: string; required_measurements: string[]; max_parts_per
 interface Config { scales: Policy[]; colors: { code: number; name: string }[] }
 interface Job {
   id: string; status: string; error: string | null; files: Record<string, string>; log: string;
-  request: { brand_zh: string; model: string; scale: string };
+  request: { brand_zh?: string; brand?: string; model: string; scale: string };
 }
 interface Identity { brand: string; model: string; variant: string }
 interface Measurement { value: number | null; unit: string; status: string; source: string | null; evidence: string; note: string }
@@ -34,7 +34,7 @@ const scaleDescriptions: Record<string, string> = {
   "1:16": "精细座舱 · 双门开合 · 转向",
   "1:12": "分层车身 · 精细底盘 · 独立悬挂",
 };
-const swatches: Record<number, string> = { 4: "#c82a34", 0: "#202124", 15: "#ffffff", 1: "#226bc0", 14: "#f0ce3c", 2: "#267851" };
+const swatches: Record<number, string> = { 4: "#c82a34", 25: "#ef7d13", 0: "#202124", 15: "#ffffff", 1: "#226bc0", 14: "#f0ce3c", 2: "#267851" };
 const statusNames: Record<string, string> = { running: "生成中", completed: "草稿已生成", failed: "生成失败", interrupted: "任务已中断" };
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
@@ -238,7 +238,7 @@ function App() {
         </form>
       </section>
       <section className="result" aria-labelledby="result-title">
-        <div className="section-heading"><h2 id="result-title">{job ? `${job.request.brand_zh} ${job.request.model}` : "Ferrari F40"}</h2>
+        <div className="section-heading"><h2 id="result-title">{job ? `${job.request.brand_zh || job.request.brand || ""} ${job.request.model}`.trim() : "Ferrari F40"}</h2>
           <span className={`job-status ${job?.status || ""}`} role="status">{job ? statusNames[job.status] : "已有研究草稿"}</span></div>
         <div className="pipeline-strip"><span className={job?.files.image ? "done" : ""}><Image size={16} />参考图片</span><ArrowRight size={14} />
           <span className={job?.files.mesh ? "done" : ""}><Box size={16} />3D 网格</span><ArrowRight size={14} />
@@ -247,8 +247,12 @@ function App() {
           <img src={job?.files.native || job?.files.preview || job?.files.image || "/api/preview"} alt={job?.files.native ? "本次乐高模型" : job?.files.preview ? "本次重建网格" : job?.files.image ? "本次生成参考图片" : "已有 F40 乐高研究草稿的原生零件渲染"} />
           <figcaption>{job ? (job.files.native ? "原生 LEGO 零件渲染 · 外观未验收" : job.files.preview ? "本次重建网格" : job.files.image ? "本次参考图片" : "已有 F40 草稿 · 等待本次结果") : "原生 LEGO 零件渲染 · 外观未验收"}</figcaption>
         </figure>
+        {job && ['front', 'left', 'back', 'right'].some(key => job.files[key]) && <div className="reference-views">
+          {[['front', '前视'], ['left', '左视'], ['back', '后视'], ['right', '右视']].map(([key, label]) => job.files[key] &&
+            <a href={job.files[key]} key={key} target="_blank" rel="noreferrer"><img src={job.files[key]} alt={label} /><span>{label}</span></a>)}
+        </div>}
         {job?.files.studio && <div className="downloads"><a className="primary-button" href={job.files.studio}><Download size={17} />Studio .io</a>
-          {[['ldraw', 'LDraw'], ['mesh', '3D 网格'], ['specs', '物理规格'], ['request', '生成参数']].map(([key, label]) => job.files[key] && <a key={key} href={job.files[key]}><Download size={15} />{label}</a>)}</div>}
+          {[['ldraw', 'LDraw'], ['mesh', '3D 网格'], ['specs', '物理规格'], ['recipe', '配方来源'], ['views', '视图记录'], ['request', '生成参数']].map(([key, label]) => job.files[key] && <a key={key} href={job.files[key]}><Download size={15} />{label}</a>)}</div>}
         {job && <div className="run-details">
           {job.error && <p className="error" role="alert">{job.error}</p>}
           <details open={job.status === "failed"}><summary>运行记录</summary><pre>{job.log || "任务已提交"}</pre></details>

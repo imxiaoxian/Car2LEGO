@@ -124,3 +124,7 @@ pre { max-height: 240px; overflow: auto; padding: 12px; background: var(--surfac
 .brand-other-chevron { margin-left: auto; transform: rotate(-90deg); color: var(--muted); }
 .brand-other:hover { color: var(--blue); }
 @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+.reference-views { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+.reference-views a { min-width: 0; color: var(--muted); text-decoration: none; font-size: 12px; }
+.reference-views img { width: 100%; aspect-ratio: 3 / 2; object-fit: contain; background: white; display: block; }
+.reference-views span { display: block; text-align: center; margin-top: 6px; }

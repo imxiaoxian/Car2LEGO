@@ -1,4 +1,17 @@
 {
+  "hunyuan3d_code": {
+    "url": "https://github.com/Tencent-Hunyuan/Hunyuan3D-2",
+    "repo": "Tencent-Hunyuan/Hunyuan3D-2",
+    "commit": "f8db63096c8282cb27354314d896feba5ba6ff8a"
+  },
+  "hunyuan3d_weights": {
+    "repo": "tencent/Hunyuan3D-2mv",
+    "revision": "3a761b539b29fe4ff64714813aa9560fd66f5de0",
+    "subfolder": "hunyuan3d-dit-v2-mv",
+    "variant": "fp16",
+    "size_bytes": 4928151562,
+    "sha256": "d36f5881bcdc56726b73e517cd444c13c60732431622da7268145355c8d38e9c"
+  },
   "triposr_code": {
     "url": "https://github.com/VAST-AI-Research/TripoSR.git",
     "commit": "107cefdc244c39106fa830359024f6a2f1c78871"

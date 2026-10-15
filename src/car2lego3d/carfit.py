@@ -40,7 +40,7 @@ class Placement:
 
 
 def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=None, width=None,
-             scale=None, requirements_plan=None):
+             scale=None, requirements_plan=None, body_style=None, reference_brief=None):
     plan = None
     if specifications is not None:
         from .requirements import plan_design, validate_plan
@@ -121,11 +121,16 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
             np.array(candidates[key]) / np.linalg.norm(candidates[key]) - unit))
     if color not in PALETTE:
         raise ValueError("Unsupported body color.")
+    upper = points[points[:, 2] >= vertices[:, 2].max() * .85, 1]
+    upper_width = float(np.diff(np.quantile(upper, [.02, .98]))[0]) if len(upper) >= 20 else None
+    upper_ratio = upper_width / mesh.extents[1] * mesh.extents[0] / (length-1) if upper_width is not None else None
     fit = {"length_studs": length, "width_studs": width, "body_color": color,
             "body_color_source": "override" if color_override else "mesh chroma",
             "axles_studs": axles, "roof_start_stud": roof_start, "roof_end_stud": roof_end,
             "source_axles_studs": mesh_axles, "axle_position_source": axle_source,
             "source_roof_interval_studs": raw_roof,
+            "source_upper_body_width_ratio": upper_ratio,
+            "upper_body_width_method": "surface samples above 85 percent height; 2-98 percentile lateral span",
             "source_extents_in_studs": vertices.max(axis=0).tolist(),
             "height_profile_studs": profile.tolist(), "wheel_evidence_histogram": histogram.tolist(),
             "principal_axis_alignment_degrees": alignment, "front_orientation_flipped": flipped,
@@ -141,9 +146,8 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
         fit["physical_calibration"] = calibration
         fit["target_scale_denominator"] = plan["target_scale_denominator"]
         fit["requirements_plan"] = plan
-        from .coupe import fit_coupe, is_coupe
-        if is_coupe(specifications, profile, length):
-            fit_coupe(fit, specifications)
+        from .recipes import fit_family
+        fit_family(fit, specifications, reference_brief, body_style)
         fit["physical_constraints"] = dimension_report(specifications, fit)
         if "axle positions" in fit["inferred_parameters"]:
             fit["inferred_parameters"].remove("axle positions")
@@ -215,7 +219,10 @@ class Car:
 
 
 def design(fit, rear_wing=True):
-    if fit.get("recipe") == "coupe-v1":
+    if fit.get("family_builder") == "open_wheel":
+        from .recipes import design_open_wheel
+        return design_open_wheel(fit)
+    if fit.get("family_builder") in ("closed", "open_cabin", "pickup") or fit.get("recipe") in ("coupe-v1", "suv-v1"):
         from .coupe import design_coupe
         return design_coupe(fit)
     car = Car(fit)
@@ -385,7 +392,8 @@ def split_steps(car, limit):
 
 
 def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=None, rear_wing=True,
-                vehicle_spec=None, width_studs=None, scale=None, requirements_plan=None):
+                vehicle_spec=None, width_studs=None, scale=None, requirements_plan=None,
+                body_style=None, reference_views=None):
     source, directory = Path(source), Path(directory)
     with stage(directory, "lego", {"mesh": source.name, "sha256": digest(source), "strategy": "car",
                                    "length_studs": length_studs, "rear_wing": rear_wing,
@@ -396,7 +404,14 @@ def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=
             from .vehicle import load_spec, spec_record
             specifications = load_spec(vehicle_spec)
             record["vehicle_spec"] = spec_record(vehicle_spec)
-        fit = fit_mesh(mesh, length_studs, up_axis, yaw, color, specifications, width_studs, scale, requirements_plan)
+        brief = None
+        if reference_views:
+            from .multiview import load_views
+            manifest, _ = load_views(reference_views)
+            brief = manifest.get("brief")
+            record["reference_views_sha256"] = digest(reference_views)
+        fit = fit_mesh(mesh, length_studs, up_axis, yaw, color, specifications, width_studs, scale,
+                       requirements_plan, body_style, brief)
         car = design(fit, rear_wing)
         requirements_report = None
         if specifications is not None:
@@ -409,6 +424,8 @@ def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=
             write_json(directory / "requirements-report.json", requirements_report)
         export(car, directory)
         write_json(directory / "fit.json", fit)
+        if fit.get("recipe_selection"):
+            write_json(directory / "recipe-selection.json", fit["recipe_selection"])
         report = {"strategy": "car", "part_count": len(car.parts), "body_color": fit["body_color"],
                   "recipe": fit.get("recipe", "sports-v1"),
                   "tyre_count": 4, "native_wheel_count": 4,

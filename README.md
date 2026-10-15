@@ -4,14 +4,20 @@
 从 [Car2LEGO](https://github.com/imxiaoxian/Car2LEGO) 的图片参考、真实零件和独立验收设计出发，将显式 3D 网格作为新的中间表示。
 
 ```text
-文字描述 + 车辆规格 → SD-Turbo 图片 → 去背景 → TripoSR 3D 网格
-                                                ↓
-                              物理尺寸校准 → 标准车辆零件拟合
-                                                ↓
-                                     LDraw + BOM → Studio .io
+车型 + 原厂规格 + 外观参考 → 复用 Car2LEGO GPT 生图服务
+                           ↓
+         同一车型前 / 后 / 左 / 右四张独立视图
+                           ↓
+    前景与对向轮廓检查 → Hunyuan3D-2mv 联合重建
+                           ↓
+    尺寸校准 → 车型分类 → 官方 LEGO 结构参考配方
+                           ↓
+         网格细节适配 → LDraw + BOM → Studio .io
 ```
 
-默认 `car` 策略根据网格轮廓和规格选择跑车或前置发动机轿跑布局，生成原生轮组、玻璃、斜坡和座椅。
+默认重建使用四视图 `Hunyuan3D-2mv`；原来的单图 TripoSR 仅保留为显式选择的历史实验。
+`car` 策略根据车型身份、GPT 外观描述和网格选择车身类别，生成原生轮组、玻璃、斜坡和座椅。
+配方类别、官方套装来源、已检查的说明书页码及未实现范围见 [官方配方配置](docs/official-recipes.md)。
 轿跑配方保留连续车顶区间，按缩尺尺寸选择轮胎、车高和轮距，使用独立前后窗和封闭后备箱。
 BMW M4 G82 另采用明确记录的双肾格栅先验；其他车型不会自动套用这一前脸。
 它是有限零件家族的近似拟合，不是通用网格到任意乐高装配的恢复算法。
@@ -33,9 +39,12 @@ cd Car2LEGO_3D
 powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 ```
 
-脚本创建 `.venv`，安装 PyTorch 2.5.1 CUDA 12.4 和固定依赖，下载并固定 TripoSR 源码。
-首次运行会下载模型权重到 Hugging Face 缓存和背景移除权重到 rembg 缓存，需联网及数 GB 磁盘空间。
-没有全局修改 Python / Conda 环境。生图与重建不要求 OpenAI API 密钥；联网规格搜索需要已安装并登录的 Codex CLI。
+脚本创建 `.venv`，安装 PyTorch 2.5.1 CUDA 12.4 和依赖，下载并固定 Hunyuan3D 的形状重建源码。
+首次运行会下载模型权重到 `models/Hunyuan3D-2mv` 和背景移除权重到 rembg 缓存，需联网及数 GB 磁盘空间。
+没有全局修改 Python / Conda 环境。GPT 生图复用原项目的 API 配置；联网规格搜索需要已安装并登录的 Codex CLI。
+将 `.env.example` 中的 `CAR2LEGO_SOURCE_ROOT` 配置为原项目目录，必要时设置 `CAR2LEGO_SOURCE_PYTHON`。
+桥接进程直接调用原来的 `ReferenceImageService.generate()`，输出写入本项目，失败不会自动换用 SD。
+Hunyuan3D-2mv 的代码、权重与许可、复现命令见 [多视角复现](docs/multiview-reconstruction.md)。
 显存不足时可用 `--device cpu`，速度更慢。
 
 如果 Git 配置了失效代理，修复本机代理，或仅在本次克隆临时使用 `git -c http.proxy= -c https.proxy= clone ...`。
@@ -52,7 +61,7 @@ powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1
 页面直接复用 Car2LEGO 的品牌选择器和目录，收录 396 个品牌的中文名与本地 Logo，
 支持热门/全部、中文/英文/别名搜索。列表底部固定“其他”，选择后可输入自定义品牌。
 目录包含现存、历史及商用品牌，不保证穷尽全球所有品牌；数据来源和更新方式见
-[品牌目录](docs/vehicle-brand-catalog.md)。原项目 `D:\lego` 不参与本项目运行，也不会被修改。
+[品牌目录](docs/vehicle-brand-catalog.md)。生图阶段以只读方式调用 `D:\lego` 的参考图服务，产物保存在本项目。
 
 页面提交品牌、车型、颜色、比例和种子，实际调用上述完整 CLI 流程；完成后可下载
 Studio `.io`、LDraw 和 3D 网格。任务参数、日志和产物保存在 `runs/web/<任务ID>/`，
@@ -104,20 +113,22 @@ CLI 获取任意车型规格：
   --vehicle-specs data/vehicles/ferrari_f40_1987.json --output runs/f40
 ```
 
-从已有图片开始：
+从已生成的四视图开始：
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d run `
-  --image path/to/car.png --output runs/my-car --length-studs 24 --strategy car
+  --views runs/image/views.json --vehicle-specs path/to/spec.json `
+  --scale 1:24 --output runs/my-car --strategy car
 ```
 
-输入应是单个完整汽车、清楚边缘、三分之四视角和简单背景，不能是拼图或多视图面板。
-默认去背景；透明 PNG 复用 alpha。`--no-remove-bg` 适用于已正确居中、灰色背景的图。
+默认输入为同一辆汽车的前、左、后、右四张独立正交视图，不能将拼图直接作为一张输入。
+`views.json` 记录视图标签和图片哈希；对重复图片、缺失视角和明显不一致的轮廓拒绝重建。
+生图保留一张三分之四视角 overview 作为外观锚点，它不进入多视角模型的图像输入。
 `run` 要求空输出目录，避免覆盖旧实验。单独阶段可复用已有图片或网格：
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d image --prompt "a red sports car" --output runs/image
-.venv/Scripts/python.exe -m car2lego3d reconstruct --image runs/image/reference.png --output runs/mesh
+.venv/Scripts/python.exe -m car2lego3d reconstruct --views runs/image/views.json --output runs/mesh --resolution 256
 .venv/Scripts/python.exe -m car2lego3d lego --mesh runs/mesh/mesh.glb --output runs/lego --length-studs 24 --strategy car
 .venv/Scripts/python.exe -m car2lego3d studio --ldraw runs/lego/model.ldr --output runs/studio
 ```
@@ -131,7 +142,7 @@ CLI 获取任意车型规格：
 宽度先按实车比例规划，不可实现的宽度/比例会明确阻止推理，不压回当前零件家族。
 不提供规格时默认 8 studs 宽度，轴位置来自网格低侧暗色区域假设。
 `--color 4` 在 `car` 中只覆盖车身颜色，在 `plates` 中覆盖全部颜色；`--no-rear-wing` 去除尾翼。
-生图会检查 SD-Turbo 的 77-token 上限，提示词过长时报错。
+GPT 默认生成高质量图片；`--image-provider sd-turbo` 和 `--backend triposr` 仅供复查旧实验。
 
 ## 物理规格与测量
 
@@ -168,15 +179,18 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 | --- | --- |
 | `00-vehicle/spec.json` | 本次物理规格快照（仅规格模式） |
 | `00-requirements/requirements.json` | 首次模型调用前保存的比例要求与网格规划（规格模式） |
-| `01-image/reference.png`、`image.json` | 生图与提示词、种子、权重版本、耗时、哈希 |
-| `02-mesh/input.png`、`foreground.png` | 实际重建输入和去背景结果 |
-| `02-mesh/mesh.glb`、`mesh.obj` | TripoSR 带顶点颜色网格 |
+| `00-recipe/recipe.json` | 重建前选择的车型类别和官方结构参考 |
+| `01-image/reference.png`、`image.json` | GPT 外观锚点与调用来源 |
+| `01-image/{front,left,back,right}.png`、`views.json` | 四个独立视角、GPT 描述与哈希 |
+| `02-mesh/*-foreground.png`、`view-quality.json` | 四视图去背景和轮廓检查 |
+| `02-mesh/mesh.glb`、`mesh.obj` | Hunyuan3D-2mv 无纹理联合重建网格 |
 | `02-mesh/reconstruction.json` | 重建参数、面数、封闭性、耗时、显存、哈希 |
 | `02-mesh/calibrated.glb`、`calibrated-mm.obj` | 长宽高先验校准网格；GLB 用米，OBJ 用毫米；原始网格保留 |
 | `02-mesh/physical-calibration.json` | 独立 XYZ 缩放与校准边界记录 |
 | `03-lego/model.ldr` | 标准零件 LDraw 与阶段 `0 STEP`；阶段不是已验证拼装说明书 |
 | `03-lego/inventory.csv` | 零件编号、LDraw 颜色编号、数量；不是 BrickLink 颜色编号 |
 | `03-lego/assembly.json`、`fit.json` | 零件放置、网格证据、拟合参数；`fit.json` 仅 `car` |
+| `03-lego/recipe-selection.json` | 最终配方、官方说明书链接和模块审查记录 |
 | `03-lego/dimensions.json` | 比例、轴距、轮距、轮胎等目标和当前零件偏差（规格模式） |
 | `03-lego/requirements.json`、`requirements-report.json` | 本次采用的分比例标准、尺寸/资料/步骤/机构/证据检查（规格模式） |
 | `03-lego/mesh-preview.png` | 重建网格静态预览 |

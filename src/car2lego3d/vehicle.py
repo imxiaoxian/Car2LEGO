@@ -166,13 +166,14 @@ def dimension_report(spec, fit):
               "front_tyre_width": 11.2, "rear_tyre_width": 11.2,
               "door_length": 32, "door_panel_height": 16,
               "windscreen_bottom_width": 48, "windscreen_top_width": 32}
-    if fit.get("recipe") == "coupe-v1":
+    if "wheel_families" in fit:
         actual["height"] = fit["roof_top_plates"] * 3.2 - fit["ground_y_mm"]
         for axle, wheel in zip(("front", "rear"), fit["wheel_families"]):
             actual[f"{axle}_tyre_diameter"] = wheel["diameter_mm"]
             actual[f"{axle}_tyre_width"] = wheel["width_mm"]
             actual[f"{axle}_track"] = wheel["track_studs"] * 8
-        actual["windscreen_top_width"] = 48
+        actual["windscreen_top_width"] = fit.get("cabin_width_studs", 6) * 8
+        actual["windscreen_bottom_width"] = fit.get("cabin_width_studs", 6) * 8
     errors = {name: {"target_mm": target, "fitted_mm": actual[name],
                      "error_mm": actual[name] - target,
                      "error_percent": None if target == 0 else 100 * (actual[name] / target - 1)}
@@ -181,7 +182,7 @@ def dimension_report(spec, fit):
     native_angle = fit.get("fitted_windscreen_angle_degrees", math.degrees(math.atan2(27.5, 70)))
     report.update(model=spec["model"], variant=spec["variant"], dimensions=errors,
                   fitted_windscreen_angle_degrees=native_angle,
-                  windscreen_angle_error_degrees=None if report["windscreen_angle_degrees"] is None else
+                  windscreen_angle_error_degrees=None if report["windscreen_angle_degrees"] is None or native_angle is None else
                   native_angle - report["windscreen_angle_degrees"],
                   enforced_constraints=["mesh length/width/height prior", "quantized wheelbase", "body width family"],
                   deferred_constraints=[name for name in ("height", "door_front_x", "windscreen_bottom_x",

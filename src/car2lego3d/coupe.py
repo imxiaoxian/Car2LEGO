@@ -87,11 +87,16 @@ def design_coupe(fit):
     center = (width-1)/2
     start, end = fit["roof_start_stud"], fit["roof_end_stud"]
     roof, deck = fit["roof_top_plates"], fit["deck_top_plates"]
+    suv = fit.get("recipe") == "suv-v1"
+    open_cabin = fit.get("family_builder") == "open_cabin"
+    pickup = fit.get("family_builder") == "pickup"
+    cabin_width = fit.get("cabin_width_studs", 6)
+    windscreen = fit.get("windscreen_part", "92583")
     glass_top = roof-2
-    left = (width-6)//2
-    sides = [left, left+5]
-    cabin = range(left, left+6)
-    inner = range(left+1, left+5)
+    left = (width-cabin_width)//2
+    sides = [left, left+cabin_width-1]
+    cabin = range(left, left+cabin_width)
+    inner = range(left+1, left+cabin_width-1)
     edges = [0, 1, width-2, width-1]
     car.fill(range(1, length-1), range(2, width-2), range(2, 4), 0)
     car.fill(range(length), range(width), range(4, deck-1), paint)
@@ -121,10 +126,26 @@ def design_coupe(fit):
 
     car.clear(range(start-2, end+3), inner, range(5, deck))
     car.fill(range(start-2, end+3), inner, [4], 0)
-    # The windshield bottom is six plates below its top; reserve its full cavity.
-    car.place("92583", 40, start-1, center, glass_top, "front windscreen", 16, QUARTER)
-    car.place("92583", 40, end+1, center, glass_top, "rear windscreen", 16, BACK_QUARTER)
+    car.place(windscreen, 40, start-1, center, glass_top, "front windscreen", 16, QUARTER)
+    if not open_cabin:
+        car.place(windscreen, 40, end+1, center, glass_top, "rear windscreen", 16, BACK_QUARTER)
     for side, y in zip((-1, 1), sides):
+        if open_cabin:
+            continue
+        car.fill(range(start, end+1), [y], range(deck, glass_top-6), paint)
+        if suv:
+            x = start
+            pillar = start+4
+            while x <= end:
+                if x == pillar or x == end:
+                    car.fill([x], [y], range(glass_top-6, glass_top), 0)
+                    x += 1
+                else:
+                    car.place("87552", 40, x+.5, y, glass_top, "continuous side glazing", 16,
+                              HALF if side == -1 else IDENTITY)
+                    x += 2
+            car.fill(range(start-1, end+2), [y], [glass_top], 0)
+            continue
         for x in range(start, end, 2):
             if x+1 > end:
                 continue
@@ -135,7 +156,8 @@ def design_coupe(fit):
         if (end-start+1) % 2:
             car.fill([end], [y], range(deck, glass_top), paint)
         car.fill(range(start-1, end+2), [y], [glass_top], paint)
-    car.fill(range(start-1, end+2), inner, [glass_top], 0)
+    if not open_cabin:
+        car.fill(range(start-1, end+2), inner, [glass_top], 0)
 
     # Bonnet and boot are opaque, independently bounded surfaces for a front-engine car.
     car.clear([0], range(width), [deck-1])
@@ -150,9 +172,10 @@ def design_coupe(fit):
         if y not in lamp_rows:
             car.place("11477", paint, length-1.5, y, deck-1, "trunk edge curves", 14, BACK_QUARTER)
 
-    for y in (left-1, left+6):
-        car.fill(range(end+1, end+4), [y], range(deck, glass_top-3), paint)
-        car.place("4286", paint, end+1, y, glass_top, "raked C pillars", 16, BACK_QUARTER)
+    for y in (left-1, left+cabin_width):
+        if not open_cabin:
+            car.fill(range(end+1, end+4), [y], range(deck, glass_top-3), paint)
+            car.place("4286", paint, end+1, y, glass_top, "raked C pillars", 16, BACK_QUARTER)
 
     front = (0, 1, 0, 0, 0, 1, 1, 0, 0)
     rear = (0, -1, 0, 0, 0, -1, 1, 0, 0)
@@ -167,12 +190,17 @@ def design_coupe(fit):
             car.place("4070" if lamp else "87087", 0, x, y, mount_height, name, 9, rotation)
     for y in ((.5, width-1.5) if width == 8 else (1.5, width-2.5)):
         car.place("3069b", 47, -.7, y, deck-1.25, "slim headlamps", 18, front)
-        car.place("3069b", 36, length-.3, y, deck-1.25, "bar tail lights", 18, rear)
+        if not suv:
+            car.place("3069b", 36, length-.3, y, deck-1.25, "bar tail lights", 18, rear)
+    if suv:
+        for y in np.arange(.5, width-1, 2):
+            car.place("3069b", 36, length-.3, y, deck-1.25, "continuous SUV tail lights", 18, rear)
     for y in (center-1, center+1):
         if fit["styling_prior"] == "bmw-m4-g82":
             car.place("3068b", 0, -.9, y, light_h, "G82 vertical kidney grilles", 18, vertical_grille)
         else:
-            car.place("3069b", 0, -.9, y, light_h-1.25, "coupe front grille", 18, front)
+            car.place("3069b", 0, -.9, y, light_h-1.25,
+                      "Lotus lower air intake" if fit.get("styling_prior") == "lotus-for-me" else "front grille", 18, front)
         car.place("3069b", 0, length-.1, y, light_h-1.25, "rear fascia finish", 18, rear)
     for y in np.arange(1.5, width-1, 2):
         car.place("2412b", 0, length-.1, y, light_h-4.25, "rear diffuser", 18, rear)
@@ -185,26 +213,33 @@ def design_coupe(fit):
         facing = IDENTITY if side == -1 else HALF
         panel = (1, 0, 0, 0, 0, side, 0, -side, 0)
         # Door skins use the same native side-stud socket spacing as the sports recipe.
-        door_start = start-2
-        for x in (door_start, door_start+3):
-            car.clear([x], [outside], range(deck-5, deck-2))
-            car.place("87087", paint, x, outside, deck-2, "door mounts", 9, facing)
-        car.place("87079", paint, door_start+1.5, center+side*(center+.9), deck-3.25,
-                  "door skin", 18, panel)
+        door_starts = [start-2, start+3] if fit.get("door_count", 4 if suv else 2) == 4 else [start-2]
+        for door_start in door_starts:
+            for x in (door_start, door_start+3):
+                car.clear([x], [outside], range(deck-5, deck-2))
+                car.place("87087", paint, x, outside, deck-2, "door mounts", 9, facing)
+            car.place("87079", paint, door_start+1.5, center+side*(center+.9), deck-3.25,
+                      "door skin", 18, panel)
         car.clear([start-3], [outside], range(deck-2, deck))
         car.place("4070", paint, start-3, outside, deck+1, "mirror mounts", 13, facing)
         car.place("24246", paint, start-3, center+side*(center+.7), deck-.25, "mirrors", 18, panel)
         car.place("3070b", paint, start-3, outside, deck+2, "mirror caps", 18)
 
+    if pickup:
+        car.clear(range(end+4, length-1), range(1, width-1), range(5, deck))
+        car.fill(range(end+4, length-1), range(1, width-1), [4], 0)
     car.pack()
     car.tiles([0, 1, length-2, length-1], lamp_rows, deck+1, paint, "lamp caps", 14)
     car.tiles(range(2, start-3), range(2, width-2), deck+1, paint, "bonnet surface", 14)
-    car.tiles(range(end+4, length-2), range(1, width-1), deck+1, paint, "opaque trunk", 14)
-    car.tiles(range(start-1, end+2), cabin, roof, 0, "coupe roof", 18)
+    car.tiles(range(end+4, length-2), range(1, width-1), 5 if pickup else deck+1,
+              0 if pickup else paint, "cargo bed" if pickup else "opaque trunk", 14)
+    if not open_cabin:
+        car.tiles(range(start-1, end+2), cabin, roof, fit.get("roof_color", 0),
+                  "SUV roof" if suv else "coupe roof", 18)
     for x in range(length):
         for y in (0, 1, width-2, width-1):
             if ((x, y, deck-1) in car.cells and 2 <= x < length-2 and x != start-3
-                    and not (end+1 <= x <= end+3 and y in (left-1, left+6))):
+                    and not (end+1 <= x <= end+3 and y in (left-1, left+cabin_width))):
                 car.tiles([x], [y], deck+1, paint, "beltline finish", 14)
     for axle, wheel in zip(fit["axles_studs"], fit["wheel_families"]):
         if wheel["arch_span_studs"] == 6:
@@ -214,7 +249,11 @@ def design_coupe(fit):
                 car.tiles([int(axle-2.5), int(axle+2.5)], [y], deck, paint, "arch foot finish", 14)
     for y in (center-1, center+1):
         car.place("4079", 0, start+1.5, y, 6, "front seats", 15, QUARTER)
-        car.place("4079", 0, end+.5, y, 6, "rear seats", 15, QUARTER)
+        if not pickup:
+            car.place("4079", 0, end+.5, y, 6, "rear seats", 15, QUARTER)
     car.place("3829c01", 0, start-2, center-1, 5, "steering wheel", 15, QUARTER)
-    car.tiles([length-3], range(1, width-1), deck+2, 0, "trunk lip spoiler", 19)
+    if suv:
+        car.tiles([end+2], cabin, roof, 0, "SUV roof spoiler", 19)
+    elif not pickup:
+        car.tiles([length-3], range(1, width-1), deck+2, 0, "trunk lip spoiler", 19)
     return car

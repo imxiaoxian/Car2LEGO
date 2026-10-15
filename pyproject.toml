@@ -15,13 +15,16 @@ dependencies = [
   "accelerate==0.34.2", "safetensors==0.4.5", "omegaconf==2.3.0",
   "einops==0.8.0", "jaxtyping==0.2.36", "rembg==2.0.59",
   "onnxruntime==1.19.2", "imageio==2.36.0", "imageio-ffmpeg==0.5.1",
-  "matplotlib==3.9.2", "jsonschema==4.26.0", "httpx==0.28.1", "beautifulsoup4==4.14.2"
+  "matplotlib==3.9.2", "jsonschema==4.26.0", "httpx==0.28.1", "beautifulsoup4==4.14.2",
+  "python-dotenv==1.2.4"
 ]
 
 [project.optional-dependencies]
 test = ["pytest==8.3.3"]
 brands = ["httpx==0.28.1", "beautifulsoup4==4.14.2"]
 native = ["ldraw-mcp==0.3.1"]
+multiview = ["pymeshlab==2023.12.post3", "pygltflib==1.16.3", "opencv-python==4.10.0.84"]
+gpt = ["openai>=2.20,<3", "langchain-openai>=1,<2", "pydantic-settings>=2,<3"]
 
 [project.scripts]
 car2lego3d = "car2lego3d.cli:main"

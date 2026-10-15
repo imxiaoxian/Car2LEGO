@@ -1,0 +1,29 @@
+{
+  "version": "official-reference-families-v1",
+  "scope": "Vehicle architecture references, not replicas or LEGO-endorsed designs. Bounds below are this project's adaptation limits, not measured official dimensions.",
+  "families": {
+    "sports_car": {"label": "跑车/超跑", "builder": "sports", "official_sets": ["76934", "76909", "42115"], "modules": ["low_chassis", "wheel_arches", "compact_cabin", "rear_engine_deck", "optional_wing"], "doors": 2, "roof": "compact", "roof_start_fraction": [0.36, 0.55], "roof_end_fraction": [0.55, 0.73], "status": "draft"},
+    "f1_race": {"label": "F1/开轮赛车", "builder": "open_wheel", "official_sets": ["76909", "42141"], "modules": ["narrow_spine", "exposed_wheels", "single_seat", "sidepods", "front_wing", "rear_wing"], "doors": 0, "roof": "open", "roof_start_fraction": [0.40, 0.50], "roof_end_fraction": [0.55, 0.66], "status": "draft"},
+    "coupe": {"label": "双门轿跑/GT", "builder": "closed", "official_sets": ["76922", "10295"], "modules": ["layered_floor", "wheel_arches", "two_doors", "raked_glazing", "trunk"], "doors": 2, "roof": "coupe", "roof_start_fraction": [0.30, 0.43], "roof_end_fraction": [0.48, 0.70], "status": "draft"},
+    "sedan": {"label": "三厢轿车", "builder": "closed", "official_sets": ["76922", "76924"], "reference_scope": "Adapt coupe cabin and four-door SUV modules; these sets are not stock sedan replicas.", "modules": ["layered_floor", "four_doors", "separate_trunk", "front_rear_glazing"], "doors": 4, "roof": "sedan", "roof_start_fraction": [0.29, 0.39], "roof_end_fraction": [0.58, 0.72], "status": "draft"},
+    "hatchback": {"label": "两厢/掀背车", "builder": "closed", "official_sets": ["75885", "10242"], "modules": ["short_overhangs", "continuous_cabin", "rear_hatch", "wheel_arches"], "doors": 4, "roof": "hatch", "roof_start_fraction": [0.27, 0.38], "roof_end_fraction": [0.63, 0.78], "status": "draft"},
+    "wagon": {"label": "旅行车/猎装车", "builder": "closed", "official_sets": ["75828", "76924"], "reference_scope": "Ecto-1 supplies an extended roof/cargo architecture, not a modern estate identity.", "modules": ["long_floor", "four_doors", "extended_roof", "cargo_hatch"], "doors": 4, "roof": "wagon", "roof_start_fraction": [0.28, 0.39], "roof_end_fraction": [0.68, 0.81], "status": "draft"},
+    "suv": {"label": "SUV", "builder": "closed", "official_sets": ["76924", "42110"], "modules": ["long_floor", "wheel_arches", "four_doors", "wide_cabin", "tailgate"], "doors": 4, "roof": "suv", "roof_start_fraction": [0.30, 0.40], "roof_end_fraction": [0.65, 0.81], "status": "draft"},
+    "crossover": {"label": "跨界/轿跑SUV", "builder": "closed", "official_sets": ["76924", "76922"], "reference_scope": "Combine SUV floor and coupe roof modules; adapt to reconstructed roof slope.", "modules": ["suv_floor", "four_doors", "sloping_roof", "rear_hatch"], "doors": 4, "roof": "crossover", "roof_start_fraction": [0.30, 0.40], "roof_end_fraction": [0.60, 0.76], "status": "draft"},
+    "offroad": {"label": "硬派越野车", "builder": "closed", "official_sets": ["76924", "10317", "42110"], "modules": ["reinforced_floor", "upright_cabin", "wheel_arches", "tailgate"], "doors": 4, "roof": "upright", "roof_start_fraction": [0.28, 0.39], "roof_end_fraction": [0.67, 0.81], "status": "draft"},
+    "convertible": {"label": "敞篷/跑车敞篷版", "builder": "open_cabin", "official_sets": ["76924", "10295"], "modules": ["layered_floor", "open_cockpit", "front_windscreen", "rear_deck"], "doors": 2, "roof": "open", "roof_start_fraction": [0.32, 0.44], "roof_end_fraction": [0.53, 0.70], "status": "draft"},
+    "pickup": {"label": "皮卡", "builder": "pickup", "official_sets": ["10290"], "modules": ["ladder_frame", "cab", "open_cargo_bed", "tailgate"], "doors": 2, "roof": "cab", "roof_start_fraction": [0.27, 0.36], "roof_end_fraction": [0.45, 0.58], "status": "draft"},
+    "mpv": {"label": "MPV/多用途乘用车", "builder": null, "official_sets": ["10279", "31108"], "reference_scope": "Camper/van cabin modules only; modern MPV doors and seating need a separate implementation.", "modules": ["tall_cabin", "three_seat_rows", "sliding_door", "rear_hatch"], "status": "planned"},
+    "van": {"label": "厢式车/客货车", "builder": null, "official_sets": ["10279"], "modules": ["cab_forward", "long_roof", "sliding_door", "cargo_floor"], "status": "planned"},
+    "truck": {"label": "卡车/多轴商用车", "builder": null, "official_sets": ["42128"], "modules": ["ladder_frame", "multi_axle", "cab", "rear_equipment"], "status": "planned"},
+    "bus": {"label": "巴士/客车", "builder": null, "official_sets": ["10258"], "reference_scope": "London Bus provides a bus-specific architecture reference; detailed instruction review and a bus builder are pending.", "modules": ["long_frame", "repeated_windows", "passenger_floor"], "status": "planned"},
+    "prototype_race": {"label": "耐力原型赛车", "builder": null, "official_sets": ["76922"], "modules": ["low_monocoque", "enclosed_wheels", "narrow_canopy", "aero_tunnels", "rear_wing"], "status": "planned"},
+    "other": {"label": "其他/待确定", "builder": null, "official_sets": [], "modules": [], "status": "needs_classification"}
+  },
+  "scale_architectures": {
+    "1:38": {"reference_theme": "compact System adaptation", "status": "planned", "reason": "Independent compact wheel and glazing layout required"},
+    "1:24": {"reference_theme": "Speed Champions structural modules", "official_sets": ["76934", "76909", "76924", "76922"], "status": "draft", "native_widths": [8, 10, 12], "length_studs": [23, 32]},
+    "1:16": {"reference_theme": "Icons and Technic structural modules", "official_sets": ["10295", "10317", "42110"], "status": "planned"},
+    "1:12": {"reference_theme": "Technic chassis and mechanisms", "official_sets": ["42141", "42115", "42128"], "status": "planned"}
+  }
+}

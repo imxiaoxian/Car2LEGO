@@ -156,6 +156,30 @@ def test_legacy_job_store_can_serve_config_without_research_store(tmp_path):
             worker.join(timeout=5)
 
 
+def test_all_advertised_artifact_kinds_have_download_routes(tmp_path):
+    job_id = "b" * 32
+    write_json(tmp_path / job_id / "status.json", {"status": "completed"})
+    store = JobStore(tmp_path, None)
+    for kind, relative in FILES.items():
+        file = tmp_path / job_id / (relative if kind in {"request", "specs"} else "artifacts/"+relative)
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_bytes(kind.encode("ascii"))
+    with ThreadingHTTPServer(("127.0.0.1", 0), partial(Handler, directory=str(tmp_path), jobs=store)) as server:
+        worker = Thread(target=server.serve_forever)
+        worker.start()
+        connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+        try:
+            for kind in FILES:
+                connection.request("GET", f"/api/jobs/{job_id}/files/{kind}")
+                response = connection.getresponse()
+                assert response.status == 200, kind
+                assert response.read() == kind.encode("ascii")
+        finally:
+            connection.close()
+            server.shutdown()
+            worker.join(timeout=5)
+
+
 @pytest.mark.parametrize("variant_fields", [{}, {"variant": ""}, {"variant": "   "}])
 def test_http_research_and_plan_accept_optional_year(variant_fields, tmp_path, ready_research):
     research, research_id = ready_research()

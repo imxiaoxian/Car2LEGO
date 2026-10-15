@@ -22,10 +22,13 @@ from .vehicle import load_spec
 
 CATALOG = ROOT / "frontend/lib/data/vehicle-brands.json"
 FILES = {"image": "01-image/reference.png", "mesh": "02-mesh/mesh.glb",
+         "front": "01-image/front.png", "back": "01-image/back.png",
+         "left": "01-image/left.png", "right": "01-image/right.png", "views": "01-image/views.json",
+         "recipe": "03-lego/recipe-selection.json", "mesh_preview": "02-mesh/mesh-preview.png",
          "native": "03-lego/native-ldraw.png",
          "preview": "03-lego/mesh-preview.png", "ldraw": "03-lego/model.ldr",
          "studio": "04-studio/model.io", "request": "request.json", "specs": "vehicle-specs.json"}
-COLORS = {4: ("红色", "red"), 0: ("黑色", "black"), 15: ("白色", "white"),
+COLORS = {4: ("红色", "red"), 25: ("橙色", "orange"), 0: ("黑色", "black"), 15: ("白色", "white"),
           1: ("蓝色", "blue"), 14: ("黄色", "yellow"), 2: ("绿色", "green")}
 
 
@@ -247,7 +250,7 @@ class Handler(SimpleHTTPRequestHandler):
                 if not self.research():
                     return self.json_response({"error": "规格搜索暂不可用。"}, 503)
                 return self.json_response(self.research().get(match[1]))
-            match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(?:/files/([a-z]+))?", path)
+            match = re.fullmatch(r"/api/jobs/([a-f0-9]{32})(?:/files/([a-z_]+))?", path)
             if match:
                 if match[2]:
                     return self.send_file(self.jobs.file(match[1], match[2]))

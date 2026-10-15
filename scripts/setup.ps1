@@ -13,6 +13,8 @@ uv pip install --python .venv/Scripts/python.exe -r requirements.lock.txt --quie
 Check-Exit
 uv pip install --python .venv/Scripts/python.exe -e . --no-deps --quiet
 Check-Exit
+uv pip install --python .venv/Scripts/python.exe -e ".[multiview,gpt]" --quiet
+Check-Exit
 .venv/Scripts/python.exe -m car2lego3d setup
 Check-Exit
 .venv/Scripts/python.exe -m car2lego3d doctor

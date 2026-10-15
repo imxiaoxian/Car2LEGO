@@ -1,0 +1,920 @@
+{
+  "sets": {
+    "76934": {
+      "set": "76934",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/76934",
+      "retrieved_at": "2026-10-15T01:16:53.812872+00:00",
+      "source_sha256": "9122f1e392a3c80aebdf63d42442138c8fdb918b1466987efdcf1cb07dbaef8c",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Ferrari F40 Supercar",
+        "setNumber": "76934",
+        "year": "2024",
+        "ageRating": "9+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/76934_Prod.png",
+          "alt": "Ferrari F40 Supercar"
+        },
+        "setPieceCount": "318",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6533783.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6533783.pdf",
+              "fileSize": "31664259"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6533783.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "76909": {
+      "set": "76909",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/76909",
+      "retrieved_at": "2026-10-15T01:16:53.215565+00:00",
+      "source_sha256": "32e270077658ed293700991b94a3e7e4c8ae3397b6ab27e4878cb33b9b85c881",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Mercedes-AMG F1 W12 E Performance & Mercedes-AMG Project One",
+        "setNumber": "76909",
+        "year": "2022",
+        "ageRating": "9+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/76909_Prod.png",
+          "alt": "Mercedes-AMG F1 W12 E Performance & Mercedes-AMG Project One"
+        },
+        "setPieceCount": "564",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6409502.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6409502.pdf",
+              "fileSize": "13121692"
+            }
+          },
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "2"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6409871.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6409871.pdf",
+              "fileSize": "17384479"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6409502.pdf",
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6409871.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "76922": {
+      "set": "76922",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/76922",
+      "retrieved_at": "2026-10-15T01:16:53.728406+00:00",
+      "source_sha256": "eec84c7b65957fa4554047d9c6efea6ccaad981ed347b0666da2d72ec945406b",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "BMW M4 GT3 & BMW M Hybrid V8 Race Cars",
+        "setNumber": "76922",
+        "year": "2024",
+        "ageRating": "9+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/76922_Prod.png",
+          "alt": "BMW M4 GT3 & BMW M Hybrid V8 Race Cars"
+        },
+        "setPieceCount": "676",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6507084.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6507084.pdf",
+              "fileSize": "31752828"
+            }
+          },
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "2"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6507086.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6507086.pdf",
+              "fileSize": "37457623"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6507084.pdf",
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6507086.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "76924": {
+      "set": "76924",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/76924",
+      "retrieved_at": "2026-10-15T01:16:56.551651+00:00",
+      "source_sha256": "643c0b187c11398c9488d91fa8fe57386af31f1fcef41c3e0f856c707fe47e51",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Mercedes-AMG G 63 & Mercedes-AMG SL 63",
+        "setNumber": "76924",
+        "year": "2024",
+        "ageRating": "10+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/76924_Prod.png",
+          "alt": "Mercedes-AMG G 63 & Mercedes-AMG SL 63"
+        },
+        "setPieceCount": "808",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6522905.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6522905.pdf",
+              "fileSize": "23312160"
+            }
+          },
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "2"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6572269.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6572269.pdf",
+              "fileSize": "34995179"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6522905.pdf",
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6572269.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "75885": {
+      "set": "75885",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/75885",
+      "retrieved_at": "2026-10-15T01:16:57.951250+00:00",
+      "source_sha256": "466519335967c3ed28d54b8b66dd3adf993abc269e8d42c35d845e50fe887eb1",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Ford Fiesta M-Sport WRC",
+        "setNumber": "75885",
+        "year": "2018",
+        "ageRating": "7-14",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/75885_Prod.jpg",
+          "alt": "Ford Fiesta M-Sport WRC"
+        },
+        "setPieceCount": "203",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6228398.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6228398.pdf",
+              "fileSize": "27530098"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6228398.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10242": {
+      "set": "10242",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10242",
+      "retrieved_at": "2026-10-15T01:16:58.014643+00:00",
+      "source_sha256": "dba62b9a7b147c6b503e72870507a61ce4f28675e0614dbf86ab27f5352b6026",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "MINI Cooper",
+        "setNumber": "10242",
+        "year": "2014",
+        "ageRating": "16+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10242_prod.jpg",
+          "alt": "MINI Cooper"
+        },
+        "setPieceCount": "1077",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Creator Expert"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6092144.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6092144.pdf",
+              "fileSize": "9394083"
+            }
+          },
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "2"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6131696.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6131696.pdf",
+              "fileSize": "7904354"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6092144.pdf",
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6131696.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10295": {
+      "set": "10295",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10295",
+      "retrieved_at": "2026-10-15T01:16:59.720956+00:00",
+      "source_sha256": "e6e876a0d57d868388d1080946b98f2884a0f5fde02c8247a817ff35d2b9c8c1",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Porsche 911",
+        "setNumber": "10295",
+        "year": "2021",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10295_Prod.jpg",
+          "alt": "Porsche 911"
+        },
+        "setPieceCount": "1458",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Icons"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6590140.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6590140.pdf",
+              "fileSize": "90168921"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6590140.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10290": {
+      "set": "10290",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10290",
+      "retrieved_at": "2026-10-15T01:17:02.015463+00:00",
+      "source_sha256": "5a614cf42343f046edb869da9f1b7f0c1ccce076fc03738fb166ac5e0ca51d91",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Pickup Truck",
+        "setNumber": "10290",
+        "year": "2021",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10290_Prod.jpg",
+          "alt": "Pickup Truck"
+        },
+        "setPieceCount": "1677",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Icons"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6390900.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6390900.pdf",
+              "fileSize": "71807117"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6390900.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10279": {
+      "set": "10279",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10279",
+      "retrieved_at": "2026-10-15T01:17:02.235030+00:00",
+      "source_sha256": "dab55e49da0218b8362720499f3b213e34fc46698fa2fb76298ceec869455004",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Volkswagen T2 Camper Van",
+        "setNumber": "10279",
+        "year": "2021",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10279_Prod.jpg",
+          "alt": "Volkswagen T2 Camper Van"
+        },
+        "setPieceCount": "2207",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Icons"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6384271.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6384271.pdf",
+              "fileSize": "132016803"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6384271.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "42110": {
+      "set": "42110",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/42110",
+      "retrieved_at": "2026-10-15T01:17:03.970251+00:00",
+      "source_sha256": "07aa564976fac7f2beb2af46deb48ab6a05f6280878e5f0f31947d49ff2c2d5a",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Land Rover Defender",
+        "setNumber": "42110",
+        "year": "2019",
+        "ageRating": "11+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/42110_Prod.jpg",
+          "alt": "Land Rover Defender"
+        },
+        "setPieceCount": "2573",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6323001.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6323001.pdf",
+              "fileSize": "154116478"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6323001.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "42141": {
+      "set": "42141",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/42141",
+      "retrieved_at": "2026-10-15T01:17:05.839472+00:00",
+      "source_sha256": "8ff3f5f154d01d6a82c2abd2a33a0cae2ec3c733cb3ed0b55413c7c95ceb3b34",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "McLaren Formula 1™ Race Car",
+        "setNumber": "42141",
+        "year": "2022",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/42141_Prod.png",
+          "alt": "McLaren Formula 1™ Race Car"
+        },
+        "setPieceCount": "1434",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Technic"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6452820.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6452820.pdf",
+              "fileSize": "99647063"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6452820.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "42115": {
+      "set": "42115",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/42115",
+      "retrieved_at": "2026-10-15T01:17:06.084798+00:00",
+      "source_sha256": "3ed9dcfca7b0917448cafc6b4331a7ce17784756ecce1dd6b601b0c9de421289",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Lamborghini Sián FKP 37",
+        "setNumber": "42115",
+        "year": "2020",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/42115_Prod.jpg",
+          "alt": "Lamborghini Sián FKP 37"
+        },
+        "setPieceCount": "3696",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6392474.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6392474.pdf",
+              "fileSize": "143159756"
+            }
+          },
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "2",
+              "element": "2"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6394694.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6394694.pdf",
+              "fileSize": "167846427"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6392474.pdf",
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6394694.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "75828": {
+      "set": "75828",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/75828",
+      "retrieved_at": "2026-10-15T01:17:07.255294+00:00",
+      "source_sha256": "23499a3200621ad171ae1a8b08210f00bb827bc1818e4c56a7f36ea801e6bb21",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Ecto-1 & 2",
+        "setNumber": "75828",
+        "year": "2016",
+        "ageRating": "8-14",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/75828_Prod.jpg",
+          "alt": "Ecto-1 & 2"
+        },
+        "setPieceCount": "556",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6175392.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6175392.pdf",
+              "fileSize": "21710188"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6175392.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10317": {
+      "set": "10317",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10317",
+      "retrieved_at": "2026-10-15T01:17:09.194554+00:00",
+      "source_sha256": "e56b8fffd05729ae82e52e0ba58acd1b3ea48c1eba6d404219e17cdc9a0b1bcd",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Land Rover Classic Defender 90",
+        "setNumber": "10317",
+        "year": "2023",
+        "ageRating": "18+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10317_Prod.png",
+          "alt": "Land Rover Classic Defender 90"
+        },
+        "setPieceCount": "2336",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Icons"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6491765.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6491765.pdf",
+              "fileSize": "109337551"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6491765.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "31108": {
+      "set": "31108",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/31108",
+      "retrieved_at": "2026-10-15T01:17:10.278918+00:00",
+      "source_sha256": "a1d092db0bec1d55d9ac24a42ddd4e6c0f121bfea1032dc4d8e4e6abfc813a4b",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Caravan Family Holiday",
+        "setNumber": "31108",
+        "year": "2020",
+        "ageRating": "9+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/31108_Prod.jpg",
+          "alt": "Caravan Family Holiday"
+        },
+        "setPieceCount": "766",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Creator"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6325410.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6325410.pdf",
+              "fileSize": "63191965"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6325410.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "42128": {
+      "set": "42128",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/42128",
+      "retrieved_at": "2026-10-15T01:17:11.264071+00:00",
+      "source_sha256": "e4c44cc7255e97b611db29a27f2384669f8a488909588a99b8190e32e884c1da",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "Heavy-duty Tow Truck",
+        "setNumber": "42128",
+        "year": "2021",
+        "ageRating": "11+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/42128_Prod.jpg",
+          "alt": "Heavy-duty Tow Truck"
+        },
+        "setPieceCount": "2017",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": ""
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6381989.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6381989.pdf",
+              "fileSize": "153365928"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6381989.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    },
+    "10258": {
+      "set": "10258",
+      "url": "https://www.lego.com/en-gb/service/buildinginstructions/10258",
+      "retrieved_at": "2026-10-15T01:38:16.081703+00:00",
+      "source_sha256": "eb5c3c6691465c3f764361449e32441bd5d86a006eaf239399173588c9aa252c",
+      "metadata": {
+        "__typename": "CS_BuildingInstructionData",
+        "name": "London Bus",
+        "setNumber": "10258",
+        "year": "2017",
+        "ageRating": "16+",
+        "setImage": {
+          "__typename": "CustomerServiceImage",
+          "src": "https://www.lego.com/cdn/product-assets/product.img.pri/10258_Prod.jpg",
+          "alt": "London Bus"
+        },
+        "setPieceCount": "1686",
+        "theme": {
+          "__typename": "Theme",
+          "themeName": "LEGO® Creator Expert"
+        },
+        "buildingInstructions": [
+          {
+            "__typename": "BuildingInstruction",
+            "isAdditionalInfoBooklet": false,
+            "sequence": {
+              "__typename": "Sequence",
+              "total": "1",
+              "element": "1"
+            },
+            "pdf": {
+              "__typename": "PDF",
+              "coverImage": {
+                "__typename": "CustomerServiceImage",
+                "src": "https://www.lego.com/cdn/product-assets/product.bi.core.img/6211373.png",
+                "alt": ""
+              },
+              "pdfUrl": "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6211373.pdf",
+              "fileSize": "36672892"
+            }
+          }
+        ]
+      },
+      "instruction_pdfs": [
+        "https://www.lego.com/cdn/product-assets/product.bi.core.pdf/6211373.pdf"
+      ],
+      "verification": "official set metadata and PDF links retrieved; structural review pending"
+    }
+  }
+}

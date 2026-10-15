@@ -1,0 +1,9 @@
+{
+  "verification": "Selected official PDF pages visually inspected on 2026-10-15. Module observations only; no digitized official assembly or collision validation.",
+  "modules": [
+    {"set": "76934", "pdf": "6533783.pdf", "pages": [7, 13, 19, 25, 31, 37, 43, 49, 55, 61, 67, 73, 79, 85, 91, 97], "observations": ["Layered low chassis assembled before body", "Independent side panels and wheel arches", "Separate front wedge and rear wing subassemblies", "Compact glazing and visible rear engine-cover region"]},
+    {"set": "76909", "pdf": "6409502.pdf", "pages": [13, 19, 25, 31, 37, 43, 49, 55, 61, 67, 73, 79, 85, 91], "observations": ["Narrow central chassis with exposed axle locations", "Long sidepod assemblies attached to central chassis", "Open single-seat cockpit", "Separate front and rear aerodynamic wings"]},
+    {"set": "76924", "pdf": "6572269.pdf", "pages": [10, 19, 28, 37, 46, 55, 64, 73, 82, 91, 100, 109, 118, 127, 136], "observations": ["Extended ladder-like floor linking front and rear wheel modules", "Cabin interior assembled before upper glazing", "Separate side panels and front fascia", "Tall cabin pillars and roof subassembly"]},
+    {"set": "76924", "pdf": "6522905.pdf", "pages": [6, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61, 66, 71, 76, 81], "observations": ["Low floor with separate wheel arch sections", "Open cockpit with separate front windscreen", "Curved front and rear body subassemblies", "Wheels installed late in the assembly sequence"]}
+  ]
+}

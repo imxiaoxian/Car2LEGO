@@ -5,6 +5,17 @@ Model licenses and downloaded dependencies remain separate. This repository does
 not redistribute model weights or the Studio/LDraw library. Reused UI source
 and catalog assets are identified below.
 
+- **Hunyuan3D-2 / Hunyuan3D-2mv**:
+  https://github.com/Tencent-Hunyuan/Hunyuan3D-2 and
+  https://huggingface.co/tencent/Hunyuan3D-2mv . Code and model use the
+  Tencent Hunyuan 3D 2.0 Community License, not this project's MIT license.
+  The license contains territory and use restrictions. The pinned source's
+  LICENSE and NOTICE are retained by the downloader; versions and checkpoint
+  SHA256 are in `models.lock.json`. No weights or upstream source are bundled.
+- **LEGO building instructions**: official set metadata and PDF source links
+  are recorded in `data/recipes/official-sources.json`. PDFs remain local
+  research inputs and are not redistributed. Module observations and adapted
+  recipes are not official replicas or endorsed LEGO designs.
 - **TripoSR**: https://github.com/VAST-AI-Research/TripoSR
   Copyright (c) 2024 Tripo AI & Stability AI; MIT code and model weights.
   Downloaded source retains its original LICENSE and per-file notices, including
