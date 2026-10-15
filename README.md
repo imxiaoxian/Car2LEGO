@@ -101,7 +101,7 @@ M4 的算法改进、同网格对照和剩余问题见 [轿跑实验](docs/coupe
 旧 Vite 页面源码仅作历史保留；当前 `npm run build` 构建 Next.js 桌面页面。
 浏览器验收截图、测试和页面实际生成记录见 [验证记录](docs/brand-selector-validation.md)。
 规格对话、配置和数据边界见 [车辆参数获取](docs/vehicle-spec-search.md)。
-`gpt-blender` 实验后端通过 GPT 四视图分析、Blender MCP 和会话插件生成网格；配置及实测记录见 [Blender 实验](docs/gpt-blender-experiment.md)。
+`gpt-blender` 实验后端通过 GPT 四视图分析、Blender MCP 和会话插件生成网格。建模、修复和视觉复查使用独立的 `CAR2LEGO_BLENDER_MODEL`，默认 `gpt-6-astra`；配置及实测记录见 [Blender 实验](docs/gpt-blender-experiment.md)。
 
 CLI 获取任意车型规格：
 

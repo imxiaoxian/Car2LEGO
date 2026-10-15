@@ -11,7 +11,7 @@ from .common import ROOT, write_json
 from .gpt_reference import configuration
 
 
-def settings():
+def settings(model_key="OPENAI_MODEL", default_model="gpt-6.1-sol"):
     source, _ = configuration()
     inherited = dotenv_values(source / "backend/.env")
     local = dotenv_values(ROOT / ".env")
@@ -19,7 +19,7 @@ def settings():
         return os.environ.get(key) or local.get(key) or inherited.get(key) or default
     base = value("OPENAI_BASE_URL", "https://api.lundong.ai/v1").rstrip("/")
     return dict(api_key=value("OPENAI_API_KEY"), base_url=base if base.endswith("/v1") else base + "/v1",
-                model=value("OPENAI_MODEL", "gpt-6.1-sol"))
+                model=value(model_key, default_model))
 
 
 def image_content(paths):
@@ -35,9 +35,11 @@ def image_content(paths):
     return content
 
 
-def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_completed=False):
+def ask_json(messages, directory, name, max_tokens=16000, timeout=300, reuse_completed=False, *, model=None):
     from openai import OpenAI
     config = settings()
+    if model is not None:
+        config["model"] = model
     if not config["api_key"]:
         raise RuntimeError("OPENAI_API_KEY is missing from the original or experiment configuration.")
     # The gateway supports vision through Responses; validate plain JSON locally.

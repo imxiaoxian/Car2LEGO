@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+import json
 
 import pytest
 
@@ -38,3 +39,36 @@ def test_blender_preferences_stay_in_run_directory(tmp_path, monkeypatch):
 def test_generated_code_rejects_unsupported_host_operations(code):
     with pytest.raises(ValueError):
         blender_mcp.validate_code(code)
+
+
+def test_modelling_repairs_and_visual_review_use_same_model(tmp_path):
+    addon = tmp_path / "addon.py"
+    addon.write_text("# Constructed addon fixture", encoding="utf-8")
+    session = MagicMock()
+    session.__enter__.return_value = session
+
+    def execute(code, name):
+        if name == "model-1":
+            raise RuntimeError("Constructed Blender execution failure")
+
+    session.execute.side_effect = execute
+    responses = [dict(analysis="Constructed model", code="import bpy"),
+                 dict(analysis="Constructed repair", code="import bpy"),
+                 dict(analysis="Constructed review", code="")]
+    with patch.object(blender_mcp, "modelling_model", return_value="gpt-6-astra"), \
+            patch.object(blender_mcp, "load_views", return_value=({"views": {}}, {})), \
+            patch.object(blender_mcp, "load_spec", return_value={}), \
+            patch.object(blender_mcp, "spec_record", return_value={}), \
+            patch.object(blender_mcp, "image_content", return_value=[]), \
+            patch.object(blender_mcp, "digest", return_value="test-hash"), \
+            patch.object(blender_mcp, "upstream", return_value=tmp_path), \
+            patch.object(blender_mcp, "render_code", return_value="host export"), \
+            patch.object(blender_mcp, "BlenderSession", return_value=session), \
+            patch.object(blender_mcp, "ask_json", side_effect=responses) as ask:
+        output = tmp_path / "output"
+        blender_mcp.reconstruct(tmp_path / "views.json", output, tmp_path / "spec.json")
+    assert [c.args[2] for c in ask.call_args_list] == ["model", "repair-1", "visual-review"]
+    assert all(c.kwargs["model"] == "gpt-6-astra" for c in ask.call_args_list)
+    assert all(c.kwargs["timeout"] == 600 for c in ask.call_args_list)
+    record = json.loads((output / "reconstruction.json").read_text(encoding="utf-8"))
+    assert record["model"] == record["inputs"]["model"] == "gpt-6-astra"

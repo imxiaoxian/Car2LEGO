@@ -43,3 +43,28 @@ def test_incomplete_reply_is_retained_but_not_parsed(tmp_path):
         with pytest.raises(ValueError, match="did not complete"):
             dialogue.ask_json(MESSAGES, tmp_path, "test")
     assert (tmp_path / "test-response.json").is_file()
+
+
+def test_explicit_model_is_used_and_invalidates_previous_model_cache(tmp_path):
+    client = MagicMock()
+    client.__enter__.return_value = client
+    client.responses.create.return_value = response()
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), patch("openai.OpenAI", return_value=client):
+        dialogue.ask_json(MESSAGES, tmp_path, "model", reuse_completed=True)
+        dialogue.ask_json(MESSAGES, tmp_path, "model", reuse_completed=True, model="gpt-6-astra")
+        assert client.responses.create.call_count == 2
+        assert client.responses.create.call_args.kwargs["model"] == "gpt-6-astra"
+        dialogue.ask_json(MESSAGES, tmp_path, "model", reuse_completed=True, model="gpt-6-astra")
+        assert client.responses.create.call_count == 2
+
+
+def test_modelling_setting_is_independent_from_vehicle_dialogue(monkeypatch, tmp_path):
+    monkeypatch.setenv("OPENAI_MODEL", "vehicle-model")
+    monkeypatch.delenv("CAR2LEGO_BLENDER_MODEL", raising=False)
+    with patch.object(dialogue, "configuration", return_value=(tmp_path, "python")), \
+            patch.object(dialogue, "dotenv_values", return_value={}):
+        assert dialogue.settings()["model"] == "vehicle-model"
+        assert dialogue.settings("CAR2LEGO_BLENDER_MODEL", "gpt-6-astra")["model"] == "gpt-6-astra"
+        monkeypatch.setenv("CAR2LEGO_BLENDER_MODEL", "modelling-override")
+        assert dialogue.settings("CAR2LEGO_BLENDER_MODEL", "gpt-6-astra")["model"] == "modelling-override"
+        assert dialogue.settings()["model"] == "vehicle-model"

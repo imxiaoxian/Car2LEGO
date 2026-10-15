@@ -15,6 +15,9 @@ from .multiview import load_views
 from .vehicle import load_spec, spec_record
 
 
+MODEL_TIMEOUT = 600
+
+
 PROMPT = """You are a senior automotive Blender modeller. Build an accurate detailed smooth car from ALL
 four labelled elevation images and the overview. This is a 3D reconstruction experiment, NOT a LEGO model.
 Return only JSON: {"analysis": "concise visual analysis and modelling plan", "code": "complete bpy script"}.
@@ -151,6 +154,10 @@ def render_code(directory, export=True):
     return "OUTPUT_DIRECTORY = " + repr(str(Path(directory).resolve())) + "\nEXPORT = " + repr(export) + "\n" + template
 
 
+def modelling_model():
+    return settings(model_key="CAR2LEGO_BLENDER_MODEL", default_model="gpt-6-astra")["model"]
+
+
 def reconstruct(manifest_path, directory, vehicle_spec, review=True):
     if vehicle_spec is None:
         raise ValueError("GPT Blender modelling requires a physical specification snapshot")
@@ -160,13 +167,15 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
     images = dict(paths)
     if (Path(manifest_path).parent / "reference.png").is_file():
         images["overview"] = Path(manifest_path).parent / "reference.png"
-    inputs = dict(backend="gpt-blender", model=settings()["model"], views=manifest["views"],
+    model = modelling_model()
+    inputs = dict(backend="gpt-blender", model=model, views=manifest["views"],
                   manifest_sha256=digest(manifest_path), vehicle_spec=spec_record(vehicle_spec))
     with stage(directory, "reconstruction", inputs) as record:
         user = [{"type": "text", "text": json.dumps({"vehicle": spec, "brief": manifest.get("brief")}, ensure_ascii=False)},
                 *image_content(images)]
         messages = [{"role": "system", "content": PROMPT}, {"role": "user", "content": user}]
-        response = ask_json(messages, directory, "model", max_tokens=24000, reuse_completed=True)
+        response = ask_json(messages, directory, "model", max_tokens=24000, timeout=MODEL_TIMEOUT,
+                            reuse_completed=True, model=model)
         with BlenderSession(directory) as blender:
             for attempt in range(3):
                 code = validate_code(response["code"])
@@ -179,7 +188,8 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                         raise
                     messages += [{"role": "assistant", "content": json.dumps(response)},
                         {"role": "user", "content": "Execution failed. Return a corrected FULL script: " + str(error)[-7000:]}]
-                    response = ask_json(messages, directory, f"repair-{attempt+1}", max_tokens=24000)
+                    response = ask_json(messages, directory, f"repair-{attempt+1}", max_tokens=24000,
+                                        timeout=MODEL_TIMEOUT, model=model)
             blender.execute(render_code(directory), "export-render")
             if review:
                 before = directory / "before-review"
@@ -194,7 +204,7 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                         *image_content(images), *image_content({"CURRENT_" + v: directory / f"render-{v}.png"
                             for v in ("left", "front", "back", "three-quarter")}),
                         {"type": "text", "text": "Current script: " + response["code"]}]}],
-                    directory, "visual-review", max_tokens=18000)
+                    directory, "visual-review", max_tokens=18000, timeout=MODEL_TIMEOUT, model=model)
                 if feedback.get("code", "").strip():
                     try:
                         blender.execute(validate_code(feedback["code"]), "visual-refine")
@@ -205,7 +215,7 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                         for path in before.iterdir():
                             shutil.copyfile(path, directory / path.name)
                         blender.execute("import bpy\nbpy.ops.wm.open_mainfile(filepath=" + repr(str(directory / "model.blend")) + ")", "restore")
-            record.update(analysis=response["analysis"], model=settings()["model"],
+            record.update(analysis=response["analysis"], model=model,
                 addon=dict(commit=model_lock()["blender_mcp_code"]["commit"], sha256=digest(upstream() / "addon.py")),
                 vehicle_spec=spec_record(vehicle_spec), glb_units="metres", obj_units="mm",
                 physical_measurement_verified=False, appearance_accepted=False,
