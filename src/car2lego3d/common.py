@@ -27,7 +27,15 @@ def write_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    os.replace(temporary, path)
+    for attempt in range(8):
+        try:
+            os.replace(temporary, path)
+            break
+        except PermissionError:
+            # Windows readers/scanners may briefly deny replacement of an otherwise writable file.
+            if attempt == 7:
+                raise
+            time.sleep(.02 * 2 ** min(attempt, 3))
 
 
 @contextmanager

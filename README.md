@@ -23,6 +23,7 @@ BMW M4 G82 另采用明确记录的双肾格栅先验；其他车型不会自动
 它是有限零件家族的近似拟合，不是通用网格到任意乐高装配的恢复算法。
 `plates` 策略保留早期的车形板件雕塑路线，便于对照。
 当前是装配草稿，外观、实体拼装、转向和开门机构仍需验证；数字检查按具体产物记录。
+窗区分段、收窄后三角窗、分体灯组和细灯带的生成改进见 [透明件拟合](docs/glazing-fitting.md)。
 实际复现的版本、耗时、显存、结果和限制见 [复现记录](docs/reproduction.md)。
 
 ![规格约束车辆的原生零件渲染](examples/f40-physical/03-lego/native-ldraw.png)
@@ -44,6 +45,9 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 3.11
 没有全局修改 Python / Conda 环境。GPT 生图和规格对话复用原项目的 API 配置；默认规格获取不需要 Codex CLI 或联网搜索工具。
 将 `.env.example` 中的 `CAR2LEGO_SOURCE_ROOT` 配置为原项目目录，必要时设置 `CAR2LEGO_SOURCE_PYTHON`。
 桥接进程直接调用原来的 `ReferenceImageService.generate()`，输出写入本项目，失败不会自动换用 SD。
+身份锚图先单独生成；随后按参考依赖分批，每批最多 5 张并行生成，整批完成（含重试）后才启动下一批。
+不足 5 张的批次直接生成，不跨依赖层凑数；批内失败时保留成功图片并暂停后续批次，恢复时复用缓存。所有桥接生图进程共享最多 5 个活动请求。
+`car2lego/reference-dispatch.json` 记录本次执行的批次名单、开始与结束时间，并在单张图片完成时更新进度。
 Hunyuan3D-2mv 的代码、权重与许可、复现命令见 [多视角复现](docs/multiview-reconstruction.md)。
 显存不足时可用 `--device cpu`，速度更慢。
 
@@ -66,7 +70,8 @@ powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1
 目录包含现存、历史及商用品牌，不保证穷尽全球所有品牌；数据来源和更新方式见
 [品牌目录](docs/vehicle-brand-catalog.md)。生图阶段以只读方式调用 `D:\lego` 的参考图服务，产物保存在本项目。
 
-页面提交品牌、车型、可选年款、比例或车辆照片；后台依次通过模型对话获取尺寸、生成四视图、重建和装配。
+页面提交品牌、车型、可选年款或车辆照片；后台依次通过模型对话获取尺寸、生成四视图、重建和装配。
+新任务和定制副本不再选择比例，以外观和模块细节为优先自动规划尺寸，不设固定车长或百分比尺寸边界。
 完成后可下载 Studio `.io`、LDraw、MPD、步骤 PDF、CSV、BrickLink XML 和检查报告。
 任务参数、日志和产物保存在 `runs/web/<任务ID>/`，详情路径为 `/designs/<任务ID>`；
 旧的 `/?job=<任务ID>` 链接会跳转至详情页。暂停在阶段边界生效，恢复会复用已完成且哈希匹配的输出。
@@ -78,7 +83,7 @@ powershell -ExecutionPolicy Bypass -File scripts/start-web.ps1
 数值全部标记为模型估算，并记录逐项依据和置信度，不声称原厂核验或实际测量。
 详情页可重新获取。规格缓存绑定品牌、车型、版本、模型、接口、提示词和 schema；旧的搜索缓存不会自动复用。
 生成及自定义车长均采用该次规格快照，无固定车型回退。页面加载不会自动发起模型调用。
-不同尺度继续采用各自的要求；缺少独立配方或超出当前零件范围时禁止生成。
+自动模式不按尺寸简化细节；目前仍受现有原生零件配方容量限制，取消比例并不表示大尺寸模块已实现。
 车辆配方不保证车型外观或精确尺寸还原；品牌目录不等同于规格/配方支持目录。
 桌面流程复用原项目的真实零件几何、渲染和步骤文档服务，并单独记录碰撞与连接检查。
 首页展示图沿用原项目的官方套件图片。步骤 PDF 和连通检查均不代表实际拼搭通过。
@@ -114,10 +119,13 @@ CLI 获取任意车型规格：
 
 ## 完整流程
 
+以下命令默认采用约 1:12 的软参考。当前大尺寸原生轮组、风挡和底盘配方尚未实现，
+会在保存需求规划后、调用生图前停止；这些命令目前不能产出约 1:12 的完整 Studio 模型。
+
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d run `
   --prompt "a red Ferrari F40 sports car, realistic proportions, black tires" `
-  --seed 42 --steps 4 --resolution 256 --length-studs 24 --strategy car --color 4 `
+  --seed 42 --steps 4 --resolution 256 --strategy car --color 4 `
   --vehicle-specs data/vehicles/ferrari_f40_1987.json --output runs/f40
 ```
 
@@ -126,12 +134,15 @@ CLI 获取任意车型规格：
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d run `
   --views runs/image/views.json --vehicle-specs path/to/spec.json `
-  --scale 1:24 --output runs/my-car --strategy car
+  --output runs/my-car --strategy car
 ```
 
 默认输入为同一辆汽车的前、左、后、右四张独立正交视图，不能将拼图直接作为一张输入。
 `views.json` 记录视图标签和图片哈希；对重复图片、缺失视角和明显不一致的轮廓拒绝重建。
 生图保留一张三分之四视角 overview 作为外观锚点，它不进入多视角模型的图像输入。
+overview 完成后，前、后、左、右四个生图请求同时发送，共享这张锚图和车型外观描述。
+各视角独立重试临时错误，最多尝试 6 次；已完成图片按哈希复用，单个视角失败也保留其他视角的结果。
+请求沿用原服务配置的长超时时间，等待 15 秒不会触发取消或重发。
 `run` 要求空输出目录，避免覆盖旧实验。单独阶段可复用已有图片或网格：
 
 ```powershell
@@ -145,9 +156,8 @@ CLI 获取任意车型规格：
 网格上方向默认 Z，其他模型可设置 `--up-axis y`；`--yaw` 旋转水平方向。
 转换通过水平主成分方向将车身长轴放到 X。
 `car` 当前支持 23–32 studs 长度和 8 / 10 / 12 studs 核心宽度，`--width-studs` 可覆盖选择。
-提供规格时，`--scale 1:24` 保留精确目标比例，分别报告网格取整误差；与 `--length-studs` 互斥。
-自定义长度仍按核心车长 `length_studs × 8mm` 定义比例，并选择最近比例档的要求。
-宽度先按实车比例规划，不可实现的宽度/比例会明确阻止推理，不压回当前零件家族。
+提供规格且未指定尺寸时采用自动模式，在现有配方内优先保留模块空间，再匹配实车长宽关系。
+显式 `--scale` / `--length-studs` 接口只用于兼容历史实验，不用于新的桌面任务。
 不提供规格时默认 8 studs 宽度，轴位置来自网格低侧暗色区域假设。
 `--color 4` 在 `car` 中只覆盖车身颜色，在 `plates` 中覆盖全部颜色；`--no-rear-wing` 去除尾翼。
 GPT 默认生成高质量图片；`--image-provider sd-turbo` 和 `--backend triposr` 仅供复查旧实验。
@@ -162,17 +172,13 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 尺寸先验用于提示词和网格边界校准，并约束乐高宽度、轴距。
 轮胎/玻璃保留标准零件原有尺寸；`dimensions.json` 报告无法满足的目标，不缩放真实 LEGO 零件。
 
-## 分比例要求
+## 自动尺寸
 
-| 比例 | 细节和机构目标 | 当前状态 |
-| --- | --- | --- |
-| 1:38 | 可辨识外观、透明座舱、四轮滚动，内饰可简化 | 要求与规划已设置，独立配方未实现 |
-| 1:24 | 完整外观、简化内饰与发动机舱、前后盖开合 | 可生成草稿，开盖等机构未验收 |
-| 1:16 | 精细座舱、双门开合、前轮转向 | 要求与规划已设置，独立配方未实现 |
-| 1:12 | 分层车身、精细底盘与发动机、独立悬挂 | 要求与规划已设置，独立配方未实现 |
-
-尺寸容差、必需物理资料、视图计划和每步零件上限分别设置，见 [分比例要求](docs/scale-requirements.md)。
-这些是设计目标，不代表功能已经实现。1:8 / 1:10 仍未开放。
+当前默认参考约 1:12 的体量和完整细节级别，不提供比例选择，不设硬性比例边界。
+零件适配以效果为先，保留车身、门窗、灯组、座舱及底盘细节要求。前端只显示原生几何测得的成品尺寸，
+不再根据固定比例判定超差。连接、碰撞、机构和外观继续独立验收。
+现有小尺寸配方尚未适配这一体量时，流程保存缺失原因并在生图前停止，不回退小模型。
+现有配方能力、报告含义与历史比例兼容接口见 [自动尺寸说明](docs/scale-requirements.md)。
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d requirements --vehicle-specs data/vehicles/ferrari_f40_1987.json --output runs/requirements
@@ -212,6 +218,9 @@ F40 的整体尺寸、轴距、轮距、前后轮胎规格已核对原厂宣传�
 `buildability=unverified` 是当前统一状态，即使占用覆盖和连接图通过，也没有实物认证。
 
 ## 验证与研究
+
+SUV/跨界车外壳拟合采用较大的原生曲面件、光面板和侧向安装门板，并分别处理内部支撑与外壳空间。
+算法、对比方式和验证边界见 [模块化车身外壳](docs/modular-exterior.md)。
 
 ```powershell
 .venv/Scripts/python.exe -m car2lego3d doctor

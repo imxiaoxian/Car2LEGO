@@ -5,7 +5,17 @@ const path = require('node:path');
 const job = process.env.DESKTOP_JOB;
 
 test('original creation, brand selection, optional year, and photo workflow', async ({ page }, info) => {
-  await page.goto('/');
+  const submitted = [];
+  await page.route('**/api/v1/designs', async route => {
+    submitted.push(route.request().postDataJSON());
+    await route.fulfill({ status: 422, body: 'Browser test: generation disabled' });
+  });
+  let photoBody;
+  await page.route('**/api/v1/designs/from-image', async route => {
+    photoBody = route.request().postData();
+    await route.fulfill({ status: 422, body: 'Browser test: generation disabled' });
+  });
+  await page.goto('/?scale=1:24');
   await expect(page.getByRole('heading', { name: 'Car2LEGO', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '选择品牌', exact: true }).click();
   await page.getByRole('textbox', { name: '搜索品牌', exact: true }).fill('宝马');
@@ -16,12 +26,19 @@ test('original creation, brand selection, optional year, and photo workflow', as
   await page.getByRole('button', { name: '其他，自定义品牌' }).click();
   await page.getByRole('textbox', { name: '自定义品牌名称' }).fill('测试品牌');
   await page.getByRole('textbox', { name: '车型', exact: true }).fill('Test');
-  await page.getByRole('combobox', { name: '模型比例' }).selectOption('1:24');
-  await expect(page.getByRole('region', { name: '比例设计要求' })).toContainText('1:24');
+  await expect(page.getByRole('combobox', { name: '模型比例' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: '比例设计要求' })).toHaveCount(0);
+  await page.getByRole('button', { name: '创建设计', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  expect(submitted).toEqual([{ make: '测试品牌', model: 'Test' }]);
   await page.screenshot({ path: info.outputPath('creation.png') });
   await page.getByRole('button', { name: '车辆照片', exact: true }).click();
   await page.getByLabel('上传车辆照片').setInputFiles(path.join(__dirname, '../public/images/ferrari-f40.webp'));
   await expect(page.getByAltText('已选择的车辆照片')).toBeVisible();
+  await page.getByRole('button', { name: '创建设计', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  expect(photoBody).toContain('name="image"');
+  expect(photoBody).not.toMatch(/name="(?:scale|scale_mode|length_studs|width_studs)"/);
   await page.getByRole('button', { name: '移除照片' }).click();
   await expect(page.getByRole('button', { name: '选择车辆照片' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
@@ -32,8 +49,44 @@ test('vehicle catalog filters and prepopulates creation', async ({ page }) => {
   await page.getByRole('combobox', { name: '筛选品牌' }).selectOption('BMW');
   await expect(page.getByRole('heading', { name: 'BMW M3 E30' })).toBeVisible();
   await expect(page.locator('.catalog-item')).toHaveCount(1);
-  await page.getByRole('link', { name: /创建 .* 设计/ }).click();
+  const create = page.getByRole('link', { name: '创建设计', exact: true });
+  expect(await create.getAttribute('href')).not.toContain('scale');
+  await create.click();
   await expect(page.getByRole('textbox', { name: '车型', exact: true })).toHaveValue('M3 E30');
+});
+
+test('customization and parameter dialogue omit scale even for a historical design', async ({ page }, info) => {
+  const id = '00000000000000000000000000000001';
+  const car = { id, make: 'Lamborghini', model: 'Countach', year: null, created_at: '' };
+  const specs = { version: 'test', vehicle: car, scale: null, overall_grounded: false,
+    measurements: {}, missing: [], conflicts: [], sources: [] };
+  await page.route(`**/api/v1/designs/${id}`, route => route.fulfill({ json: {
+    id, status: 'draft', requested_scale: '1:24', car, parts_count: 188,
+    difficulty: 'Expert', parts: [], file_urls: {}, created_at: '', physical_specifications: specs,
+  } }));
+  await page.route('**/api/v1/mods', route => route.fulfill({ json: {} }));
+  let customization, parameters;
+  await page.route(`**/api/v1/designs/${id}/customize`, async route => {
+    customization = route.request().postDataJSON();
+    await route.fulfill({ status: 422, body: 'Browser test: generation disabled' });
+  });
+  await page.route('**/api/v1/research/physical-specifications', async route => {
+    parameters = route.request().postDataJSON();
+    await route.fulfill({ json: specs });
+  });
+  await page.goto(`/designs/${id}`);
+  await expect(page.getByRole('heading', { name: 'Lamborghini Countach', exact: true })).toBeVisible();
+  await expect(page.getByText('模型比例', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('1:24', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '通过模型获取车辆参数', exact: true }).click();
+  await expect(page.getByText('新获取参数', { exact: true })).toBeVisible();
+  expect(parameters).toEqual({ make: 'Lamborghini', model: 'Countach', year: null });
+  await page.getByRole('textbox', { name: '定制内容' }).fill('车身改为黑色');
+  await page.getByRole('button', { name: '创建设计副本', exact: true }).click();
+  await expect(page.getByText(/Browser test: generation disabled/)).toBeVisible();
+  expect(customization).toEqual({ customization_text: '车身改为黑色' });
+  await page.screenshot({ path: info.outputPath('customization.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });
 
 test('real draft geometry, canvas pixels, controls, and exports', async ({ page, request }, info) => {
@@ -81,17 +134,6 @@ test('real draft geometry, canvas pixels, controls, and exports', async ({ page,
     expect(detail.physical_specifications.overall_grounded).toBe(false);
     expect(detail.physical_specifications.sources).toEqual([]);
     expect(detail.physical_specifications.research.queries).toEqual([]);
-    const collected = await request.post('/api/v1/research/physical-specifications', {
-      headers: { origin: new URL(page.url()).origin },
-      data: { make: detail.physical_specifications.vehicle.make,
-        model: detail.physical_specifications.vehicle.model, year: null, scale: detail.requested_scale },
-    });
-    expect(collected.ok()).toBeTruthy();
-    const parameters = await collected.json();
-    expect(parameters.research.mode).toBe('model_dialogue');
-    expect(parameters.measurements.length.method).toBe('estimated');
-    expect(parameters.measurements.length.confidence).toBeLessThan(1);
-    expect(parameters.sources).toEqual([]);
   }
   for (const [kind, url] of Object.entries(detail.file_urls)) {
     const exported = await request.get(url);

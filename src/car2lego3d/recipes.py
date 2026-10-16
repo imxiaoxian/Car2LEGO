@@ -35,7 +35,7 @@ def classify(spec, brief=None, explicit=None):
         (r"hatchback|fiesta|mini cooper|掀背|两厢", "hatchback"),
         (r"sedan|saloon|轿车|三厢", "sedan"),
         (r"coupe|\bm4\b|轿跑", "coupe"),
-        (r"ferrari.*f40|sports.car|supercar|跑车", "sports_car"),
+        (r"countach|ferrari.*f40|sports.car|supercar|跑车", "sports_car"),
     ]
     for pattern, family in rules:
         if re.search(pattern, identity):
@@ -72,6 +72,9 @@ def fit_family(fit, spec, brief=None, explicit=None):
         raise ValueError(f"Vehicle family {family} has no implemented recipe. Classification: {selection['source']}.")
     fit["recipe_selection"] = config
     if family == "sports_car":
+        from .wedge import applies, fit_wedge
+        if applies(spec):
+            return fit_wedge(fit, spec, brief)
         fit["recipe"] = "sports-v1"
         return fit
     fit_suv(fit, spec) if family in ("suv", "crossover", "offroad") else fit_coupe(fit, spec)
@@ -81,6 +84,9 @@ def fit_family(fit, spec, brief=None, explicit=None):
     minimum_span = 8 if config["doors"] == 4 else 2
     end = int(np.clip(fit["roof_end_stud"], max(start+minimum_span, round(length*config["roof_end_fraction"][0])),
                       min(length-5, max(start+minimum_span, round(length*config["roof_end_fraction"][1])))))
+    if family in ("suv", "crossover"):
+        start = min(start, length-14)
+        end = min(max(start+8, end), length-6)
     fit.update(recipe="suv-v1" if family in ("suv", "crossover", "offroad") else
                "coupe-v1" if family == "coupe" else f"{family}-v1",
                family_builder=config["builder"], roof_start_stud=start, roof_end_stud=end,

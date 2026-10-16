@@ -13,9 +13,19 @@ import sys
 from dotenv import dotenv_values
 
 
+def configure_render_palette(source, service):
+    # The upstream preview's small default palette omits transparent colours.
+    # Load the actual Studio definitions only in this bridge process.
+    with (source / "Studio 2.0/data/StudioColorDefinition.txt").open(encoding="utf-8-sig") as stream:
+        for row in csv.DictReader(stream, delimiter="\t"):
+            code, color = row["LDraw Color Code"], row["RGB value"]
+            if code.isdigit() and re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+                service.COLOR_MAP[int(code)] = (row["LDraw Color Name"], color)
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("operation", choices=["catalog", "geometry", "recognize", "presentation"])
+    parser.add_argument("operation", choices=["catalog", "geometry", "recognize", "presentation", "render"])
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--input", type=Path)
     parser.add_argument("--request", type=Path)
@@ -58,10 +68,12 @@ def main():
         if not features or not features.make or not features.model:
             raise ValueError("Unable to identify vehicle from photograph")
         result = asdict(features)
-    elif args.operation == "presentation":
+    elif args.operation in {"presentation", "render"}:
         from app.services.assembly_v3.scene import AssemblyScene
         from app.services.assembly_v3.exports import ldraw, instructions_pdf
         from app.services.assembly_v3.render import render_scene
+        from app.services.ldraw_service import LDrawService
+        configure_render_palette(source, LDrawService)
         request = json.loads(args.request.read_text(encoding="utf-8"))
         rows = json.loads(args.input.read_text(encoding="utf-8"))["parts"]
         module_ids = {name: re.sub(r"[^a-z0-9_]", "_", name.lower()) for name in {p["module"] for p in rows}}
@@ -82,19 +94,21 @@ def main():
         (output.parent / "model.mpd").write_text(ldraw(scene, True), encoding="utf-8")
         for view in ("front", "rear", "left", "right", "top", "bottom"):
             render_scene(scene, output.parent / f"render_{view}.png", view)
-        instructions_pdf(scene, output.parent / "instructions.partial.pdf", {})
-        (output.parent / "instructions.partial.pdf").replace(output.parent / "instructions.pdf")
+        if args.operation == "presentation":
+            instructions_pdf(scene, output.parent / "instructions.partial.pdf", {})
+            (output.parent / "instructions.partial.pdf").replace(output.parent / "instructions.pdf")
         result = dict(assembly_sha256=hashlib.sha256(args.input.read_bytes()).hexdigest(),
             part_count=len(parts), step_count=len(steps), insertion_paths_verified=False,
             files={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in output.parent.iterdir()
                    if p.suffix in {".mpd", ".pdf", ".png"}})
     else:
-        from app.services.assembly_v3.exports import colored_geometry
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+        from car2lego3d.part_library import assembly_library
         rows = json.loads(args.input.read_text(encoding="utf-8"))["parts"]
-        import numpy as np
-        result = {name: [{"color_id": c, "positions": mesh.astype(np.float32).ravel().tolist()}
-                        for c, mesh in colored_geometry(name)]
-                  for name in sorted({p["part"] + ".dat" for p in rows})}
+        library = assembly_library(args.input, source / 'Studio 2.0/ldraw')
+        result = library.geometry(rows)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.with_suffix('.dependencies.json').write_text(json.dumps(library.dependency_record(), indent=2), encoding='utf-8')
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
     print(str(output))

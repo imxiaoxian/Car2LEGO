@@ -6,6 +6,7 @@ import re
 
 import numpy as np
 
+from .glazing import place_side_windows
 from .vehicle import constraint_targets, measurement
 
 
@@ -129,33 +130,9 @@ def design_coupe(fit):
     car.place(windscreen, 40, start-1, center, glass_top, "front windscreen", 16, QUARTER)
     if not open_cabin:
         car.place(windscreen, 40, end+1, center, glass_top, "rear windscreen", 16, BACK_QUARTER)
-    for side, y in zip((-1, 1), sides):
-        if open_cabin:
-            continue
-        car.fill(range(start, end+1), [y], range(deck, glass_top-6), paint)
-        if suv:
-            x = start
-            pillar = start+4
-            while x <= end:
-                if x == pillar or x == end:
-                    car.fill([x], [y], range(glass_top-6, glass_top), 0)
-                    x += 1
-                else:
-                    car.place("87552", 40, x+.5, y, glass_top, "continuous side glazing", 16,
-                              HALF if side == -1 else IDENTITY)
-                    x += 2
-            car.fill(range(start-1, end+2), [y], [glass_top], 0)
-            continue
-        for x in range(start, end, 2):
-            if x+1 > end:
-                continue
-            car.place("60592", 0, x+.5, y, glass_top, "side window frames", 16,
-                      IDENTITY if side == -1 else HALF)
-            car.place("60601", 40, x+.5, y, glass_top, "side window glass", 16,
-                      IDENTITY if side == -1 else HALF)
-        if (end-start+1) % 2:
-            car.fill([end], [y], range(deck, glass_top), paint)
-        car.fill(range(start-1, end+2), [y], [glass_top], paint)
+    if not open_cabin:
+        place_side_windows(car, start, end, sides, glass_top, deck,
+                           four_doors=fit.get("door_count", 4 if suv else 2) == 4)
     if not open_cabin:
         car.fill(range(start-1, end+2), inner, [glass_top], 0)
 

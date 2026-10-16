@@ -42,6 +42,66 @@ def test_imported_completion_is_draft_without_embedded_acceptance_reference(stor
     assert scene["joints"] == []
 
 
+def test_rich_reference_details_and_batch_state_are_available_over_http(store):
+    desktop, id = store
+    directory = desktop.artifacts(id) / "01-image"
+    path = directory / "shots/door_left_open.png"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b"published-image")
+    shot = dict(file="shots/door_left_open.png", model="gpt-image-test", sha256=digest(path),
+                category="detail", modules=["doors", "glazing"], state="left door open")
+    write_json(directory / "views.json", dict(shots={"door_left_open": shot}, views={}))
+    dispatch = dict(status="completed", batch_index=4, batch_size=5, views=["door_left_open"],
+                    completed_views=["door_left_open"], expected_views=29, failed_views=[])
+    write_json(directory / "car2lego/reference-dispatch.json", dispatch)
+    detail = desktop.detail(id)
+    assert detail["reference_dispatch"] == dispatch
+    reference, = detail["reference_images"]
+    assert reference["category"] == "detail" and reference["state"] == "left door open"
+    assert reference["modules"] == ["doors", "glazing"]
+    server = ThreadingHTTPServer(("127.0.0.1", 0), partial(Handler, jobs=desktop.jobs,
+        desktop=desktop, directory=str(ROOT / "frontend/public")))
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    try:
+        connection = HTTPConnection("127.0.0.1", server.server_port)
+        connection.request("GET", reference["url"])
+        response = connection.getresponse()
+        assert response.status == 200 and response.read() == b"published-image"
+    finally:
+        connection.close()
+        server.shutdown()
+        server.server_close()
+        thread.join()
+    path.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="hash mismatch"):
+        desktop.reference_file(id, "door_left_open")
+    shot["file"] = "../../request.json"
+    write_json(directory / "views.json", dict(shots={"door_left_open": shot}))
+    with pytest.raises(FileNotFoundError):
+        desktop.reference_file(id, "door_left_open")
+
+
+def test_generation_uses_published_worker_images_and_keeps_legacy_reference_paths(store):
+    desktop, id = store
+    directory = desktop.artifacts(id) / "01-image"
+    path = directory / "front.png"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b"old")
+    write_json(directory / "views.json", dict(views={"front": dict(file="front.png", sha256=digest(path))}))
+    assert desktop.reference_file(id, "front") == path
+    published = directory / "car2lego/references/front.png"
+    published.parent.mkdir(parents=True)
+    published.write_bytes(b"new")
+    write_json(published.parent / "manifest.json", dict(images=[dict(view="front", path="references/front.png",
+        sha256=digest(published), model="gpt-image-test")]))
+    write_json(directory / "car2lego/reference-dispatch.json", dict(status="running"))
+    assert desktop.reference_file(id, "front") == published
+    assert len(desktop.detail(id)["reference_images"]) == 1
+    with pytest.raises(FileNotFoundError):
+        desktop.reference_file(id, "not_a_camera")
+
+
 def test_specification_mapping_preserves_unknown_and_estimates():
     spec = read(ROOT / "data/vehicles/ferrari_f40_1987.json")
     spec["measurements"]["length"]["status"] = "estimated"
@@ -104,8 +164,36 @@ def test_submission_keeps_year_optional_and_customization_parent(store, monkeypa
     assert request["year"] is None and request["variant"] == ""
     assert request["parent_design_id"] == id
     assert request["custom_request"] == "black paint"
+    assert request["scale"] is None and request["scale_mode"] == "auto"
     with pytest.raises(RuntimeError):
         desktop.submit(dict(make="New Brand", model="Test"))
+
+
+def test_automatic_specs_have_no_scaled_targets():
+    spec = read(ROOT / "data/vehicles/ferrari_f40_1987.json")
+    result = physical(spec, dict(make="Ferrari", model="F40", year=None))
+    assert result["scale"] is None and result["scale_mode"] == "auto"
+    assert all(m["target_model_mm"] is None for m in result["measurements"].values())
+    assert result["measurements"]["length"]["value"] == 4430
+
+
+def test_automatic_native_bounds_are_measured_without_scale_deviation_or_acceptance(store):
+    desktop, id = store
+    directory = desktop.directory(id)
+    write_json(directory / "request.json", dict(brand="Ferrari", model="F40", year=None, scale=None, scale_mode="auto"))
+    write_json(directory / "vehicle-specs.json", read(ROOT / "data/vehicles/ferrari_f40_1987.json"))
+    write_json(desktop.artifacts(id) / "03-lego/native-audit.json", dict(
+        assembly_sha256=digest(desktop.artifacts(id) / "03-lego/assembly.json"),
+        bounds_ldu=[[0, -100, -200], [1000, 0, 200]], collision_count=2,
+        connectivity=dict(status="failed")))
+    detail = desktop.detail(id)
+    assert detail["actual_dimensions_mm"] == dict(length=400, width=160, height=40)
+    assert detail["scale_deviation_percent"] == {}
+    assert detail["requested_scale"] is None and detail["scale_requirements"] is None
+    assert detail["quality_report"]["gates"]["dimensions"] == "measured"
+    assert detail["quality_report"]["gates"]["collisions"] == "failed"
+    assert detail["quality_report"]["gates"]["connections"] == "failed"
+    assert not detail["quality_report"]["precision_verified"]
 
 
 def test_invalid_photo_and_year_do_not_start_worker(store):
@@ -130,6 +218,15 @@ def test_compatibility_http_and_origin_guard(store, monkeypatch):
             response = connection.getresponse()
             assert response.status == 200, path
             assert json.loads(response.read())
+        monkeypatch.setattr(desktop, "run", lambda id: None)
+        connection.request("POST", f"/api/v1/designs/{id}/customize", body=json.dumps(dict(customization_text="black paint")),
+                           headers={"Origin": "http://127.0.0.1:8768", "Content-Type": "application/json"})
+        response = connection.getresponse()
+        assert response.status == 201
+        child = json.loads(response.read())["id"]
+        child_request = read(desktop.directory(child) / "request.json")
+        assert child_request["scale"] is None and child_request["scale_mode"] == "auto"
+        assert child_request["parent_design_id"] == id
         connection.request("POST", f"/api/v1/designs/{id}/control/cancel", headers={"Origin":"https://untrusted.example"})
         response = connection.getresponse()
         assert response.status == 403
@@ -145,14 +242,16 @@ def test_compatibility_http_and_origin_guard(store, monkeypatch):
 
 
 @pytest.mark.parametrize("backend", ["hunyuan-mv", "gpt-blender"])
-def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(tmp_path, ready_research, monkeypatch, backend):
+@pytest.mark.parametrize("scale_mode", ["exact", "appearance"])
+def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(tmp_path, ready_research, monkeypatch, backend, scale_mode):
     monkeypatch.setenv("CAR2LEGO_RECONSTRUCTION_BACKEND", backend)
     from PIL import Image
     research, _ = ready_research()
     desktop = DesktopStore(JobStore(tmp_path / "jobs", research))
     id = "c"*32
     directory = desktop.root / id
-    write_json(directory / "request.json", dict(brand="Ferrari", model="F40", year=None, scale="1:24", color=None))
+    write_json(directory / "request.json", dict(brand="Ferrari", model="F40", year=None,
+        scale="1:24", scale_mode=scale_mode, color=None))
     write_json(directory / "status.json", dict(status="pending"))
     write_json(directory / "desktop.json", dict(artifacts="artifacts"))
     commands = []
@@ -179,6 +278,8 @@ def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(t
             (output / "calibrated.glb").write_bytes(b"mock reconstruction")
         elif "lego" in args:
             assert args[args.index("--color")+1] == "0"
+            assert args[args.index("--scale-mode")+1] == scale_mode
+            assert args[args.index("--scale")+1] == "1:24"
             (output / "model.ldr").write_text("mock assembly")
             write_json(output / "assembly.json", dict(parts=[]))
         elif "studio" in args:
@@ -205,3 +306,28 @@ def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(t
     desktop.run(id)
     assert desktop.state(id)["status"] == "draft"
     assert len(commands) == 9
+
+
+def test_automatic_worker_preserves_large_plan_and_stops_before_image_calls(tmp_path, ready_research, monkeypatch):
+    research, _ = ready_research()
+    desktop = DesktopStore(JobStore(tmp_path / "jobs", research))
+    id = "d"*32
+    directory = desktop.root / id
+    write_json(directory / "request.json", dict(brand="Ferrari", model="F40", year=None,
+        scale=None, scale_mode="auto", color=None))
+    write_json(directory / "status.json", dict(status="pending"))
+    write_json(directory / "desktop.json", dict(artifacts="artifacts"))
+
+    def unexpected(*args):
+        pytest.fail("A missing large recipe must stop before image or reconstruction calls")
+    monkeypatch.setattr(desktop, "command", unexpected)
+    monkeypatch.setattr("car2lego3d.desktop.bridge", unexpected)
+    desktop.active = id
+    desktop.run(id)
+    state = desktop.state(id)
+    assert state["status"] == "failed" and "1:12" in state["error_message"]
+    plan = read(directory / "requirements.json")
+    assert plan["grid"]["length_studs"] == 46 and plan["grid"]["width_studs"] == 20
+    assert not plan["generation"]["draft_recipe_available"]
+    assert not (desktop.artifacts(id) / "01-image").exists()
+    assert desktop.active is None

@@ -70,7 +70,9 @@ def main():
                 child.add_argument("--mesh", type=Path, required=True)
             size = child.add_mutually_exclusive_group()
             size.add_argument("--length-studs", type=int, help="Custom nominal core length; default 24")
-            size.add_argument("--scale", choices=SCALES, help="Exact target scale; requires --vehicle-specs")
+            size.add_argument("--scale", choices=SCALES, help="Reference size class; requires --vehicle-specs")
+            child.add_argument("--scale-mode", choices=["auto", "appearance", "exact"],
+                               help="Appearance-first sizing near 1:12 by default; explicit scales support legacy replay")
             child.add_argument("--strategy", choices=["plates", "car"], default="car")
             child.add_argument("--width-studs", type=int, choices=[8, 10, 12],
                                help="Body core width; spec mode selects the nearest family if omitted")
@@ -81,7 +83,15 @@ def main():
             if name == "lego":
                 child.add_argument("--requirements-snapshot", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.command in ("run", "lego"):
+        if args.scale_mode is None:
+            args.scale_mode = "appearance" if args.scale else "exact" if args.length_studs is not None else "auto"
+        if args.scale_mode == "auto" and (args.scale or args.length_studs is not None or args.width_studs is not None):
+            parser.error("Automatic sizing does not accept --scale, --length-studs or --width-studs")
     vehicle_spec = getattr(args, "vehicle_specs", None)
+    if (args.command in ("run", "lego") and args.strategy == "car"
+            and args.scale_mode == "auto" and vehicle_spec is None):
+        parser.error("Automatic sizing near 1:12 requires --vehicle-specs; use an explicit grid for legacy drafts")
     if vehicle_spec is not None:
         from .vehicle import load_spec
         vehicle_spec = vehicle_spec.resolve()
@@ -148,7 +158,7 @@ def main():
             parser.error("run --output must be empty to preserve prior artifacts")
         plan = None
         if vehicle_spec is not None:
-            plan = plan_design(load_spec(vehicle_spec), args.scale, args.length_studs, args.width_studs)
+            plan = plan_design(load_spec(vehicle_spec), args.scale, args.length_studs, args.width_studs, args.scale_mode)
             from .recipes import classify, selection_record
             early = classify(load_spec(vehicle_spec), explicit=args.body_style)
             if early["family"] != "other" and selection_record(early)["builder"] is None:
@@ -166,7 +176,7 @@ def main():
             vehicle_spec = snapshot.resolve()
         spec_args = ["--vehicle-specs", vehicle_spec] if vehicle_spec is not None else []
         core_length = args.length_studs if args.length_studs is not None else 24
-        size_args = ["--scale", args.scale] if args.scale else ["--length-studs", core_length]
+        size_args = ["--scale", args.scale] if args.scale else [] if args.scale_mode == "auto" else ["--length-studs", core_length]
         with stage(args.output, "pipeline", {"mode": "prompt" if args.prompt else "views" if args.views else "image", "seed": args.seed,
                                              "backend": args.backend,
                                              "resolution": args.resolution,
@@ -216,6 +226,7 @@ def main():
             mesh = args.output / "02-mesh" / ("calibrated.glb" if vehicle_spec is not None else "mesh.glb")
             color_args = ["--color", args.color] if args.color is not None else []
             invoke("lego", "--mesh", mesh, "--output", args.output / "03-lego",
+                   "--scale-mode", args.scale_mode,
                    *size_args, "--up-axis", args.up_axis, "--yaw", args.yaw,
                    "--strategy", args.strategy, *(["--no-rear-wing"] if args.no_rear_wing else []), *color_args,
                    *(["--width-studs", args.width_studs] if args.width_studs is not None else []),
@@ -261,7 +272,7 @@ def main():
             print(convert_car(args.mesh, args.output, args.length_studs, args.up_axis, args.yaw,
                               args.color, not args.no_rear_wing, vehicle_spec, args.width_studs, args.scale,
                               json.loads(args.requirements_snapshot.read_text(encoding="utf-8"))
-                              if args.requirements_snapshot else None, args.body_style, args.reference_views))
+                              if args.requirements_snapshot else None, args.body_style, args.reference_views, args.scale_mode))
         else:
             from .lego import convert
             print(convert(args.mesh, args.output, args.length_studs if args.length_studs is not None else 24,

@@ -12,6 +12,7 @@ from .common import ROOT, digest, model_lock, stage, write_json
 from .dialogue import ask_json, image_content, settings
 from .gpt_reference import configuration
 from .multiview import load_views
+from .model_quality import assess_model, new_failures
 from .vehicle import load_spec, spec_record
 
 
@@ -20,12 +21,13 @@ MCP_TIMEOUT = 600
 
 
 PROMPT = """You are a senior automotive Blender modeller. Build an accurate detailed smooth car from ALL
-four labelled elevation images and the overview. This is a 3D reconstruction experiment, NOT a LEGO model.
+labelled whole-car and module-detail references supplied for this phase. This is a full-detail 3D reconstruction.
 Return only JSON: {"analysis": "concise visual analysis and modelling plan", "code": "complete bpy script"}.
 Script runs via Blender MCP execute_blender_code in Blender 4.5. Use only bpy, math, mathutils, random.
 No filesystem, network, shell, addon installation, file loading or saving. Host code handles export/render.
 Clear all scene objects before building. Units are METRES; full-size coordinates. X increases from FRONT
 bumper (x=0) to REAR bumper (x=length); Y left/right centred at 0; Z up, tyre ground contact z=0.
+The labelled LEFT camera is at negative Y; name its wheels/door left. RIGHT is positive Y.
 Use vehicle specs for length, body width excluding mirrors, height, wheelbase, tyres and axle positions.
 The supplied specification snapshot takes precedence over conflicting dimensions in the image brief.
 Values are model estimates; prioritize image geometry for low confidence details while retaining core size.
@@ -33,17 +35,52 @@ Roof/cabin MUST have a shaped fastback/SUV profile if shown. Avoid generic boxes
 Create a continuous curved body using dense longitudinal cross-section lofts with shoulder, beltline,
 sill, bonnet and fender surfaces. Use real wheel-arch cuts (EXACT boolean or purpose-built topology),
 body depth, underbody and connected shell. Do NOT use a cube as final main body. No floating broad panels.
+Build cabin/cowl/A-pillar roots, nose/fenders/bumper, and rear deck/buttresses/tail from shared
+boundary coordinates. Weld continuous shell sections; allow small intentional door/bonnet gaps.
+Do not bridge disconnected modules with a thick trim strip or hide them inside an opaque cabin block.
+Windscreen and rear glass lower edges must seat into body/cowl/engine deck and upper edges into roof,
+within 12 mm along the WHOLE edge. Name support roles cowl, header, cabin_buttress, front_fender,
+rear_fender, front_fascia, rear_fascia, engine_deck as appropriate. For separate transition meshes,
+add vertex groups join_<target car_role> containing ALL vertices along the actual shared boundary,
+and set car_connection_region='cabin', 'front' or 'rear'. Host samples those topology edges every 10 mm.
+If two disjoint edges meet the same role, use join_<role>__<edge_id> separately so interior cross-edges
+are not mistaken for seams. These groups contain contact-edge vertices only, not all panel vertices.
+Include measured boundary groups for all three regions. Preserve intentional Countach-style creases;
+use matched tangents only where the reference has a continuous smooth transition.
 Separate named body, roof, windshield, side windows, rear glass, pillars, four tyres/rims/spokes,
 headlamps, rear light bar, intakes/grilles, rocker panels, door seams, handles, mirrors, spoiler as applicable.
 Name four tyre objects tyre_front_left, tyre_front_right, tyre_rear_left, tyre_rear_right.
 Tyre cylinders' axes are Y, wheels at front_overhang and front_overhang+wheelbase, authentic arch clearances.
 Use procedural meshes/curves for narrow vehicle-specific light signatures and vents, not only primitives.
-Glazing should be fitted TO the cabin surfaces, visually opaque dark glass (alpha=1, roughness .15),
-not a giant dark box or an opaque panel hovering above body. Inspect opposite views for consistency.
+Glazing must be fitted TO the cabin surfaces, with finite 3-5 mm thickness, smoked transmissive
+Principled glass (Transmission Weight .65-.9, IOR 1.45-1.52, roughness .08-.16, alpha=1).
+Use a moderately tinted base colour so the seats remain visible; do not use an opaque black plate.
+Keep thin fitted perimeter gaskets and real cabin openings. Inspect opposite views for consistency.
+Headlamps need a fitted shallow recess, dark housing, reflector and clear lens with finite thickness;
+tail lamps need coloured translucent lenses. Fit the lens perimeter to its housing, not a floating
+emissive rectangle. Preserve the reference's lamp outline, dividers and separate indicator segments.
+Each opening door is ONE assembly: create an EMPTY with car_role='door_assembly', and parent its
+door panel (car_role='door_panel'), window frame (car_role='door_frame'), and side glass
+(car_role='side_window') to it while preserving their world transforms. Separate fixed quarter glass
+from the moving door glass. The bottom/front/rear glass edges must meet its own frame/panel within
+15 mm; parenting alone is not a physical connection. Use shared boundary coordinates for door and glass.
+Set car_role='body' on the main body shell (excluding mirrors), 'roof' on roof geometry.
+Set car_role='windscreen', 'quarter_window', 'rear_window' on other glass as applicable.
+Avoid parenting with a stale matrix_world: update the view layer BEFORE reading parent matrices,
+store each child's world matrix, assign parent and its inverse, then restore the child's world matrix.
+The closed door/window assembly stays at the cabin, never above the roof. Cut window openings in
+the cabin shell or build only roof and pillars; no opaque cabin volume may cover the glazing.
+All closed lofts need outward face winding and positive volume. Recalculate normals before booleans.
+Use exactly four separately named tyre meshes, with no tread geometry outside their intended diameter.
+Do not distort the cabin to obey low-confidence door/glass estimates: infer its silhouette from the
+side views, especially the cowl, roof onset, rear cabin edge and windscreen rake. Include these choices
+in analysis. For angular cars retain angular surfaces; dense lofts do not imply rounding sharp creases.
 Model the sharp styling identity and image colours. Good topology, smooth shading, bevels where appropriate.
 Keep total evaluated triangles below 250000 and booleans limited. Don't subdivide Boolean result arbitrarily.
 Materials use Principled BSDF Base Color/Metallic/Roughness. Emit lenses via Emission Color/Strength.
 No text labels, ground plane, camera or light. The host adds a common render rig. No need to print vertices.
+Keep the script compact: use reusable mesh loft/arch helpers and roughly 120-220 lines of Python.
+Resolve the major silhouettes and distinct styling before fine trim; avoid lengthy speculative analysis.
 """
 
 
@@ -155,9 +192,10 @@ class BlenderSession:
         self.log.close()
 
 
-def render_code(directory, export=True):
+def render_code(directory, export=True, provenance=None):
     template = (ROOT / "scripts/blender_export_render.py").read_text(encoding="utf-8")
-    return "OUTPUT_DIRECTORY = " + repr(str(Path(directory).resolve())) + "\nEXPORT = " + repr(export) + "\n" + template
+    return ("OUTPUT_DIRECTORY = " + repr(str(Path(directory).resolve())) + "\nEXPORT = " + repr(export)
+            + "\nSCENE_PROVENANCE = " + repr(provenance or {}) + "\n" + template)
 
 
 def modelling_model():
@@ -169,6 +207,9 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
         raise ValueError("GPT Blender modelling requires a physical specification snapshot")
     directory = Path(directory).resolve()
     manifest, paths = load_views(manifest_path)
+    if manifest.get("schema_version") == 2:
+        from .staged_model import reconstruct as reconstruct_staged
+        return reconstruct_staged(manifest_path, directory, vehicle_spec, review)
     spec = load_spec(vehicle_spec)
     images = dict(paths)
     if (Path(manifest_path).parent / "reference.png").is_file():
@@ -181,49 +222,73 @@ def reconstruct(manifest_path, directory, vehicle_spec, review=True):
                 *image_content(images)]
         messages = [{"role": "system", "content": PROMPT}, {"role": "user", "content": user}]
         response = ask_json(messages, directory, "model", max_tokens=24000, timeout=MODEL_TIMEOUT,
-                            reuse_completed=True, model=model, stream=True)
+                            reuse_completed=True, model=model, stream=True, reasoning_effort="medium", transient_retries=2)
         with BlenderSession(directory) as blender:
             for attempt in range(3):
-                code = validate_code(response["code"])
-                (directory / f"model-{attempt + 1}.py").write_text(code, encoding="utf-8")
                 try:
+                    code = validate_code(response["code"])
+                    (directory / f"model-{attempt + 1}.py").write_text(code, encoding="utf-8")
                     blender.execute(code, f"model-{attempt + 1}")
                     break
-                except RuntimeError as error:
+                except (RuntimeError, ValueError, SyntaxError) as error:
                     if attempt == 2:
                         raise
                     messages += [{"role": "assistant", "content": json.dumps(response)},
                         {"role": "user", "content": "Execution failed. Return a corrected FULL script: " + str(error)[-7000:]}]
                     response = ask_json(messages, directory, f"repair-{attempt+1}", max_tokens=24000,
-                                        timeout=MODEL_TIMEOUT, model=model, stream=True)
+                                        timeout=MODEL_TIMEOUT, model=model, stream=True, reasoning_effort="medium", transient_retries=2)
             blender.execute(render_code(directory), "export-render")
+            body_style = (manifest.get("brief") or {}).get("body_style")
+            quality = assess_model(directory, spec, body_style=body_style)
             if review:
                 before = directory / "before-review"
                 before.mkdir(exist_ok=True)
                 for path in directory.iterdir():
-                    if path.suffix in {".png", ".glb", ".obj", ".mtl", ".blend"} or path.name == "scene-metrics.json":
+                    if path.suffix in {".png", ".glb", ".obj", ".mtl", ".blend"} or path.name in {"scene-metrics.json", "model-quality.json"}:
                         shutil.copyfile(path, before / path.name)
-                feedback = ask_json([{"role": "system", "content": PROMPT + "\nReview the reference vs current renders. "
-                    "Return JSON {analysis, code}; code is a corrective PATCH to the existing scene, not a fresh scene. "
-                    "Do not clear all objects. If no concrete improvement is possible, code is an empty string."},
-                    {"role": "user", "content": [{"type": "text", "text": "Vehicle specifications: " + json.dumps(spec)},
-                        *image_content(images), *image_content({"CURRENT_" + v: directory / f"render-{v}.png"
-                            for v in ("left", "front", "back", "three-quarter")}),
-                        {"type": "text", "text": "Current script: " + response["code"]}]}],
-                    directory, "visual-review", max_tokens=18000, timeout=MODEL_TIMEOUT, model=model, stream=True)
+                review_prompt = PROMPT.replace("Clear all scene objects before building.", "Preserve the existing scene.")
+                try:
+                    feedback = ask_json([{"role": "system", "content": review_prompt + "\nReview the reference vs current renders. "
+                        "Return JSON {analysis, code}; code is a corrective PATCH to the existing scene, not a fresh scene. "
+                        "Do not clear all objects. If no concrete improvement is possible, code is an empty string."},
+                        {"role": "user", "content": [{"type": "text", "text": "Vehicle specifications: " + json.dumps(spec)},
+                            *image_content(images), *image_content({"CURRENT_" + v: directory / f"render-{v}.png"
+                                for v in ("left", "front", "back", "three-quarter")}),
+                            {"type": "text", "text": "Measured geometry diagnostics (fix failures): " + json.dumps(quality)
+                             + "\nCurrent script: " + response["code"]}]}],
+                        directory, "visual-review", max_tokens=18000, timeout=MODEL_TIMEOUT, model=model, stream=True,
+                        reasoning_effort="medium", transient_retries=2)
+                except Exception as error:
+                    write_json(directory / "review-failure.json", dict(error=str(error), scene_preserved=True))
+                    feedback = {"code": ""}
                 if feedback.get("code", "").strip():
                     try:
+                        (directory / "visual-refine.py").write_text(feedback["code"], encoding="utf-8")
                         blender.execute(validate_code(feedback["code"]), "visual-refine")
                         blender.execute(render_code(directory), "refined-export-render")
-                    except (RuntimeError, ValueError) as error:
+                        refined = assess_model(directory, spec, body_style=body_style)
+                        regressions = new_failures(quality, refined)
+                        if regressions:
+                            raise ValueError("Visual patch introduced geometry failures: " + ", ".join(regressions))
+                        quality = refined
+                        write_json(directory / "review-selection.json", dict(selected="refined", new_geometry_failures=[]))
+                    except (RuntimeError, ValueError, SyntaxError) as error:
                         # Keep the saved successful pre-review scene if a patch failed midway.
                         write_json(directory / "review-failure.json", dict(error=str(error)))
+                        rejected = directory / "rejected-review"
+                        rejected.mkdir(exist_ok=True)
+                        for path in before.iterdir():
+                            if (directory / path.name).is_file():
+                                shutil.copyfile(directory / path.name, rejected / path.name)
                         for path in before.iterdir():
                             shutil.copyfile(path, directory / path.name)
+                        write_json(directory / "review-selection.json", dict(selected="before-review", reason=str(error)))
                         blender.execute("import bpy\nbpy.ops.wm.open_mainfile(filepath=" + repr(str(directory / "model.blend")) + ")", "restore")
             record.update(analysis=response["analysis"], model=model,
                 addon=dict(commit=model_lock()["blender_mcp_code"]["commit"], sha256=digest(upstream() / "addon.py")),
                 vehicle_spec=spec_record(vehicle_spec), glb_units="metres", obj_units="mm",
                 physical_measurement_verified=False, appearance_accepted=False,
+                geometry_diagnostics=dict(status=quality["status"], failed_checks=quality["failed_checks"],
+                                          report="model-quality.json", sha256=digest(directory / "model-quality.json")),
                 outputs={p.name: digest(p) for p in directory.iterdir() if p.suffix in {".glb", ".obj", ".blend", ".png"}})
     return directory / "calibrated.glb"

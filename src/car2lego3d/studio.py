@@ -1,4 +1,4 @@
-"""Export flat, standard-part LDraw assemblies as Studio-compatible .io archives."""
+"""Export recursive LDraw assemblies without claiming unobserved Studio acceptance."""
 import json
 import math
 from pathlib import Path
@@ -7,6 +7,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 from PIL import Image
 
 from .common import digest, stage
+from .ldraw_document import Document
 
 
 def assembly_sequence(text):
@@ -35,19 +36,21 @@ def assembly_sequence(text):
 
 
 def verify_archive(path, source):
-    expected = assembly_sequence(Path(source).read_text(encoding="utf-8"))
+    expected = Document(Path(source).read_text(encoding="utf-8"))
     with ZipFile(path) as archive:
         if archive.testzip() is not None:
             raise ValueError("Corrupt Studio archive.")
         for name in ("model.ldr", "model2.ldr"):
-            actual = assembly_sequence(archive.read(name).decode("utf-8"))
-            if actual != expected:
+            actual = Document(archive.read(name).decode("utf-8"))
+            if actual.signature() != expected.signature():
                 raise ValueError(f"Studio {name} changed the assembly or step sequence.")
         info = json.loads(archive.read(".info"))
-        count = sum(row[0] == "1" for row in expected)
+        count = len(expected.instances())
         if info["total_parts"] != count:
             raise ValueError("Studio metadata part count mismatch.")
-    return {"part_count": count, "step_count": sum(row[0] == "0" for row in expected),
+    return {"part_count": count, "step_count": sum(line.strip() == "0 STEP" for line in expected.sections[expected.root]),
+            "submodel_count": sum(n != expected.root and not n.endswith(".dat") for n in expected.sections),
+            "custom_part_count": len({i['part'] for i in expected.instances() if i['custom']}),
             "archive_roundtrip_verified": True, "studio_open_verified": False,
             "buildability": "unverified", "physical_verified": False}
 
@@ -56,8 +59,8 @@ def export_studio(source, directory, thumbnail=None):
     source, directory = Path(source), Path(directory)
     with stage(directory, "studio", {"ldraw": source.name, "sha256": digest(source)}) as record:
         content = source.read_text(encoding="utf-8")
-        sequence = assembly_sequence(content)
-        count = sum(row[0] == "1" for row in sequence)
+        document = Document(content)
+        count = len(document.instances())
         info = {"total_parts": count, "application": "Car2LEGO_3D",
                 "description": "Car2LEGO_3D assembly; physical assembly unverified."}
         destination = directory / "model.io"
@@ -77,6 +80,6 @@ def export_studio(source, directory, thumbnail=None):
             temporary.replace(destination)
         finally:
             temporary.unlink(missing_ok=True)
-        record.update(**report, format="unencrypted ZIP with standard LDraw library references",
+        record.update(**report, format="unencrypted ZIP with recursive LDraw references",
                       outputs={"model.io": digest(destination)})
     return destination

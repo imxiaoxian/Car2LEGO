@@ -6,7 +6,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RotateCcw, LoaderCircle, Eye, Layers } from "lucide-react";
 import { AssemblyScene, getAssemblyGeometry, getAssemblyScene } from "@/lib/api";
 
-const palette: Record<number, string> = { 0:"#17191a",4:"#c91a09",7:"#9ba19d",14:"#f2cd37",15:"#fafafa",25:"#fe8a18",36:"#c91a09",46:"#ff9d28",47:"#7c9daf",71:"#a0a5a9",72:"#6c6e68" };
+const palette: Record<number, string> = { 0:"#17191a",1:"#0055bf",2:"#257a3e",4:"#c91a09",7:"#9ba19d",14:"#f2cd37",15:"#fafafa",19:"#e4cd9e",25:"#fe8a18",36:"#c91a09",40:"#635f52",46:"#ff9d28",47:"#fbfbfb",70:"#582a12",71:"#a0a5a9",72:"#6c6e68",272:"#0d325b" };
 const mechanismNames:Record<string,string>={rolling_wheels:"车轮滚动",front_hood:"前盖开合",engine_cover:"发动机盖开合",doors:"车门开合",steering:"前轮转向",independent_suspension:"独立悬挂"};
 function jointLabel(j:AssemblyScene["joints"][number]) {
   const location=j.id.startsWith("wheel_") ? `${j.id.includes("left") ? "左" : "右"}${j.id.includes("front") ? "前" : "后"}轮` : mechanismNames[j.capability] || "机构";
@@ -57,11 +57,14 @@ export default function AssemblyViewer({ id, highlightedModule = "" }: { id: str
         const r = part.transform.rotation, p = part.transform.position;
         group.matrix.set(r[0],r[1],r[2],p[0],r[3],r[4],r[5],p[1],r[6],r[7],r[8],p[2],0,0,0,1);
         group.matrixAutoUpdate = false; group.userData = { module:part.module, step:stepMap.get(part.id), original:group.matrix.clone() };
+        if (!geometries[part.part_num]?.length) throw new Error(`缺少零件几何：${part.part_num}`);
         (geometries[part.part_num] || []).forEach((g,index) => {
           const c = g.color_id === 16 ? part.color_id : g.color_id;
-          const transparent = (c >= 32 && c <= 47);
-          const material = new THREE.MeshStandardMaterial({ color:palette[c] || "#b9b9b9", roughness:.3, metalness:c === 71 ? .18 : .03,
-            transparent, opacity:transparent ? .45 : 1, depthWrite:!transparent, side:THREE.DoubleSide });
+          const direct = c >= 0x2000000;
+          const transparent = (c >= 32 && c <= 47) || (c >= 0x3000000 && c < 0x4000000);
+          const paint = direct ? `#${(c & 0xffffff).toString(16).padStart(6,"0")}` : palette[c] || "#b9b9b9";
+          const material = new THREE.MeshStandardMaterial({ color:paint, roughness:transparent ? .12 : .3, metalness:transparent ? 0 : c === 71 ? .18 : .03,
+            transparent, opacity:transparent ? (c === 40 ? .65 : c === 47 ? .35 : .7) : 1, depthWrite:!transparent, side:THREE.DoubleSide });
           disposables.push(material); group.add(new THREE.Mesh(geometryCache.get(part.part_num)![index], material));
         });
         root.add(group);
@@ -86,11 +89,18 @@ export default function AssemblyViewer({ id, highlightedModule = "" }: { id: str
     const assembly=data.current;
     if (!model.current || !assembly) return;
     const selected=assembly.joints.find(j => j.id===joint);
-    // Joint preview only moves its actual child module, never dependency modules.
+    const affected = new Set(selected ? [selected.child] : []);
+    // Hierarchy controls articulation; depends_on only controls assembly order.
+    for (let changed=true; changed;) {
+      changed=false;
+      assembly.modules.forEach(module => {
+        if (module.parent && affected.has(module.parent) && !affected.has(module.id)) {affected.add(module.id);changed=true;}
+      });
+    }
     model.current.children.forEach(group => {
       group.visible=Number(group.userData.step)<=step;
       group.matrix.copy(group.userData.original);
-      if (selected && group.userData.module===selected.child) {
+      if (selected && affected.has(group.userData.module)) {
         const pivot=new THREE.Vector3(...selected.pivot as [number,number,number]);
         const axis=new THREE.Vector3(...selected.axis as [number,number,number]);
         const move=new THREE.Matrix4();

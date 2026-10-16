@@ -130,6 +130,10 @@ def load_views(path):
     from PIL import Image
     path = Path(path).resolve()
     manifest = json.loads(path.read_text(encoding="utf-8"))
+    if manifest.get('schema_version') == 2:
+        from .references import load_references
+        manifest, paths = load_references(path)
+        return manifest, {v: paths[v] for v in VIEWS}
     if manifest.get("schema_version") != 1 or set(manifest.get("views", {})) != set(VIEWS):
         raise ValueError("Multiview reconstruction requires front, left, back and right views.json.")
     paths, hashes = {}, set()
@@ -152,19 +156,21 @@ def load_views(path):
 
 def snapshot_views(source, directory):
     import shutil
-    manifest, paths = load_views(source)
+    from .references import load_references
+    manifest, paths = load_references(source)
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     copied = {}
     for name, origin in paths.items():
         destination = directory / f"{name}.png"
         shutil.copyfile(origin, destination)
-        copied[name] = {**manifest["views"][name], "file": destination.name}
+        copied[name] = {**(manifest.get('shots') or manifest['views'])[name], "file": destination.name}
     anchor = Path(source).parent / "reference.png"
     if anchor.is_file():
         shutil.copyfile(anchor, directory / "reference.png")
     output = directory / "views.json"
-    write_json(output, {**manifest, "views": copied})
+    write_json(output, {**manifest, "views": {v: copied[v] for v in VIEWS},
+                       **({'shots': copied} if manifest.get('schema_version') == 2 else {})})
     write_json(directory / "import.json", {"source_manifest": str(Path(source).resolve()),
                "source_sha256": digest(source), "imported": True, "new_image_api_calls": 0})
     return output

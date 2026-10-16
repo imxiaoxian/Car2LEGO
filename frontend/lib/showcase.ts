@@ -6,6 +6,13 @@ export const showcaseCars = [
 
 export const viewNames: Record<string, string> = {
   left:"左侧",right:"右侧",
+  back:"后视",top:"顶视",front_left:"左前斜视",front_right:"右前斜视",rear_left:"左后斜视",rear_right:"右后斜视",
+  windscreen:"风挡与立柱",door_left_closed:"左门关闭",door_right_closed:"右门关闭",
+  door_left_open:"左门开启",door_right_open:"右门开启",headlamps:"前灯组",taillamps:"尾灯组",
+  front_cabin_join:"车头与座舱连接",rear_cabin_join:"座舱与车尾连接",seats_pedals:"座椅与踏板",
+  front_running_gear:"前轮与转向",rear_running_gear:"后轮与悬挂",front_cover_open:"前盖开启",
+  rear_cover_open:"后盖开启",powertrain_cargo:"动力舱与储物舱",scissor_hinge:"剪刀门铰链",
+  side_intake:"侧进气口",popup_lamps:"跳灯开启",rear_clamshell:"整体后掀车壳",rear_doors:"后排车门",
   render_front:"零件前视",render_rear:"零件后视",render_left:"零件左视",render_right:"零件右视",render_top:"零件顶视",render_bottom:"零件底视",
   assembly: "装配模型",
   assembly_rear: "模型后视",

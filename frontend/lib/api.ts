@@ -55,7 +55,8 @@ export interface Design {
 export interface PhysicalSpecifications {
   version: string;
   vehicle: { make: string; model: string; year: number | null };
-  scale: string;
+  scale: string | null;
+  scale_mode?: "auto" | "appearance" | "exact";
   applied_to_design?: boolean;
   overall_grounded: boolean;
   generation_status?: "ambiguous" | "source_scoped" | "requested_year" | "unknown";
@@ -79,8 +80,9 @@ export interface PhysicalSpecifications {
 
 export interface DesignDetail extends Design {
   workflow_version?: string;
-  requested_scale?: string;
-  scale_requirements?: ScaleRequirements;
+  requested_scale?: string | null;
+  scale_mode?: "auto" | "appearance" | "exact";
+  scale_requirements?: ScaleRequirements | null;
   scene_url?: string;
   renders?: { view: string; url: string }[];
   external_renders?: { view: string; label: string; url: string; category: string; module?: string; synthetic: boolean }[];
@@ -97,6 +99,8 @@ export interface DesignDetail extends Design {
   quality_level?: string;
   reference_images?: { view: string; url: string; model: string; synthetic: boolean; category?: string; purpose?: string;
     shot_request?: {focus: string; angles: string[]; reason: string; modules: string[]} }[];
+  reference_dispatch?: { status: string; batch_index: number; batch_size: number; views: string[];
+    completed_views: string[]; failed_views: string[]; expected_views: number } | null;
   official_build_references?: {set_num: string; name: string; instructions_url: string; product_url: string; local_pages?: number[]; local_pdf?: boolean}[];
   car?: CarResult;
   parts: DesignPart[];
@@ -148,21 +152,19 @@ export async function createDesign(
   make: string,
   model: string,
   year?: number | null,
-  image_url?: string,
-  scale: string = "1:38"
+  image_url?: string
 ): Promise<DesignDetail> {
   return fetchApi<DesignDetail>("/designs", {
     method: "POST",
-    body: JSON.stringify({ make, model, year, image_url, scale }),
+    body: JSON.stringify({ make, model, year, image_url }),
   });
 }
 
 export async function createDesignFromImage(
-  image: File, overrides: { make?: string; model?: string; year?: number; scale?: string } = {}
+  image: File, overrides: { make?: string; model?: string; year?: number } = {}
 ): Promise<DesignDetail> {
   const form = new FormData();
   form.append("image", image);
-  form.append("scale", overrides.scale || "1:38");
   if (overrides.make) form.append("make", overrides.make);
   if (overrides.model) form.append("model", overrides.model);
   if (overrides.year) form.append("year", String(overrides.year));
@@ -176,9 +178,9 @@ export async function getDesign(id: string): Promise<DesignDetail> {
   return fetchApi<DesignDetail>(`/designs/${id}`);
 }
 
-export async function collectVehicleSpecifications(make: string, model: string, year: number | null, scale: string): Promise<PhysicalSpecifications> {
+export async function collectVehicleSpecifications(make: string, model: string, year: number | null): Promise<PhysicalSpecifications> {
   return fetchApi("/research/physical-specifications", {
-    method: "POST", body: JSON.stringify({ make, model, year, scale }),
+    method: "POST", body: JSON.stringify({ make, model, year }),
   });
 }
 
@@ -219,12 +221,11 @@ export async function lookupCar(make: string, model: string, year?: number | nul
 /** POST /designs/:id/customize — customize an existing design */
 export async function customizeDesign(
   designId: string,
-  customizationText: string,
-  scale?: string
+  customizationText: string
 ): Promise<CustomizationResponse> {
   return fetchApi<CustomizationResponse>(`/designs/${designId}/customize`, {
     method: "POST",
-    body: JSON.stringify({ customization_text: customizationText, scale }),
+    body: JSON.stringify({ customization_text: customizationText }),
   });
 }
 
@@ -264,6 +265,8 @@ export async function getModsCatalog(): Promise<Record<string, ModPartInfo[]>> {
 }
 
 export interface ScaleRequirements {
+  scale_mode?: "appearance" | "exact";
+  size_margin_percent?: number | null;
   version: string; scale: string; label: string; description: string; applied_to_design?: boolean;
   visual_requirements: { id: string; label: string; detail: string }[];
   mechanisms: { id: string; label: string; minimum_instances: number }[];
@@ -286,6 +289,6 @@ export async function controlDesign(id: string, action: string, module?: string)
   return fetchApi<DesignStatus>(`/designs/${id}/control/${action}${module ? `?module=${encodeURIComponent(module)}` : ""}`, { method: "POST" });
 }
 export interface ScenePart { id: string; part_num: string; color_id: number; module: string; feature: string; transform: { position: number[]; rotation: number[] } }
-export interface AssemblyScene { version: string; parts: ScenePart[]; modules: { id: string; depends_on: string[] }[]; steps: { index: number; module: string; parts: string[] }[]; joints: { id: string; child: string; parent: string; axis: number[]; pivot: number[]; limits: number[]; kind: string; capability: string; implemented: boolean }[] }
+export interface AssemblyScene { version: string; parts: ScenePart[]; modules: { id: string; parent?: string | null; depends_on: string[] }[]; steps: { index: number; module: string; parts: string[] }[]; joints: { id: string; child: string; parent: string; axis: number[]; pivot: number[]; limits: number[]; kind: string; capability: string; implemented: boolean }[] }
 export function getAssemblyScene(id: string): Promise<AssemblyScene> { return fetchApi(`/designs/${id}/scene`); }
 export function getAssemblyGeometry(id: string): Promise<Record<string, { color_id: number; positions: number[] }[]>> { return fetchApi(`/designs/${id}/geometry`); }

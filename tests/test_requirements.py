@@ -102,9 +102,119 @@ def test_snapshot_rejects_changed_vehicle_grid_or_policy():
     altered["policy"]["max_parts_per_step"] = 100
     with pytest.raises(ValueError, match="snapshot"):
         validate_plan(altered, spec, 23, 10, "1:24")
+    with pytest.raises(ValueError, match="snapshot"):
+        validate_plan(plan, spec, 23, 12, "1:24")
     spec["measurements"]["length"]["value"] += 1
     with pytest.raises(ValueError, match="snapshot"):
         validate_plan(plan, spec, 23, 10, "1:24")
+
+
+def test_automatic_sizing_has_no_named_ratio_size_bounds_or_scale_detail_reduction():
+    spec = load_spec(SPEC)
+    plan = plan_design(spec, scale_mode="auto")
+    assert plan["requested_scale"] is None and plan["policy"]["scale"] is None
+    assert plan["grid"]["target_length_mm"] is None
+    assert plan["scale_intent"]["size_margin_percent"] is None
+    assert plan["policy"]["dimension_tolerances_percent"] == {}
+    reference = plan["scale_intent"]["size_reference"]
+    assert reference["ratio"] == "1:12" and not reference["binding"]
+    assert reference["dimensions_mm"]["length"] == pytest.approx(4430/12)
+    assert (plan["grid"]["length_studs"], plan["grid"]["width_studs"]) == (46, 20)
+    assert not any("simplified" in value for value in plan["policy"]["visual_requirements"])
+    assert plan["policy"]["required_mechanisms"]["independent_suspension"] == 4
+    assert not plan["generation"]["draft_recipe_available"]
+    assert plan["generation"]["blockers"]
+    assert not plan["generation"]["delivery_ready"]
+    # The soft reference follows vehicle size rather than squeezing every car into a compact recipe.
+    enlarged = deepcopy(spec)
+    for item in enlarged["measurements"].values():
+        if item["unit"] == "mm" and item["value"] is not None:
+            item["value"] *= 2
+    larger = plan_design(enlarged, scale_mode="auto")
+    assert larger["grid"]["length_studs"] == pytest.approx(2*plan["grid"]["length_studs"], abs=1)
+    assert larger["grid"]["width_studs"] == pytest.approx(2*plan["grid"]["width_studs"], abs=2)
+    validate_plan(plan, spec, **{ "length": plan["grid"]["length_studs"], "width": plan["grid"]["width_studs"], "scale": None })
+    with pytest.raises(ValueError, match="Automatic sizing"):
+        plan_design(spec, "1:24", scale_mode="auto")
+
+
+def test_default_cli_saves_soft_reference_and_stops_before_inference_for_missing_large_recipe(tmp_path, monkeypatch):
+    def unexpected(*args):
+        pytest.fail("Missing large native modules must not start model inference")
+    monkeypatch.setattr(cli, "invoke", unexpected)
+    monkeypatch.setattr(sys, "argv", ["car2lego3d", "run", "--prompt", "red Ferrari F40",
+        "--vehicle-specs", str(SPEC), "--output", str(tmp_path)])
+    with pytest.raises(SystemExit) as error:
+        cli.main()
+    assert error.value.code == 2
+    plan = json.loads((tmp_path / "00-requirements/requirements.json").read_text())
+    assert plan["scale_intent"]["mode"] == "auto" and plan["requested_scale"] is None
+    assert plan["grid"]["length_studs"] == 46 and plan["grid"]["width_studs"] == 20
+    assert not plan["generation"]["draft_recipe_available"]
+    assert not (tmp_path / "01-image").exists()
+    with pytest.raises(ValueError, match="native wheel, glazing and chassis"):
+        fit_mesh(trimesh.creation.box((4.43, 1.98, 1.13)), specifications=load_spec(SPEC), scale_mode="auto")
+
+
+def test_automatic_size_reference_does_not_create_dimension_tolerance_acceptance():
+    spec = load_spec(SPEC)
+    plan = plan_design(spec, scale_mode="auto")
+    report = assess_requirements(plan, {"dimensions": {"length": {"error_percent": 90}}}, [8])
+    length = next(c for c in report["dimension_checks"] if c["field"] == "length")
+    assert length["status"] == "reference_only" and length["tolerance"] is None
+    assert report["scale"] is None and not report["delivery_accepted"]
+    altered = deepcopy(plan)
+    altered["scale_intent"]["size_reference"]["denominator"] = 24
+    with pytest.raises(ValueError, match="snapshot"):
+        validate_plan(altered, spec, 46, 20, None)
+
+
+def test_automatic_car_sizing_needs_vehicle_dimensions_instead_of_falling_back_to_24_studs(tmp_path, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["car2lego3d", "run", "--prompt", "red Ferrari F40",
+        "--output", str(tmp_path)])
+    with pytest.raises(SystemExit) as error:
+        cli.main()
+    assert error.value.code == 2 and not (tmp_path / "01-image").exists()
+    with pytest.raises(ValueError, match="requires vehicle specifications"):
+        fit_mesh(trimesh.creation.box((4.43, 1.98, 1.13)), scale_mode="auto")
+
+
+def test_appearance_grid_can_trade_exact_scale_for_a_native_module_footprint():
+    spec = load_spec(SPEC)
+    plan = plan_design(spec, "1:24", length_studs=26, scale_mode="appearance")
+    assert plan["generation"]["draft_recipe_available"]
+    assert plan["requested_scale"] == "1:24"
+    assert plan["target_scale_denominator"] == 24
+    assert plan["grid"]["length_studs"] == 26
+    assert plan["scale_intent"]["fitting_scale_denominator"] == pytest.approx(4430/208)
+    validate_plan(plan, spec, 26, 10, "1:24")
+    mesh = trimesh.creation.box((4.43, 1.98, 1.13))
+    fit = fit_mesh(mesh, specifications=spec, scale="1:24", requirements_plan=plan)
+    report = fit["physical_constraints"]
+    assert report["scale_denominator"] == 24
+    assert report["dimensions"]["length"]["error_percent"] > 12
+    assert report["effective_core_scale_denominators"]["length"] == pytest.approx(4430/208)
+    assert not report["dimensions_verified"]
+    for part in design(fit).parts:
+        assert np.linalg.det(np.asarray(part.rotation).reshape(3, 3)) == pytest.approx(1)
+    altered = deepcopy(plan)
+    altered["scale_intent"]["size_margin_percent"] = 100
+    with pytest.raises(ValueError, match="snapshot"):
+        validate_plan(altered, spec, 26, 10, "1:24")
+
+
+def test_approximate_size_is_bounded_and_does_not_claim_visual_acceptance():
+    spec = load_spec(SPEC)
+    plan = plan_design(spec, "1:24", scale_mode="appearance")
+    for candidate in plan["scale_intent"]["candidates"]:
+        assert abs(candidate["length_error_percent"]) <= 15
+        assert abs(candidate["width_error_percent"]) <= 15
+    assert not plan["generation"]["delivery_ready"]
+    assert not plan["scale_intent"]["standard_part_scaling_allowed"]
+    oversized = plan_design(spec, "1:24", length_studs=32, scale_mode="appearance")
+    assert not oversized["generation"]["draft_recipe_available"]
+    with pytest.raises(ValueError, match="not both"):
+        plan_design(spec, "1:24", length_studs=26, scale_mode="exact")
 
 
 @pytest.mark.parametrize("scale", ["1:38", "1:16", "1:12"])

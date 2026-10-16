@@ -3,15 +3,16 @@ import { ScaleRequirements as ScalePolicy } from "@/lib/api";
 export default function ScaleRequirements({ policy, compact = false }: { policy?: ScalePolicy; compact?: boolean }) {
   if (!policy?.version) return null;
   const tolerance = policy.dimension_tolerances_percent;
+  const approximate = policy.scale_mode === "appearance";
   return <section className={`scale-requirements ${compact ? "compact" : ""}`} aria-label="比例设计要求" key={policy.scale}>
-    <div className="scale-requirements-heading"><h2>{policy.scale} · {policy.label}</h2>
+    <div className="scale-requirements-heading"><h2>{approximate ? "约 " : ""}{policy.scale} · {policy.label}</h2>
       {!compact && <span className="secondary">{policy.applied_to_design ? "本设计采用的标准" : "当前标准 · 此设计未记录采用"}</span>}
     </div>
     <p className="secondary scale-description">{policy.description}</p>
     <dl className="scale-summary">
       <div><dt>必需机构</dt><dd>{policy.mechanisms.map(m => `${m.label}${m.minimum_instances > 1 ? ` ×${m.minimum_instances}` : ""}`).join("、")}</dd></div>
-      <div><dt>尺寸偏差上限</dt><dd>车长 / 轴距 {tolerance.length}% · 车宽 / 车高 {tolerance.width}%{tolerance.height !== tolerance.width ? ` / ${tolerance.height}%` : ""}</dd></div>
-      <div><dt>轮胎偏差上限</dt><dd>外径 {policy.component_tolerances_percent.tyre_diameter}% · 宽度 {policy.component_tolerances_percent.tyre_width}%</dd></div>
+      <div><dt>{approximate ? "参考尺寸范围" : "尺寸偏差上限"}</dt><dd>{approximate ? `车长 / 车宽 ±${policy.size_margin_percent}% · 外观优先` : <>车长 / 轴距 {tolerance.length}% · 车宽 / 车高 {tolerance.width}%{tolerance.height !== tolerance.width ? ` / ${tolerance.height}%` : ""}</>}</dd></div>
+      <div><dt>{approximate ? "轮胎尺寸参考" : "轮胎偏差上限"}</dt><dd>{approximate ? "原尺寸零件 · 比例与轮拱匹配" : <>外径 {policy.component_tolerances_percent.tyre_diameter}% · 宽度 {policy.component_tolerances_percent.tyre_width}%</>}</dd></div>
       <div><dt>参考与资料</dt><dd>{policy.reference_views.length} 组参考角度 · {policy.required_measurements.length} 项必需尺寸</dd></div>
     </dl>
     <details className="scale-requirements-details"><summary>外观与实物验收要求</summary>

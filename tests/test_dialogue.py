@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -156,6 +157,48 @@ def test_stream_without_terminal_event_fails_even_with_complete_json(tmp_path):
         dialogue.streamed_response(client, {"model": "test-model"}, tmp_path, "missing", 1800)
 
 
+def test_sparse_gateway_failure_preserves_the_original_error(tmp_path):
+    raw = dict(id="resp_failed", status="failed", output=None,
+               error=dict(code="upstream_error", message="Upstream request timed out"))
+    failed = SimpleNamespace(id=raw["id"], model_dump=lambda **kwargs: raw)
+    client = stream_client([Event("response.failed", failed)])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client), patch.object(dialogue, "parse_json") as parse:
+        with pytest.raises(ValueError, match="Upstream request timed out"):
+            dialogue.ask_json(MESSAGES, tmp_path, "gateway", stream=True)
+        parse.assert_not_called()
+    assert json.loads((tmp_path / "gateway-response.json").read_text(encoding="utf-8")) == raw
+    event = json.loads((tmp_path / "gateway-events.jsonl").read_text(encoding="utf-8"))
+    assert event["response"]["error"]["code"] == "upstream_error"
+
+
+def test_completed_gateway_reply_with_null_usage_can_be_reused(tmp_path):
+    raw = response().model_dump(mode="json")
+    raw["usage"] = {"input_tokens_details": {"cache_write_tokens": None}}
+    completed = SimpleNamespace(id=raw["id"], model_dump=lambda **kwargs: raw)
+    client = stream_client([Event("response.completed", completed)])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client):
+        for _ in range(2):
+            assert dialogue.ask_json(MESSAGES, tmp_path, "gateway", stream=True,
+                                     reuse_completed=True) == {"length": 5103}
+        assert client.responses.create.call_count == 1
+    assert json.loads((tmp_path / "gateway-response.json").read_text(encoding="utf-8")) == raw
+    assert json.loads((tmp_path / "gateway-progress.json").read_text(encoding="utf-8"))["status"] == "completed"
+
+
+def test_sparse_failed_cache_does_not_block_a_new_request(tmp_path):
+    client = stream_client([Event("response.completed", response())])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client):
+        dialogue.ask_json(MESSAGES, tmp_path, "gateway", stream=True, reuse_completed=True)
+        write_json(tmp_path / "gateway-response.json", dict(status="failed", output=None))
+        client.responses.create.return_value.__enter__.return_value = iter([Event("response.completed", response())])
+        assert dialogue.ask_json(MESSAGES, tmp_path, "gateway", stream=True,
+                                 reuse_completed=True) == {"length": 5103}
+        assert client.responses.create.call_count == 2
+
+
 def test_active_stream_deadline_is_checked_and_failure_is_recorded(tmp_path):
     client = stream_client([Event("response.output_text.delta", delta="partial")])
     with patch.object(dialogue.time, "monotonic", side_effect=[0, 2, 2]):
@@ -164,3 +207,65 @@ def test_active_stream_deadline_is_checked_and_failure_is_recorded(tmp_path):
     progress = json.loads((tmp_path / "deadline-progress.json").read_text(encoding="utf-8"))
     assert progress["status"] == "failed"
     assert progress["error"] == "TimeoutError"
+
+
+def test_stream_retry_keeps_failed_events_and_consumes_only_completed_reply(tmp_path):
+    def interrupted():
+        yield Event("response.output_text.delta", delta='{"incorrect_partial":true}')
+        raise ConnectionError("Constructed reset")
+    client = stream_client([])
+    client.responses.create.return_value.__enter__.side_effect = [interrupted(),
+        iter([Event("response.completed", response())])]
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client), patch.object(dialogue.time, "sleep"):
+        assert dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True, transient_retries=1) == {"length": 5103}
+    assert "incorrect_partial" in (tmp_path / "model-events.jsonl").read_text()
+    assert (tmp_path / "model-retry-1-events.jsonl").is_file()
+    assert json.loads((tmp_path / "model-progress.json").read_text())["status"] == "completed"
+    retries = json.loads((tmp_path / "model-retries.json").read_text())
+    assert retries["completed_attempt"] == "model-retry-1"
+    assert client.responses.create.call_count == 2
+
+
+def test_incomplete_response_is_not_retried(tmp_path):
+    client = stream_client([Event("response.incomplete", response("incomplete"))])
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client):
+        with pytest.raises(ValueError, match="did not complete"):
+            dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True, transient_retries=2)
+    assert client.responses.create.call_count == 1
+
+
+def test_reasoning_setting_is_forwarded_and_part_of_cache_identity(tmp_path):
+    client = MagicMock()
+    client.__enter__.return_value = client
+    client.responses.create.return_value = response()
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), patch("openai.OpenAI", return_value=client):
+        dialogue.ask_json(MESSAGES, tmp_path, "model", reuse_completed=True)
+        dialogue.ask_json(MESSAGES, tmp_path, "model", reuse_completed=True, reasoning_effort="medium")
+        assert client.responses.create.call_count == 2
+        assert client.responses.create.call_args.kwargs["reasoning"] == {"effort": "medium"}
+
+
+def test_missing_terminal_event_retries_a_fresh_stream(tmp_path):
+    client = stream_client([])
+    client.responses.create.return_value.__enter__.side_effect = [
+        iter([Event("response.output_text.delta", delta='{"not_authoritative":true}')]),
+        iter([Event("response.completed", response())])]
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client), patch.object(dialogue.time, "sleep"):
+        assert dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True, transient_retries=1) == {"length": 5103}
+
+
+def test_transient_upstream_failure_is_retained_and_retried(tmp_path):
+    raw = dict(id="resp_failed", status="failed", output=None,
+               error=dict(code="upstream_error", message="Constructed temporary outage"))
+    failed = SimpleNamespace(id=raw["id"], model_dump=lambda **kwargs: raw)
+    client = stream_client([])
+    client.responses.create.return_value.__enter__.side_effect = [
+        iter([Event("response.failed", failed)]), iter([Event("response.completed", response())])]
+    with patch.object(dialogue, "settings", return_value=CONFIG.copy()), \
+            patch("openai.OpenAI", return_value=client), patch.object(dialogue.time, "sleep"):
+        assert dialogue.ask_json(MESSAGES, tmp_path, "model", stream=True, transient_retries=1) == {"length": 5103}
+    assert "upstream_error" in (tmp_path / "model-events.jsonl").read_text()
+    assert json.loads((tmp_path / "model-response.json").read_text())["status"] == "completed"

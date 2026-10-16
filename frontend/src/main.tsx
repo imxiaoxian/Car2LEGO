@@ -28,12 +28,6 @@ const measurementNames: Record<string, string> = {
   front_tyre_width: "前胎宽度", rear_tyre_width: "后胎宽度", front_tyre_aspect: "前胎扁平比", rear_tyre_aspect: "后胎扁平比",
   front_rim_diameter: "前轮毂直径", rear_rim_diameter: "后轮毂直径",
 };
-const scaleDescriptions: Record<string, string> = {
-  "1:38": "外观识别 · 透明座舱 · 四轮滚动",
-  "1:24": "完整外观 · 简化内饰 · 前后盖开合",
-  "1:16": "精细座舱 · 双门开合 · 转向",
-  "1:12": "分层车身 · 精细底盘 · 独立悬挂",
-};
 const swatches: Record<number, string> = { 4: "#c82a34", 25: "#ef7d13", 0: "#202124", 15: "#ffffff", 1: "#226bc0", 14: "#f0ce3c", 2: "#267851" };
 const statusNames: Record<string, string> = { running: "生成中", completed: "草稿已生成", failed: "生成失败", interrupted: "任务已中断" };
 
@@ -58,8 +52,6 @@ function App() {
   const [plan, setPlan] = useState<Plan>();
   const [planKey, setPlanKey] = useState("");
   const [planError, setPlanError] = useState("");
-  const [scale, setScale] = useState("1:24");
-  const [length, setLength] = useState(24);
   const [color, setColor] = useState(4);
   const [description, setDescription] = useState("");
   const [seed, setSeed] = useState(42);
@@ -76,9 +68,8 @@ function App() {
   const searching = startingResearch || research?.status === "running";
   const currentResearch = research && identityKey(research.request) === key ? research : undefined;
   const spec = !startingResearch && currentResearch?.status === "ready" ? currentResearch.spec : undefined;
-  const selectionKey = `${key}\n${currentResearch?.id}\n${scale}\n${length}`;
+  const selectionKey = `${key}\n${currentResearch?.id}`;
   const currentPlan = planKey === selectionKey ? plan : undefined;
-  const policy = config?.scales.find(item => item.scale === scale);
   const blocked = !spec || !currentPlan?.generation.draft_recipe_available;
 
   async function searchSpecs(refresh = false) {
@@ -124,10 +115,10 @@ function App() {
     if (!spec || !currentResearch) return;
     let active = true;
     api<Plan>("/api/plan", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...identity, custom, research_id: currentResearch.id, scale, length_studs: length }) })
+      body: JSON.stringify({ ...identity, custom, research_id: currentResearch.id }) })
       .then(result => { if (active) { setPlan(result); setPlanKey(selectionKey); } }).catch(e => { if (active) setPlanError(e.message); });
     return () => { active = false; };
-  }, [key, currentResearch?.id, spec, scale, length]);
+  }, [key, currentResearch?.id, spec]);
 
   function identityEdited() { setEdited(true); setResearchError(""); setError(""); }
 
@@ -160,7 +151,7 @@ function App() {
     setSubmitting(true);
     try {
       const result = await api<Job>("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...identity, custom, research_id: currentResearch?.id, scale, length_studs: length, color, seed, description }) });
+        body: JSON.stringify({ ...identity, custom, research_id: currentResearch?.id, color, seed, description }) });
       setJob(result);
       setJobId(result.id);
       localStorage.setItem("car2lego3d.job", result.id);
@@ -213,18 +204,9 @@ function App() {
               </>}
               {currentResearch?.notes?.map((note, index) => <p key={index} className="research-note">{note}</p>)}
             </div>
-            <label className="field"><span>模型比例</span><select aria-label="模型比例" value={scale} onChange={e => setScale(e.target.value)}>
-              {config?.scales.map(item => <option key={item.scale} value={item.scale}>{item.scale}{item.scale !== "1:24" ? "（仅要求规划）" : ""}</option>)}
-              <option value="custom">自定义车长（研究草稿）</option>
-            </select></label>
-            {scale === "custom" ? <>
-              <label className="field"><span>车长 / studs</span><input type="number" aria-label="车长" min={23} max={32} required value={length} onChange={e => setLength(Number(e.target.value))} /></label>
-            </> : <div className="scale-requirements"><p>{scaleDescriptions[scale]}</p>
-              {policy && <span>{policy.required_measurements.length} 项尺寸资料 · 每步最多 {policy.max_parts_per_step} 件</span>}
-            </div>}
             <p className={blocked ? "constraint blocked" : "constraint"}>{!spec ? "等待车型规格" : planError || (currentPlan ?
               currentPlan.generation.draft_recipe_available ? `尺寸辅助 · ${currentPlan.grid.length_studs} × ${currentPlan.grid.width_studs} studs · ${currentPlan.missing_measurements.length} 项所需参数未找到` :
-              `当前配方不支持 ${currentPlan.policy.scale} / ${currentPlan.grid.length_studs} × ${currentPlan.grid.width_studs} studs` : "正在规划尺寸")}</p>
+              `当前装配配方不可用：${currentPlan.generation.blockers.join("；")}` : "正在规划尺寸")}</p>
             <div className="color-field"><span>车身颜色</span><div role="group" aria-label="车身颜色" className="swatches">
               {config?.colors.map(item => <button key={item.code} type="button" className="swatch" style={{ background: swatches[item.code] }}
                 title={item.name} aria-label={item.name} aria-pressed={color === item.code} onClick={() => setColor(item.code)} />)}

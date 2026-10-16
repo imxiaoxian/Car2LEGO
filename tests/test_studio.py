@@ -47,9 +47,9 @@ def test_roundtrip_detects_a_changed_color_or_step(tmp_path):
             verify_archive(output, source)
 
 
-@pytest.mark.parametrize("content", ["0 Empty\n", "0 FILE submodel.ldr\n" + ASSEMBLY,
+@pytest.mark.parametrize("content", ["0 Empty\n", "0 FILE submodel.ldr\n0 FILE submodel.ldr\n" + ASSEMBLY,
                                     ASSEMBLY.replace("-10 -8", "nan -8")])
-def test_studio_rejects_incomplete_or_nonflat_assemblies(tmp_path, content):
+def test_studio_rejects_incomplete_or_invalid_assemblies(tmp_path, content):
     source = tmp_path / "bad.ldr"
     source.write_text(content)
     with pytest.raises(ValueError):

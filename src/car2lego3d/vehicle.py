@@ -155,7 +155,8 @@ def constrained_axles(spec, length, mesh_axles, scale_denominator=None):
 
 
 def dimension_report(spec, fit):
-    report = constraint_targets(spec, fit["length_studs"], fit.get("target_scale_denominator"))
+    report = constraint_targets(spec, fit["length_studs"],
+        fit.get("nominal_scale_denominator", fit.get("target_scale_denominator")))
     actual = {"length": fit["length_studs"] * 8, "width": fit["width_studs"] * 8,
               "wheelbase": (fit["axles_studs"][1] - fit["axles_studs"][0]) * 8,
               "front_overhang": (fit["axles_studs"][0] + .5) * 8,
@@ -174,6 +175,8 @@ def dimension_report(spec, fit):
             actual[f"{axle}_track"] = wheel["track_studs"] * 8
         actual["windscreen_top_width"] = fit.get("cabin_width_studs", 6) * 8
         actual["windscreen_bottom_width"] = fit.get("cabin_width_studs", 6) * 8
+    actual.update({key: value for key, value in fit.get("native_module_dimensions_mm", {}).items()
+                   if key in ("door_length", "door_panel_height")})
     errors = {name: {"target_mm": target, "fitted_mm": actual[name],
                      "error_mm": actual[name] - target,
                      "error_percent": None if target == 0 else 100 * (actual[name] / target - 1)}
@@ -181,6 +184,8 @@ def dimension_report(spec, fit):
     # 65633's central front surface rises 27.5 LDU over approximately 70 LDU.
     native_angle = fit.get("fitted_windscreen_angle_degrees", math.degrees(math.atan2(27.5, 70)))
     report.update(model=spec["model"], variant=spec["variant"], dimensions=errors,
+                  effective_core_scale_denominators={axis: measurement(spec, axis)/actual[axis]
+                      for axis in ("length", "width", "height") if axis in actual},
                   fitted_windscreen_angle_degrees=native_angle,
                   windscreen_angle_error_degrees=None if report["windscreen_angle_degrees"] is None or native_angle is None else
                   native_angle - report["windscreen_angle_degrees"],

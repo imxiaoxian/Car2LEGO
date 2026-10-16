@@ -19,15 +19,15 @@ const names: Record<string, string> = {
 };
 
 type Props = {
-  car: CarResult; scale: string; data?: PhysicalSpecifications; requirements?: ScaleRequirements;
+  car: CarResult; data?: PhysicalSpecifications; requirements?: ScaleRequirements | null;
 };
 
 export default function VehicleSpecifications(props: Props) {
-  const { car, scale } = props;
-  return <VehicleSpecificationsView key={JSON.stringify([car.id, car.make, car.model, car.year, scale])} {...props} />;
+  const { car } = props;
+  return <VehicleSpecificationsView key={JSON.stringify([car.id, car.make, car.model, car.year])} {...props} />;
 }
 
-function VehicleSpecificationsView({ car, scale, data, requirements }: Props) {
+function VehicleSpecificationsView({ car, data, requirements }: Props) {
   const [collected, setCollected] = useState<PhysicalSpecifications | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +42,7 @@ function VehicleSpecificationsView({ car, scale, data, requirements }: Props) {
 
   async function collect() {
     setBusy(true); setError("");
-    try { setCollected({ ...await collectVehicleSpecifications(car.make, car.model, car.year, scale), applied_to_design: false }); }
+    try { setCollected({ ...await collectVehicleSpecifications(car.make, car.model, car.year), applied_to_design: false }); }
     catch (err) { setError(err instanceof Error ? err.message : "车型规格获取失败"); }
     finally { setBusy(false); }
   }
@@ -61,11 +61,10 @@ function VehicleSpecificationsView({ car, scale, data, requirements }: Props) {
     {car.year == null && specs?.generation_status === "source_scoped" && <p className="secondary">资料适用年款：{specs.source_year_ranges?.map(range => `${range.start}–${range.end}`).join("、")}</p>}
     {error && <p className="error-message" role="alert">{error}</p>}
     {measurements.length > 0 ? <div className="parts-table-wrap"><table className="parts-table physical-spec-table">
-      <thead><tr><th>项目</th><th>规划用途</th><th>实车</th><th>{scale} 目标</th><th>资料状态</th><th>来源</th></tr></thead>
+      <thead><tr><th>项目</th><th>规划用途</th><th>实车</th><th>资料状态</th><th>来源</th></tr></thead>
       <tbody>{measurements.map(([name, m]) => <tr key={name}><td>{names[name] || name}</td>
-        <td>{required?.includes(name) ? "比例与结构" : "细节参考"}</td>
+        <td>{required?.includes(name) ? "外形与结构" : "细节参考"}</td>
         <td>{m.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} {m.unit === "deg" ? "°" : m.unit}</td>
-        <td>{m.unit === "deg" ? `${m.value}°` : m.target_model_mm == null ? "待换算" : `${m.target_model_mm.toFixed(2)} mm`}</td>
         <td>{m.conflicted ? "多来源差异" : m.method === "derived" ? m.grounded ? "规格换算" : "估算换算" : m.method === "estimated" ? "估算" : m.grounded ? "原文数据" : "适用版本待确认"}</td>
         <td>{m.source_url ? <a className="text-link" href={m.source_url} target="_blank" rel="noreferrer" title={m.evidence}>资料<ExternalLink size={12} /></a> : dialogue ? <span title={m.evidence}>模型对话 · {Math.round(m.confidence * 100)}%</span> : "缺少来源"}</td>
       </tr>)}</tbody></table></div> : <p className="secondary">尚无可用的尺寸资料</p>}

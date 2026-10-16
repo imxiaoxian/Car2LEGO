@@ -92,6 +92,7 @@ def test_modelling_repairs_and_visual_review_use_same_model(tmp_path):
             patch.object(blender_mcp, "digest", return_value="test-hash"), \
             patch.object(blender_mcp, "upstream", return_value=tmp_path), \
             patch.object(blender_mcp, "render_code", return_value="host export"), \
+            patch.object(blender_mcp, "assess_model", return_value={"status": "pass", "failed_checks": 0}), \
             patch.object(blender_mcp, "BlenderSession", return_value=session), \
             patch.object(blender_mcp, "ask_json", side_effect=responses) as ask:
         output = tmp_path / "output"
@@ -99,5 +100,48 @@ def test_modelling_repairs_and_visual_review_use_same_model(tmp_path):
     assert [c.args[2] for c in ask.call_args_list] == ["model", "repair-1", "visual-review"]
     assert all(c.kwargs["model"] == "gpt-6-astra" for c in ask.call_args_list)
     assert all(c.kwargs["timeout"] == 180 and c.kwargs["stream"] for c in ask.call_args_list)
+    assert all(c.kwargs["reasoning_effort"] == "medium" and c.kwargs["transient_retries"] == 2
+               for c in ask.call_args_list)
     record = json.loads((output / "reconstruction.json").read_text(encoding="utf-8"))
     assert record["model"] == record["inputs"]["model"] == "gpt-6-astra"
+
+
+def test_review_restores_scene_when_patch_fixes_windows_but_destroys_body(tmp_path):
+    (tmp_path / "addon.py").write_text("# Constructed fixture")
+    output = tmp_path / "output"
+    session = MagicMock()
+    session.__enter__.return_value = session
+    before = dict(status="needs_revision", failed_checks=2, checks=[
+        dict(name="left_window", passed=False), dict(name="right_window", passed=False),
+        dict(name="body_width", passed=True)])
+    after = dict(status="needs_revision", failed_checks=1, checks=[
+        dict(name="left_window", passed=True), dict(name="right_window", passed=True),
+        dict(name="body_width", passed=False)])
+
+    def execute(code, name):
+        if name in {"export-render", "refined-export-render"}:
+            content = b"original-scene" if name == "export-render" else b"broken-scene"
+            (output / "model.blend").write_bytes(content)
+            (output / "render-front.png").write_bytes(content)
+            write_json(output / "model-quality.json", before if name == "export-render" else after)
+        if name == "restore":
+            assert (output / "model.blend").read_bytes() == b"original-scene"
+    session.execute.side_effect = execute
+    with patch.object(blender_mcp, "modelling_model", return_value="gpt-6-astra"), \
+            patch.object(blender_mcp, "load_views", return_value=({"views": {}}, {})), \
+            patch.object(blender_mcp, "load_spec", return_value={}), \
+            patch.object(blender_mcp, "spec_record", return_value={}), \
+            patch.object(blender_mcp, "image_content", return_value=[]), \
+            patch.object(blender_mcp, "digest", return_value="test-hash"), \
+            patch.object(blender_mcp, "upstream", return_value=tmp_path), \
+            patch.object(blender_mcp, "render_code", return_value="host export"), \
+            patch.object(blender_mcp, "assess_model", side_effect=[before, after]), \
+            patch.object(blender_mcp, "BlenderSession", return_value=session), \
+            patch.object(blender_mcp, "ask_json", side_effect=[dict(analysis="Fixture", code="import bpy"),
+                                                            dict(analysis="Bad patch", code="import bpy")]):
+        blender_mcp.reconstruct(tmp_path / "views.json", output, tmp_path / "spec.json")
+    assert (output / "render-front.png").read_bytes() == b"original-scene"
+    assert (output / "rejected-review/model.blend").read_bytes() == b"broken-scene"
+    selection = json.loads((output / "review-selection.json").read_text())
+    assert selection["selected"] == "before-review"
+    assert "body_width" in selection["reason"]

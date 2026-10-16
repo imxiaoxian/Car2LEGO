@@ -40,7 +40,7 @@ class Placement:
 
 
 def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=None, width=None,
-             scale=None, requirements_plan=None, body_style=None, reference_brief=None):
+             scale=None, requirements_plan=None, body_style=None, reference_brief=None, scale_mode="exact"):
     plan = None
     if specifications is not None:
         from .requirements import plan_design, validate_plan
@@ -52,15 +52,19 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
                 raise ValueError("Grid arguments conflict with the requirements snapshot.")
             plan = requirements_plan
         else:
-            plan = plan_design(specifications, scale, length, width)
+            plan = plan_design(specifications, scale, length, width, scale_mode)
         if not plan["generation"]["draft_recipe_available"]:
             raise ValueError(" ".join(plan["generation"]["blockers"]))
         length, width = (plan["grid"][key] for key in ("length_studs", "width_studs"))
+    elif scale_mode == "auto":
+        raise ValueError("Automatic sizing near 1:12 requires vehicle specifications.")
     elif scale is not None or requirements_plan is not None:
         raise ValueError("Scale requirements need sourced vehicle specifications.")
     length = 24 if length is None else length
+    from .wedge import applies
+    compact_wedge = applies(specifications) and length == 22
     if (isinstance(length, bool) or not isinstance(length, int)
-            or not RECIPE_LENGTH_RANGE[0] <= length <= RECIPE_LENGTH_RANGE[1]):
+            or (not compact_wedge and not RECIPE_LENGTH_RANGE[0] <= length <= RECIPE_LENGTH_RANGE[1])):
         raise ValueError(f"The sports-car part family currently supports {RECIPE_LENGTH_RANGE[0]}.."
                          f"{RECIPE_LENGTH_RANGE[1]} integer studs.")
     color_override = color is not None
@@ -111,7 +115,7 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
     if specifications is not None:
         from .vehicle import constrained_axles
         axles, axle_source = constrained_axles(specifications, length, mesh_axles,
-                                               plan["target_scale_denominator"])
+            plan.get("scale_intent", {}).get("fitting_scale_denominator", plan["target_scale_denominator"]))
     chroma = rgb.max(axis=1) - rgb.min(axis=1)
     paint = np.median(rgb[chroma > 35], axis=0) if np.any(chroma > 35) else rgb.mean(axis=0)
     if color is None:
@@ -144,7 +148,9 @@ def fit_mesh(mesh, length=None, up_axis="z", yaw=0, color=None, specifications=N
     if calibration is not None:
         from .vehicle import dimension_report
         fit["physical_calibration"] = calibration
-        fit["target_scale_denominator"] = plan["target_scale_denominator"]
+        fit["nominal_scale_denominator"] = plan["target_scale_denominator"]
+        fit["target_scale_denominator"] = plan.get("scale_intent", {}).get(
+            "fitting_scale_denominator", plan["target_scale_denominator"])
         fit["requirements_plan"] = plan
         from .recipes import fit_family
         fit_family(fit, specifications, reference_brief, body_style)
@@ -219,6 +225,9 @@ class Car:
 
 
 def design(fit, rear_wing=True):
+    if fit.get("family_builder") == "wedge":
+        from .wedge import design_wedge
+        return design_wedge(fit, rear_wing)
     if fit.get("body_family") in ("suv", "crossover"):
         from .sculpted_suv import design_sculpted_suv
         return design_sculpted_suv(fit)
@@ -396,11 +405,11 @@ def split_steps(car, limit):
 
 def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=None, rear_wing=True,
                 vehicle_spec=None, width_studs=None, scale=None, requirements_plan=None,
-                body_style=None, reference_views=None):
+                body_style=None, reference_views=None, scale_mode="exact"):
     source, directory = Path(source), Path(directory)
     with stage(directory, "lego", {"mesh": source.name, "sha256": digest(source), "strategy": "car",
                                    "length_studs": length_studs, "rear_wing": rear_wing,
-                                   "scale": scale, "width_studs": width_studs}) as record:
+                                   "scale": scale, "scale_mode": scale_mode, "width_studs": width_studs}) as record:
         mesh = load_mesh(source)
         specifications = None
         if vehicle_spec is not None:
@@ -414,10 +423,12 @@ def convert_car(source, directory, length_studs=None, up_axis="z", yaw=0, color=
             brief = manifest.get("brief")
             record["reference_views_sha256"] = digest(reference_views)
         fit = fit_mesh(mesh, length_studs, up_axis, yaw, color, specifications, width_studs, scale,
-                       requirements_plan, body_style, brief)
+                       requirements_plan, body_style, brief, scale_mode)
         car = design(fit, rear_wing)
         requirements_report = None
         if specifications is not None:
+            from .vehicle import dimension_report
+            fit["physical_constraints"] = dimension_report(specifications, fit)
             from .requirements import assess_requirements
             plan = fit["requirements_plan"]
             split_steps(car, plan["policy"]["max_parts_per_step"])
