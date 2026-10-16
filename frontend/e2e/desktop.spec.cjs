@@ -89,6 +89,42 @@ test('customization and parameter dialogue omit scale even for a historical desi
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });
 
+test('reference batches and module detail views remain visible while generating', async ({ page }, info) => {
+  const id = '00000000000000000000000000000002';
+  const names = ['overview', 'front', 'rear', 'left', 'right', 'top', 'front_left', 'front_right',
+    'rear_left', 'rear_right', 'windscreen', 'door_left_closed', 'door_right_closed',
+    'door_left_open', 'door_right_open', 'headlamps', 'taillamps', 'front_cabin_join',
+    'rear_cabin_join', 'dashboard', 'seats_pedals', 'front_running_gear', 'rear_running_gear',
+    'front_cover_open', 'rear_cover_open', 'powertrain_cargo', 'scissor_hinge', 'side_intake', 'popup_lamps'];
+  await page.route(`**/api/v1/designs/${id}`, route => route.fulfill({ json: {
+    id, status: 'processing', parts: [], file_urls: {},
+    car: { id, make: 'Lamborghini', model: 'Countach', year: null },
+    reference_images: names.map((view, index) => ({ view, category: index < 10 ? 'exterior' : 'detail',
+      url: '/api/v1/test-reference.png', synthetic: true, model: 'gpt-image-test' })),
+    reference_dispatch: { status: 'running', batch_index: 4, batch_size: 5,
+      views: names.slice(10, 15), completed_views: names.slice(0, 10), expected_views: 29, failed_views: [] },
+  } }));
+  await page.route(`**/api/v1/designs/${id}/status`, route => route.fulfill({ json: {
+    id, status: 'processing', stage: 'reference_images', progress: 20,
+  } }));
+  await page.route('**/api/v1/mods', route => route.fulfill({ json: {} }));
+  await page.route('**/api/v1/test-reference.png', route => route.fulfill({
+    path: path.join(__dirname, '../public/images/ferrari-f40.webp'), contentType: 'image/webp',
+  }));
+  await page.goto(`/designs/${id}`);
+  await expect(page.getByText('参考图第 4 组 · 本组 5 张 · 已完成 10 / 29 张')).toBeVisible();
+  await page.getByRole('tab', { name: '内饰与机构', exact: true }).click();
+  await expect(page.getByRole('tab', { name: '车头与座舱连接', exact: true })).toBeVisible();
+  await page.getByRole('tab', { name: '右门开启', exact: true }).click();
+  const image = page.locator('img.reference-main');
+  await expect(image).toHaveAttribute('alt', 'Lamborghini Countach 右门开启参考图');
+  await expect(image).toBeVisible();
+  await expect.poll(() => image.evaluate(element => element.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.getByRole('tab', { name: '左前斜视', exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  await page.screenshot({ path: info.outputPath('reference-batch.png'), fullPage: true });
+});
+
 test('real draft geometry, canvas pixels, controls, and exports', async ({ page, request }, info) => {
   test.skip(!job, 'Set DESKTOP_JOB to a real imported or generated draft');
   const errors = [];
