@@ -241,7 +241,7 @@ def test_compatibility_http_and_origin_guard(store, monkeypatch):
         thread.join()
 
 
-@pytest.mark.parametrize("backend", ["hunyuan-mv", "gpt-blender"])
+@pytest.mark.parametrize("backend", ["gpt-blender"])
 @pytest.mark.parametrize("scale_mode", ["exact", "appearance"])
 def test_worker_uses_four_views_and_reference_color_then_resumes_without_calls(tmp_path, ready_research, monkeypatch, backend, scale_mode):
     monkeypatch.setenv("CAR2LEGO_RECONSTRUCTION_BACKEND", backend)

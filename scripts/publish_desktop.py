@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--spec", type=Path, required=True)
     parser.add_argument("--research-audit", type=Path)
-    parser.add_argument("--frontend-port", type=int, default=8768)
+    parser.add_argument("--frontend-port", type=int, default=8778)
     args = parser.parse_args()
     load_views(args.views / "views.json")
     spec = load_spec(args.spec)

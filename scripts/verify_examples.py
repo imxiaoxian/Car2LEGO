@@ -51,7 +51,13 @@ def verify():
                 counts = list(Counter(part["step"] for part in assembly["parts"]).values())
                 dimensions = json.loads((folder / "dimensions.json").read_text(encoding="utf-8"))
                 assessment = json.loads((folder / "requirements-report.json").read_text(encoding="utf-8"))
-                assert assessment == assess_requirements(plan, dimensions, counts)
+                expected = assess_requirements(plan, dimensions, counts)
+                # Older published reports predate these two additive metadata fields.
+                if "scale_mode" not in assessment:
+                    expected.pop("scale_mode")
+                if "dimension_checks_are_reference" not in assessment:
+                    expected.pop("dimension_checks_are_reference")
+                assert assessment == expected
                 assert max(counts) <= plan["policy"]["max_parts_per_step"]
                 assert not report["delivery_accepted"] and not assessment["delivery_accepted"]
         else:

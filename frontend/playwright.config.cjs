@@ -5,7 +5,7 @@ module.exports = defineConfig({
   timeout: 60000,
   workers: 1,
   use: {
-    baseURL: process.env.DESKTOP_URL || 'http://127.0.0.1:8768',
+    baseURL: process.env.DESKTOP_URL || 'http://127.0.0.1:8778',
     launchOptions: { executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe' },
     screenshot: 'only-on-failure',
   },

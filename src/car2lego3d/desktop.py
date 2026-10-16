@@ -21,6 +21,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from PIL import Image, ImageOps
 
 from .common import ROOT, digest, write_json
+from .project import desktop_backend
 from .gpt_reference import configuration
 from .recipes import classify, selection_record
 from .requirements import SCALES, automatic_requirements, plan_design, requirements_for_scale
@@ -254,10 +255,7 @@ class DesktopStore:
                 raise ValueError("当前装配配方不可用：" + " ".join(plan["generation"]["blockers"]))
             spec_args = ["--vehicle-specs", str(spec_path)]
             prefix = [sys.executable, "-u", "-m", "car2lego3d"]
-            from dotenv import dotenv_values
-            backend = request.get("reconstruction_backend") or os.environ.get("CAR2LEGO_RECONSTRUCTION_BACKEND") or dotenv_values(ROOT / ".env").get("CAR2LEGO_RECONSTRUCTION_BACKEND") or "hunyuan-mv"
-            if backend not in {"hunyuan-mv", "gpt-blender"}:
-                raise ValueError("Unsupported desktop reconstruction backend")
+            backend = desktop_backend(request.get("reconstruction_backend"))
             request["reconstruction_backend"] = backend
             write_json(directory / "request.json", request)
             views, mesh, lego, studio = (artifacts / n for n in ("01-image", "02-mesh", "03-lego", "04-studio"))

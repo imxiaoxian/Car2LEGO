@@ -3,9 +3,9 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "car2lego-3d"
+name = "car2lgeo-3d-llm"
 version = "0.1.0"
-description = "Local text-to-image, image-to-3D, and mesh-to-LEGO research pipeline"
+description = "GPT image references, LLM-driven Blender modelling, and LEGO Studio export"
 requires-python = ">=3.11,<3.12"
 dependencies = [
   "torch==2.5.1", "torchvision==0.20.1",
@@ -29,6 +29,7 @@ blender = ["mcp>=1.26,<2"]
 
 [project.scripts]
 car2lego3d = "car2lego3d.cli:main"
+car2lgeo3dllm = "car2lego3d.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -64,7 +64,7 @@ def test_reconstruction_routes_entire_manifest(monkeypatch, tmp_path):
     path = view_set(tmp_path)
     calls = []
     monkeypatch.setattr(module, "reconstruct", lambda *args: calls.append(args))
-    monkeypatch.setattr(sys, "argv", ["car2lego3d", "reconstruct", "--views", str(path), "--output", str(tmp_path / "out")])
+    monkeypatch.setattr(sys, "argv", ["car2lego3d", "reconstruct", "--backend", "hunyuan-mv", "--views", str(path), "--output", str(tmp_path / "out")])
     cli.main()
     assert calls[0][0] == path
     assert len(load_views(calls[0][0])[1]) == 4

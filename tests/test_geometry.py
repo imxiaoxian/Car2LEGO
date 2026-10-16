@@ -97,6 +97,9 @@ def test_transparent_foreground_is_cropped_inclusively(tmp_path):
 
 
 def test_upstream_imports_without_native_torchmcubes():
+    from car2lego3d.common import ROOT
+    if not (ROOT / "external/TripoSR/tsr/system.py").is_file():
+        pytest.skip("Optional legacy TripoSR source is not installed in the LLM + Blender project")
     assert upstream_model().__name__ == "TSR"
 
 

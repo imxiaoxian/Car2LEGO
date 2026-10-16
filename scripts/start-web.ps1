@@ -1,4 +1,4 @@
-param([int]$Port = 8768, [int]$ApiPort = 8767, [string]$LDrawLibrary = "", [string]$Blender = "", [string]$BlenderAddons = "")
+param([int]$Port = 8778, [int]$ApiPort = 8777, [string]$LDrawLibrary = "", [string]$Blender = "", [string]$BlenderAddons = "")
 $ErrorActionPreference = "Stop"
 $taskRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $taskRoot

@@ -7,19 +7,20 @@ from pathlib import Path
 
 from .common import model_lock, stage, write_json
 from .requirements import SCALES, plan_design, requirements_for_scale
+from .project import PROJECT_NAME, DEFAULT_BACKEND, API_PORT, LEGACY_WEB_PORT
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Car2LEGO_3D: text -> image -> mesh -> LEGO -> Studio .io")
+    parser = argparse.ArgumentParser(description=f"{PROJECT_NAME}: GPT images -> LLM + Blender -> LEGO -> Studio .io")
     commands = parser.add_subparsers(dest="command", required=True)
     setup = commands.add_parser("setup", help="Download and pin an upstream reconstruction source")
-    setup.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default="hunyuan-mv")
+    setup.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default=DEFAULT_BACKEND)
     commands.add_parser("recipes", help="Show vehicle families and their official LEGO references")
     commands.add_parser("doctor", help="Show environment and CUDA availability")
     web = commands.add_parser("web", help="Serve the local generation page and brand selector")
-    web.add_argument("--port", type=int, default=8765)
+    web.add_argument("--port", type=int, default=LEGACY_WEB_PORT)
     api = commands.add_parser("desktop-api", help="API for the replicated Car2LEGO desktop frontend")
-    api.add_argument("--port", type=int, default=8767)
+    api.add_argument("--port", type=int, default=API_PORT)
     research = commands.add_parser("research", help="Get full-size physical specifications through model dialogue")
     research.add_argument("--brand", required=True)
     research.add_argument("--model", required=True)
@@ -56,7 +57,7 @@ def main():
                                    help="Reuse a completed multiview mesh only after verifying inputs and output hashes")
             child.add_argument("--image", type=Path, help="Legacy TripoSR input; requires --backend triposr")
             child.add_argument("--views", type=Path, help="Four labelled GPT views.json")
-            child.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default="hunyuan-mv")
+            child.add_argument("--backend", choices=["hunyuan-mv", "gpt-blender", "triposr"], default=DEFAULT_BACKEND)
             child.add_argument("--reconstruction-steps", type=int, default=50)
             child.add_argument("--resolution", type=int, choices=[64, 128, 192, 256], default=128)
             child.add_argument("--chunk-size", type=int, default=4096)
